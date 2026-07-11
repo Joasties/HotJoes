@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Test Results
+TestResults/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# User-specific files
+*.user
+*.suo

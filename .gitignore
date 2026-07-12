@@ -4,6 +4,8 @@ obj/
 
 # Visual Studio
 .vs/
+*.user
+*.suo
 
 # VS Code
 .vscode/
@@ -11,15 +13,21 @@ obj/
 # Rider
 .idea/
 
-# Test Results
+# Test output and coverage
 TestResults/
+coverage/
+*.trx
 
-# macOS
-.DS_Store
+# NuGet packages and artifacts
+*.nupkg
+artifacts/
+publish/
 
 # Logs
 *.log
 
-# User-specific files
-*.user
-*.suo
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

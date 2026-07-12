@@ -1,4 +1,4 @@
-﻿namespace HotJoes.Api.IntegrationTests;
+﻿namespace HotJoes.IntegrationTests;
 
 public class UnitTest1
 {

@@ -1,4 +1,4 @@
-﻿namespace HotJoes.Application.Vendor;
+namespace HotJoes.Application.Vendor;
 
 public class Class1
 {

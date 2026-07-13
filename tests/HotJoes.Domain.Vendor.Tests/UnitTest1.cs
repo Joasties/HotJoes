@@ -1,4 +1,4 @@
-﻿namespace HotJoes.Domain.Vendor.Tests;
+namespace HotJoes.Domain.Vendor.Tests;
 
 public class UnitTest1
 {

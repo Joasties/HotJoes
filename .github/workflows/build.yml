@@ -1,35 +1,37 @@
-name: Build and Test
+name: Build
 
 on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
 
 jobs:
   build:
-    name: Build and Test
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
-      - name: Display .NET information
-        run: dotnet --info
-
-      - name: Restore dependencies
+      - name: Restore
         run: dotnet restore HotJoes.sln
 
-      - name: Build solution
-        run: dotnet build HotJoes.sln --configuration Release --no-restore
+      - name: Build
+        run: dotnet build HotJoes.sln --no-restore
 
-      - name: Run tests
-        run: dotnet test HotJoes.sln --configuration Release --no-build
+      - name: Test
+        run: dotnet test HotJoes.sln --no-build
+
+      - name: Verify Formatting
+        run: dotnet format HotJoes.sln --verify-no-changes --no-restore

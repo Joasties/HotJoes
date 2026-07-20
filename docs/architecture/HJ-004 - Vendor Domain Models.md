@@ -1,12 +1,33 @@
-HJ-004 – Vendor Domain Models
+# HJ-004 – Vendor Domain Models
 
+| Property | Value |
+|----------|-------|
+| **Document ID** | HJ-004 |
+| **Document Title** | Vendor Domain Models |
+| **Version** | 1.1 |
+| **Status** | Approved |
+| **Classification** | Model |
+| **Owner** | Project Architecture |
+| **Last Updated** | 20 July 2026 |
 
-# Revision History
-# 
-# Related Documents
-# 
+## Revision History
 
-# 
+| Version | Date | Description |
+|---|---|---|
+| 0.1 | 16 July 2026 | Previous draft. |
+| 0.2 | 16 July 2026 | Updated Vendor Domain Models |
+| 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
+| 1.1 | 20 July 2026 | Introduced Trading Model and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
+
+## Related Documents
+
+| Document ID | Title | Status |
+|---|---|---|
+| HJ-001 | HotJoes Project Vision | Draft |
+| HJ-002 | Architectural Principles | Draft |
+| HJ-003 | Ubiquitous Language Guide | Draft |
+
+#
 # 1. Vendor Domain Analysis
 ## 1.1 Purpose
 The Vendor domain manages the identity, registration, lifecycle and platform-controlled trading eligibility of businesses that sell food through HotJoes.
@@ -15,6 +36,7 @@ The model explicitly separates:
 completion of Vendor Registration;
 progression through the activation process;
 regulatory and compliance requirements;
+Legal Operator Type from Trading Model;
 Vendor lifecycle state;
 Vendor trading preference;
 calculated operational availability.
@@ -31,11 +53,13 @@ This is a deliberate simplification based on the business rule that an applicant
 Successful submission creates the Vendor directly in:
 VendorState = PendingActivation
 TradingPreference = Offline
+Vendor Registration captures sufficient information to determine the Vendor’s Trading Model. The Trading Model is established during Vendor Registration and becomes an attribute of the Vendor.
 There is therefore no RegistrationProgress property or value object within the Vendor aggregate.
 ## 1.3 Mandatory Vendor Registration Information
 A Vendor may be created only when all mandatory Vendor-domain registration information has been supplied and validated.
 ### Business identity
 LegalOperatorType
+TradingModel
 LegalName
 TradingName
 CompanyRegistrationNumber, where required by the Legal Operator Type
@@ -49,16 +73,25 @@ validated TradingAddressId supplied by the Address domain.
 confirmation that the applicant is authorised to register the business;
 confirmation that the submitted information is accurate;
 acceptance of applicable HotJoes platform terms.
-Mandatory information is conditional upon the selected Legal Operator Type.
-For example:
+Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Model describes how the Vendor operates and determines applicable compliance requirements, required licences, regulatory obligations and activation requirements. Trading Model is independent of Legal Operator Type; these concepts must not be confused.
 
-The exact supported Legal Operator Types and conditional validation rules must be defined in the Vendor Registration story and its acceptance criteria.
+| Legal Operator Type | Legal Name Required | Trading Name Required | Legal Registration Number Required |
+|---|---|---|---|
+| Sole Trader | Yes | Yes | No |
+| General Partnership | Yes | Yes | No |
+| Limited Company | Yes | Yes | Yes |
+| Limited Liability Partnership | Yes | Yes | Yes |
+| Charitable Community Group | Yes | Yes | No |
+| Charitable Incorporated Organisation | Yes | Yes | Yes |
+
+The conditional validation rules must be defined in the Vendor Registration story and its acceptance criteria.
 These rules must be enforced server-side. User-interface validation alone is insufficient.
 
 ## 1.4 Core Domain Responsibility
 The Vendor domain is responsible for:
 creating a Vendor after successful registration;
 maintaining the Vendor’s legal and trading identity;
+maintaining the Vendor’s Trading Model;
 maintaining Vendor contact information;
 maintaining references to Vendor addresses;
 controlling the Vendor lifecycle;
@@ -87,6 +120,7 @@ Owns:
 Vendor identity;
 legal and trading names;
 Legal Operator Type;
+Trading Model;
 Vendor lifecycle state;
 Vendor trading preference;
 activation and deactivation transitions;
@@ -149,6 +183,28 @@ A business or legal operator that has successfully completed Vendor Registration
 ### Vendor Registration
 The submission of all mandatory Vendor information required to create a Vendor.
 Registration is complete only when the information is successfully validated and submitted.
+It captures sufficient information to determine the Vendor’s Trading Model, which is established during registration.
+### Trading Model
+The classification describing how a Vendor operates, independent of its Legal Operator Type.
+Initial supported values:
+Restaurant
+Takeaway
+Restaurant & Takeaway
+Mobile Food Truck
+Market Stall
+Home Kitchen
+Dark Kitchen
+Delivery Only
+### Compliance Requirement
+A legal or regulatory obligation that must be satisfied before a Vendor becomes eligible for activation.
+Each Compliance Requirement contains:
+Requirement Type
+Requirement Status
+Responsible Party
+Evidence Required
+Evidence Received
+Verification Status
+Expiry Date, where applicable
 ### Registration Session
 The temporary interaction during which an applicant enters Vendor Registration information.
 An expired registration session produces no Vendor.
@@ -215,6 +271,7 @@ payment data.
 VendorId
 ### Business identity
 LegalOperatorType
+TradingModel
 LegalName
 TradingName
 CompanyRegistrationNumber, where applicable
@@ -242,7 +299,9 @@ aggregate version or equivalent optimistic concurrency token.
 Strongly typed identifier for a Vendor.
 ### LegalOperatorType
 Classification of the legal person or organisation operating the Vendor.
-Initial supported values must be defined by the Vendor Registration story.
+It determines legal identity, legal registration requirements and mandatory registration fields.
+### TradingModel
+Enumeration or Reference Data classification describing how the Vendor operates. It is independent of LegalOperatorType and determines applicable compliance requirements, required licences, regulatory obligations and activation requirements.
 ### VendorName
 Validated legal or trading name.
 ### CompanyRegistrationNumber
@@ -318,7 +377,8 @@ may have outstanding compliance or administrative actions;
 is managed through the Pending Activation Process.
 
 ## 3.4 Activation
-A Vendor may transition from PendingActivation to Active only when the VendorActivationPolicy confirms that all mandatory prerequisites have been satisfied.
+A Vendor may transition from PendingActivation to Active only when the VendorActivationPolicy confirms that every generated mandatory Compliance Requirement has been satisfied.
+Activation eligibility is determined by evaluating all generated Compliance Requirements.
 Activation is explicit.
 Registration alone does not activate the Vendor.
 
@@ -398,7 +458,9 @@ with an explicit reason code.
 
 ## 4.2 Responsibilities
 The Pending Activation Process:
-determines the activation requirements applicable to the Vendor;
+generates Compliance Requirements after Vendor Registration using Vendor Registration information, Legal Operator Type, Trading Model and declared operating characteristics;
+determines applicable requirements according to both Trading Model and Legal Operator Type;
+monitors completion of the generated Compliance Requirements;
 obtains requirement status from the owning domains;
 identifies actions assigned to the Vendor;
 identifies actions assigned to HotJoes;
@@ -412,12 +474,16 @@ requests deactivation when closure conditions are met.
 The process does not bypass the Vendor aggregate.
 It issues explicit commands requesting lifecycle transitions.
 
-## 4.3 Pending Activation Requirement
-A requirement managed by the process contains:
+## 4.3 Compliance Requirements
+A Compliance Requirement managed by the process contains:
 RequirementId
-RequirementType
+ComplianceRequirementType
 ResponsibleParty
-RequirementStatus
+ComplianceRequirementStatus
+EvidenceRequired
+EvidenceReceived
+VerificationStatus
+ExpiryDate, where applicable
 RequestedAt
 DueAt
 CompletedAt
@@ -426,7 +492,7 @@ LastNotificationAt
 Vendor
 HotJoes
 ExternalAuthority
-### Requirement Status
+### Compliance Requirement Status
 Outstanding
 InProgress
 Submitted
@@ -435,6 +501,31 @@ Satisfied
 Failed
 Waived
 These statuses belong to the activation workflow, not the Vendor lifecycle.
+Evidence Required and Evidence Received describe requirement state or references only. Compliance evidence and documents remain owned outside the Vendor aggregate.
+
+### Universal Requirements
+Food Business Registration
+
+### Conditional Requirements
+Legal Registration Verification
+Street Trading Licence
+Late Night Refreshment Licence
+Premises Licence
+Personal Licence Holder
+Future Compliance Requirements
+
+| Trading Model | Food Business Registration | Street Trading Licence | Late Night Refreshment Licence | Alcohol Licence |
+|---|---|---|---|---|
+| Restaurant | Required | Not normally required | Conditional | Conditional |
+| Takeaway | Required | Not normally required | Conditional | Conditional |
+| Restaurant & Takeaway | Required | Not normally required | Conditional | Conditional |
+| Mobile Food Truck | Required | Required | Conditional | Conditional |
+| Market Stall | Required | Required | Conditional | Conditional |
+| Home Kitchen | Required | Not required | Conditional | Conditional |
+| Dark Kitchen | Required | Not required | Conditional | Conditional |
+| Delivery Only | Required | Not required | Conditional | Conditional |
+
+Food Business Registration is always required. Street Trading Licence applicability depends upon Trading Model. Late Night Refreshment Licence applicability depends upon operating after 23:00. Alcohol licensing applicability depends upon selling alcohol.
 
 ## 4.4 Vendor Activation Policy
 The VendorActivationPolicy answers:
@@ -442,10 +533,9 @@ Is this Vendor currently eligible to transition from PendingActivation to Active
 It may consider authoritative outcomes from:
 Vendor Registration;
 Vendor Compliance;
-council registration;
-trading-licence verification;
 administrative approval;
 platform restrictions.
+The policy evaluates all generated Compliance Requirements rather than individual licences. It must not contain hard-coded knowledge of UK licensing legislation.
 The policy returns an explicit eligibility decision.
 The Vendor aggregate performs the state transition only after approval.
 
@@ -478,7 +568,7 @@ They must not be hard-coded into the Vendor aggregate.
 
 ## 4.7 Pending Activation Outcomes
 ### Successful activation
-All mandatory requirements satisfied
+All generated mandatory Compliance Requirements satisfied
     → VendorActivationPolicy approves
     → ActivateVendor command
     → VendorState = Active
@@ -602,6 +692,7 @@ classDiagram
         <<Aggregate Root>>
         +VendorId Id
         +LegalOperatorType LegalOperatorType
+        +TradingModel TradingModel
         +VendorName LegalName
         +VendorName TradingName
         +CompanyRegistrationNumber? CompanyRegistrationNumber
@@ -637,6 +728,18 @@ classDiagram
 
     class LegalOperatorType {
         <<Enumeration or Reference Data>>
+    }
+
+    class TradingModel {
+        <<Enumeration or Reference Data>>
+        Restaurant
+        Takeaway
+        RestaurantAndTakeaway
+        MobileFoodTruck
+        MarketStall
+        HomeKitchen
+        DarkKitchen
+        DeliveryOnly
     }
 
     class VendorName {
@@ -728,16 +831,35 @@ classDiagram
         +requestDeactivation()
     }
 
-    class PendingActivationRequirement {
+    class ComplianceRequirement {
         <<Process State>>
         +RequirementId Id
-        +RequirementType Type
+        +ComplianceRequirementType Type
         +ResponsibleParty ResponsibleParty
-        +RequirementStatus Status
+        +ComplianceRequirementStatus Status
+        +bool EvidenceRequired
+        +bool EvidenceReceived
+        +VerificationStatus VerificationStatus
+        +DateTimeOffset? ExpiryDate
         +DateTimeOffset RequestedAt
         +DateTimeOffset? DueAt
         +DateTimeOffset? CompletedAt
         +DateTimeOffset? LastNotificationAt
+    }
+
+    class ComplianceRequirementType {
+        <<Enumeration or Reference Data>>
+    }
+
+    class ComplianceRequirementStatus {
+        <<Enumeration>>
+        Outstanding
+        InProgress
+        Submitted
+        UnderReview
+        Satisfied
+        Failed
+        Waived
     }
 
     class VendorActivationPolicy {
@@ -795,6 +917,7 @@ classDiagram
 
     Vendor *-- VendorId
     Vendor *-- LegalOperatorType
+    Vendor *-- TradingModel
     Vendor *-- VendorName
     Vendor o-- CompanyRegistrationNumber
     Vendor *-- PrimaryContact
@@ -812,12 +935,15 @@ classDiagram
     Vendor --> AddressId
     AddressId ..> AddressDomain : identifies address in
 
-    PendingActivationProcess o-- PendingActivationRequirement
+    PendingActivationProcess o-- ComplianceRequirement : manages
+    ComplianceRequirement *-- ComplianceRequirementType
+    ComplianceRequirement *-- ComplianceRequirementStatus
     PendingActivationProcess --> VendorActivationPolicy
     PendingActivationProcess --> PendingActivationClosurePolicy
     PendingActivationProcess ..> Vendor : issues lifecycle commands
 
     VendorActivationPolicy --> ActivationEligibility
+    VendorActivationPolicy ..> ComplianceRequirement : evaluates
     PendingActivationClosurePolicy --> ClosureDecision
     VendorActivationPolicy ..> VendorCompliance : consumes authoritative status
     PendingActivationClosurePolicy ..> VendorCompliance : consumes failure outcomes
@@ -830,7 +956,7 @@ classDiagram
 stateDiagram-v2
     [*] --> PendingActivation : Successful Vendor Registration
 
-    PendingActivation --> Active : Activate\n[all activation requirements satisfied]
+    PendingActivation --> Active : Activate\n[all generated Compliance Requirements satisfied]
 
     PendingActivation --> Deactivated : Compliance requirements not met
     PendingActivation --> Deactivated : Vendor action not completed
@@ -894,49 +1020,31 @@ stateDiagram-v2
     end note
 
 # 12. Pending Activation Process Model
-stateDiagram-v2
-    [*] --> RequirementsEvaluated : Vendor registered
+flowchart TD
+    A[Vendor Registered] --> B[Determine Trading Model]
+    B --> C[Generate Compliance Requirements]
+    C --> D[Monitor Requirement Completion]
+    D --> E[Eligible for Activation]
 
-    RequirementsEvaluated --> WaitingForVendor : Vendor action required
-    RequirementsEvaluated --> WaitingForHotJoes : HotJoes action required
-    RequirementsEvaluated --> WaitingForExternalAuthority : External action required
-    RequirementsEvaluated --> ReadyForActivation : All requirements satisfied
-    RequirementsEvaluated --> ClosureRequired : Terminal failure identified
-
-    WaitingForVendor --> RequirementsEvaluated : Vendor completes action
-    WaitingForVendor --> WaitingForVendor : Reminder issued
-    WaitingForVendor --> FinalWarning : Response deadline exceeded
-
-    FinalWarning --> RequirementsEvaluated : Vendor responds
-    FinalWarning --> ClosureRequired : Final deadline exceeded
-
-    WaitingForHotJoes --> RequirementsEvaluated : Review completed
-    WaitingForExternalAuthority --> RequirementsEvaluated : Authority outcome received
-
-    ReadyForActivation --> Activated : Activation policy approves
-    ClosureRequired --> Deactivated : Closure policy approves
-
-    Activated --> [*]
-    Deactivated --> [*]
-
-    note right of WaitingForVendor
-        Vendor inactivity timing runs only
-        while the Vendor owns an actionable requirement.
-    end note
-
-    note right of WaitingForHotJoes
-        The Vendor cannot be penalised
-        for delay owned by HotJoes.
-    end note
-
-    note right of WaitingForExternalAuthority
-        External delay does not count
-        as Vendor non-response.
-    end note
-The states in this diagram are process-manager states. They are not Vendor lifecycle states.
+The process determines applicability from Vendor Registration information, Legal Operator Type, Trading Model and declared operating characteristics. It monitors generated Compliance Requirements while retaining the responsibility, deadline, reminder and closure rules described above.
 
 # 13. State Transition Table
-# 
+#
+| Current lifecycle state | Command or trigger | Conditions | Resulting state | Trading Preference |
+|---|---|---|---|---|
+| None | Register Vendor | Complete, valid registration submitted | PendingActivation | Offline |
+| PendingActivation | Activate Vendor | Activation policy confirms that all generated Compliance Requirements are satisfied | Active | Offline |
+| PendingActivation | Deactivate Vendor | Valid closure decision and reason | Deactivated | Offline |
+| Active | Set Vendor Online | No effective platform restriction | Active | Online |
+| Active | Set Vendor Offline | Always permitted | Active | Offline |
+| Active | Schedule Suspension | Authorised administrator; no existing unresolved schedule; future date; reason supplied | Active | Unchanged |
+| Active | Cancel Scheduled Suspension | Authorised administrator; suspension not effective | Active | Unchanged |
+| Active | Suspend Immediately | Authorised administrator; reason supplied | Suspended | Offline |
+| Active | Apply Scheduled Suspension | Effective time reached | Suspended | Offline |
+| Active | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
+| Suspended | Reactivate Vendor | Authorised; blocking issue resolved | Active | Offline |
+| Suspended | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
+| Deactivated | Any normal lifecycle command | Not permitted | Deactivated | Offline |
 
 # 14. Operational Availability
 Operational Availability is calculated outside the Vendor aggregate.
@@ -950,7 +1058,17 @@ CanAcceptOrders =
     AND NoPlatformRestriction
 Each contributing value must come from an explicit published event, query contract or maintained read-model projection.
 The calculation must not obtain data by directly querying another domain’s internal persistence model.
+Operational Availability remains independent of Trading Model.
 
+| Vendor state | Trading Preference | Other conditions | Operational result |
+|---|---|---|---|
+| PendingActivation | Offline | Any | Unavailable |
+| Active | Online | All satisfied | Open |
+| Active | Online | Opening hours closed | Closed |
+| Active | Online | Menu unavailable | Unavailable |
+| Active | Offline | Any | Offline |
+| Suspended | Offline | Any | Suspended |
+| Deactivated | Offline | Any | Deactivated |
 
 # 15. Scheduled Suspension Sequence
 sequenceDiagram
@@ -1019,12 +1137,22 @@ The Vendor must deliberately choose to resume trading.
 It uses explicit contracts from contributing bounded contexts and is not owned by the Vendor aggregate.
 ## Decision 14: Deactivation requires a reason
 All transitions to Deactivated require a structured business reason and decision metadata.
+## Decision 15: Trading Model is independent of Legal Operator Type
+Legal Operator Type describes legal identity and registration obligations; Trading Model describes how the Vendor operates and drives applicable compliance obligations.
+## Decision 16: Compliance Requirements are generated
+The Pending Activation Process generates requirements from registration information, Legal Operator Type, Trading Model and declared operating characteristics rather than relying on a hard-coded set.
+## Decision 17: Activation Policy evaluates Compliance Requirements
+VendorActivationPolicy evaluates generated Compliance Requirements rather than containing knowledge of individual licences or UK licensing legislation.
+## Decision 18: Compliance evidence remains outside the Vendor aggregate
+The Vendor aggregate contains TradingModel but does not contain compliance evidence or compliance documents.
 
 # 17. Initial Implementation Scope
 The Vendor Registration epic should implement:
 a transient registration session;
 entry and validation of mandatory Vendor information;
 conditional validation based on Legal Operator Type;
+capture of sufficient information to determine the Vendor’s Trading Model;
+establishment and persistence of TradingModel on the Vendor;
 address selection through the Address domain;
 successful creation of a Vendor;
 initial lifecycle state of PendingActivation;
@@ -1034,7 +1162,7 @@ publication of VendorRegistered;
 retrieval of the registered Vendor.
 The first epic should not implement:
 persisted registration drafts;
-the full Compliance domain;
+the complete Compliance domain;
 council-registration workflows;
 trading-licence workflows;
 the complete Pending Activation Process;
@@ -1046,69 +1174,14 @@ Those capabilities are represented in the model so that the Vendor Registration 
 
 # 18. Remaining Review Questions
 The following require future business decisions but do not block Vendor Registration:
-Which Legal Operator Types are supported initially?
-What exact fields are mandatory for each Legal Operator Type?
 What Pending Activation deadlines and reminder periods apply?
 Which actions permit extensions?
 Who may approve an extension?
 What evidence makes a compliance failure terminal?
+Which declared operating characteristics, beyond operating after 23:00 and selling alcohol, generate conditional requirements?
+How are future Compliance Requirement types and Trading Models governed and versioned?
 When may a deactivated Vendor reapply?
 Is a reinstatement process ever required after deactivation?
 What retention period applies to suspension and deactivation records?
 Which bounded context will own opening hours?
 These are explicit future decisions, not reasons to expand the initial Vendor Registration epic.
-
-| Document ID | HJ-004 |
-|---|---|
-| Document Title | Vendor Domain Models |
-| Version | 1.0 |
-| Status | Approved |
-| Classification | Model |
-| Owner | Project Architecture |
-| Last Updated | 17 July 2026 |
-
-| Version | Date | Description |
-|---|---|---|
-| 0.1 | 16 July 2026 | Previous draft. |
-| 0.2 | 16 July 2026 | Updated Vendor Domain Models |
-| 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
-
-| Document ID | Title | Status |
-|---|---|---|
-| HJ-001 | HotJoes Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
-| HJ-003 | Ubiquitous Language Guide | Draft |
-
-| Legal Operator Type | Legal Name | Trading Name | Company Registration Number |
-|---|---|---|---|
-| Sole Trader | Required | Required | Not normally required |
-| Limited Company | Required | Required | Required |
-| Partnership | Required | Required | Dependent upon partnership type |
-| Registered Charity | Required | Required | Charity or company number as applicable |
-| Other Organisation | Required | Required | Dependent upon legal form |
-
-| Current lifecycle state | Command or trigger | Conditions | Resulting state | Trading Preference |
-|---|---|---|---|---|
-| None | Register Vendor | Complete, valid registration submitted | PendingActivation | Offline |
-| PendingActivation | Activate Vendor | Activation policy approves | Active | Offline |
-| PendingActivation | Deactivate Vendor | Valid closure decision and reason | Deactivated | Offline |
-| Active | Set Vendor Online | No effective platform restriction | Active | Online |
-| Active | Set Vendor Offline | Always permitted | Active | Offline |
-| Active | Schedule Suspension | Authorised administrator; no existing unresolved schedule; future date; reason supplied | Active | Unchanged |
-| Active | Cancel Scheduled Suspension | Authorised administrator; suspension not effective | Active | Unchanged |
-| Active | Suspend Immediately | Authorised administrator; reason supplied | Suspended | Offline |
-| Active | Apply Scheduled Suspension | Effective time reached | Suspended | Offline |
-| Active | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
-| Suspended | Reactivate Vendor | Authorised; blocking issue resolved | Active | Offline |
-| Suspended | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
-| Deactivated | Any normal lifecycle command | Not permitted | Deactivated | Offline |
-
-| Vendor state | Trading Preference | Other conditions | Operational result |
-|---|---|---|---|
-| PendingActivation | Offline | Any | Unavailable |
-| Active | Online | All satisfied | Open |
-| Active | Online | Opening hours closed | Closed |
-| Active | Online | Menu unavailable | Unavailable |
-| Active | Offline | Any | Offline |
-| Suspended | Offline | Any | Suspended |
-| Deactivated | Offline | Any | Deactivated |

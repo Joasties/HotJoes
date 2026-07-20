@@ -45,17 +45,19 @@ Related Documents
   HJ-001                  HotJoes Project Vision  Draft
 
   HJ-003                  Ubiquitous Language     Draft
-                          Guide                   
+                          Guide
 
-  HJ-004                  Coding Standards        Draft
+  HJ-004                  Vendor Domain Models    Draft
 
-  HJ-005                  Testing Strategy and    Draft
-                          Standards               
+  HJ-005                  Coding Standards        Draft
 
-  HJ-006                  Enforcement Strategy    Draft
+  HJ-006                  Testing Strategy and    Draft
+                          Standards
 
-  HJ-007                  AI Roles and            Draft
-                          Responsibilities        
+  HJ-007                  Enforcement Strategy    Draft
+
+  HJ-008                  AI Roles and            Draft
+                          Responsibilities
   ----------------------- ----------------------- -----------------------
 
 1\. Purpose
@@ -344,38 +346,38 @@ following questions.
   **Question**                        **Relevant Principle**
 
   Does this solve a genuine business  AP-001
-  problem?                            
+  problem?
 
   Does the model use business         AP-002
-  language?                           
+  language?
 
   Is ownership of behaviour and data  AP-003, AP-004, AP-005
-  clear?                              
+  clear?
 
   Is business behaviour being         AP-003
-  unnecessarily duplicated?           
+  unnecessarily duplicated?
 
   Does this introduce unnecessary     AP-006
-  coupling?                           
+  coupling?
 
   Are interactions based on explicit  AP-006
-  contracts?                          
+  contracts?
 
   Does the design model business      AP-008
-  intent explicitly?                  
+  intent explicitly?
 
   Is this the simplest solution that  AP-009
-  meets today\'s requirements?        
+  meets today\'s requirements?
 
   Will this still be understandable   AP-010
-  and maintainable in five years?     
+  and maintainable in five years?
 
   Does it satisfy the required        AP-011
-  quality attributes?                 
+  quality attributes?
 
   Is business logic independent of    AP-012
-  infrastructure?                     
+  infrastructure?
 
   Is there clear human accountability AP-013
-  and, where appropriate, an ADR?     
+  and, where appropriate, an ADR?
   ----------------------------------- -----------------------------------

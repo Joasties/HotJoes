@@ -4,11 +4,11 @@
 |----------|-------|  
 | **Document ID** | HJ-003 |  
 | **Document Title** | Ubiquitous Language Guide |  
-| **Version** | 1.0 |  
+| **Version** | 1.1 |  
 | **Status** | Draft |  
 | **Classification** | Architecture |  
 | **Owner** | Project Architecture |  
-| **Last Updated** | 17 July 2026 |  
+| **Last Updated** | 20 July 2026 |  
   
 ## Revision History  
   
@@ -17,6 +17,7 @@
 | 0.1 | 16 July 2026 | Previous draft. |  
 | 0.2 | 16 July 2026 | Updated Vendor Domain Models. |  
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |  
+| 1.1 | 20 July 2026 | Introduced Trading Model concepts and aligned the language with the Vendor Registration lifecycle. |  
   
 ## Related Documents  
   
@@ -83,18 +84,52 @@ A Vendor may represent:
 ## 3.2 Vendor Registration  
   
 The process by which a prospective Vendor supplies sufficient information to create a Vendor record within the platform.  
+
+Vendor Registration creates the Vendor in Pending Activation and creates the initial Registration Session.  
   
-Vendor Registration does not imply that the Vendor is authorised to trade.  
+Vendor Registration does not authorise trading and does not imply that compliance has been achieved.  
+
+The Vendor Compliance domain determines whether activation requirements have been satisfied.  
   
 ## 3.3 Vendor Activation  
   
-The process that changes a Vendor from Pending Activation to Active.  
+An administrative transition that moves a Vendor from Pending Activation to Active.  
   
-Activation indicates the Vendor is permitted to trade on the platform.  
+Activation occurs only after all Activation Requirements have been satisfied and authorises the Vendor to trade on the platform.  
   
-Whether compliance checks, council registration or trading licence verification are prerequisites is outside the scope of this document and will be defined by the Vendor Compliance domain.  
+Compliance rules are owned by the Vendor Compliance domain.  
   
-## 3.4 Vendor Status  
+## 3.4 Trading Model  
+
+The business model under which a Vendor trades through the HotJoes platform.  
+
+Trading Model is independent of Legal Operator Type.  
+
+Examples include:  
+
+- Mobile Food Truck  
+- Market Stall  
+- Restaurant  
+- Café  
+- Dark Kitchen  
+- Home Kitchen (where legally permitted)  
+- Catering Business  
+- Online Only Vendor  
+
+Trading Model influences operational capabilities and business rules but does not determine legal identity.  
+
+## 3.5 Registration Session  
+
+The temporary process through which a prospective Vendor supplies registration information.  
+
+A Registration Session:  
+
+- Exists only while registration is being completed  
+- Is discarded if abandoned  
+- Is not part of the Vendor lifecycle  
+- Is not a persistent business concept after registration completes  
+
+## 3.6 Vendor Status  
   
 Represents the lifecycle state of the Vendor.  
   
@@ -106,10 +141,12 @@ Examples include:
 - Suspended  
   
 Vendor Status reflects administrative state.  
+
+Pending Activation means the Vendor exists but has not yet satisfied all activation requirements.  
   
 It is not the same as whether the Vendor is currently accepting orders.  
   
-## 3.5 Trading Preference  
+## 3.7 Trading Preference  
   
 Represents whether an Active Vendor wishes to receive new Orders.  
   
@@ -122,7 +159,7 @@ A Vendor may choose to go Offline for holidays, maintenance or other operational
   
 A Suspended Vendor is automatically Offline.  
   
-## 3.6 Suspension  
+## 3.8 Suspension  
   
 An administrative action preventing a Vendor from trading.  
   
@@ -130,35 +167,41 @@ Suspension may take effect immediately or at a scheduled date and time.
   
 Suspension is independent of Trading Preference.  
   
-## 3.7 Trading Name  
+## 3.9 Trading Name  
   
 The public name under which a Vendor trades.  
   
 Customers interact with the Trading Name rather than the legal organisation.  
   
-## 3.8 Legal Operator  
+## 3.10 Legal Operator  
   
 The legally recognised organisation responsible for operating the Vendor.  
   
 Examples include:  
   
 - Sole Trader  
-- Limited Company  
-- Partnership  
+- General Partnership  
+- Limited Company (Ltd)  
+- Limited Liability Partnership (LLP)  
+- Charitable Incorporated Organisation (CIO)  
+- Registered Charity  
+- Other legally recognised organisations  
+
+Trading Model and Legal Operator Type are separate concepts.  
   
-## 3.9 Company Name  
+## 3.11 Company Name  
   
 The registered legal name of the Legal Operator.  
   
 This may differ from the Trading Name.  
   
-## 3.10 Registration Number  
+## 3.12 Registration Number  
   
 The government-issued registration identifier of the Legal Operator where applicable.  
   
 Whether mandatory depends upon the Legal Operator Type.  
   
-## 3.11 Contact Details  
+## 3.13 Contact Details  
   
 The information used to communicate with the Vendor.  
   
@@ -167,7 +210,7 @@ Examples include:
 - Email Address  
 - Telephone Number  
   
-## 3.12 Address  
+## 3.14 Address  
   
 The physical trading location of the Vendor.  
   
@@ -179,27 +222,60 @@ The Vendor domain stores only the address reference and any locally required sna
   
 ## 4.1 Registration  
   
-The creation of a Vendor within the platform.  
+Creation of a Vendor in Pending Activation following successful completion of Vendor Registration.  
   
 ## 4.2 Activation  
   
-Authorisation to begin trading.  
+Administrative authorisation permitting a Vendor to begin trading after all Activation Requirements have been satisfied.  
   
 ## 4.3 Trading  
   
 Accepting and fulfilling Customer Orders.  
   
-## 4.4 Availability  
+## 4.4 Operational Availability  
   
-Whether the Vendor is currently willing to receive new Orders.  
+Whether the Vendor may currently receive new Orders.  
   
-Availability is determined by Trading Preference and Vendor Status.  
+Operational Availability is determined by Vendor Status and Trading Preference.  
+
+A Vendor must be Active before Trading Preference can enable trading.  
   
 ## 4.5 Compliance  
   
-The process of verifying that a Vendor satisfies legal and regulatory obligations.  
+The verification of legal and regulatory obligations required before activation.  
   
-Compliance belongs to the Vendor Compliance domain.  
+Compliance is owned entirely by the Vendor Compliance domain.  
+
+Activation consumes the outcome of Compliance rather than implementing compliance rules.  
+
+## 4.6 Activation Requirement  
+
+A business requirement that must be satisfied before a Vendor may be activated.  
+
+Examples include:  
+
+- Food Business Registration  
+- Council Registration  
+- Trading Licence  
+- Identity Verification  
+- Insurance  
+- Food Hygiene Rating  
+
+The Vendor Compliance domain owns Activation Requirements.  
+
+## 4.7 Activation Policy  
+
+The policy determining when activation is permitted based upon Activation Requirements.  
+
+## 4.8 Pending Activation Closure Policy  
+
+The policy governing what happens when a Vendor remains in Pending Activation beyond an acceptable period.  
+
+Examples include:  
+
+- Reminder notifications  
+- Administrative review  
+- Automatic deactivation  
   
 # 5. Events  
   
@@ -215,6 +291,10 @@ Examples include:
 - Vendor Brought Online  
 - Trading Name Changed  
 - Contact Details Updated  
+- Registration Session Started  
+- Registration Session Abandoned  
+- Activation Requirements Satisfied  
+- Vendor Deactivated  
   
 Event names should always be expressed in the past tense.  
   
@@ -231,6 +311,8 @@ Examples include:
 - Change Trading Name  
 - Update Contact Details  
 - Set Trading Preference  
+- Start Registration Session  
+- Complete Registration  
   
 Command names should always be expressed as imperative verbs.  
   
@@ -246,8 +328,13 @@ Command names should always be expressed as imperative verbs.
 | Activation | Administrative process allowing trading |  
 | Registration | Creation of a Vendor record |  
 | Suspension | Administrative prevention of trading |  
-| Availability | Whether Orders may currently be accepted |  
-| Compliance | Verification of legal obligations |  
+| Operational Availability | Whether Orders may currently be accepted, as determined by Vendor Status and Trading Preference |  
+| Compliance | Verification of legal and regulatory obligations required before activation |  
+| Trading Model | Business model under which a Vendor trades through HotJoes |  
+| Registration Session | Temporary process through which a prospective Vendor supplies registration information |  
+| Activation Requirement | Business requirement that must be satisfied before activation |  
+| Activation Policy | Policy determining when activation is permitted |  
+| Pending Activation Closure Policy | Policy governing prolonged Pending Activation |  
   
 # 8. Naming Conventions  
   

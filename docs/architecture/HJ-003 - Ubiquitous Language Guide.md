@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-003 |
 | **Document Title** | Ubiquitous Language Guide |
-| **Version** | 1.2 |
-| **Status** | Draft |
+| **Version** | 2.0 |
+| **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 20 July 2026 |
+| **Last Updated** | 22 July 2026 |
 
 ## Revision History
 
@@ -19,6 +19,7 @@
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
 | 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and aligned the language with the Vendor Registration lifecycle. |
 | 1.2 | 22 July 2026 | Introduced Trading Characteristics, Trading Location, Registered Information, Vendor Managed Information and registered-information controls. |
+| 2.0 | 22 July 2026 | Approved Vendor Registration terminology. Clarified Registration Session, Trading Characteristics, Regulatory Authorities, Vendor lifecycle, Registered Information and Address ownership. |
 
 ## Related Documents
 
@@ -84,13 +85,15 @@ A Vendor may represent:
 
 ## 3.2 Vendor Registration
 
-The process by which a prospective Vendor supplies sufficient information to create a Vendor record within the platform.
+The process through which a prospective Vendor supplies sufficient Registered Information to create a Vendor within the platform.
 
-Vendor Registration creates the Vendor in Pending Activation and creates the initial Registration Session.
+A Vendor does not exist before successful submission.
 
-Vendor Registration does not authorise trading and does not imply that compliance has been achieved.
+Successful submission creates both the Vendor and its initial lifecycle state of **Pending Activation**.
 
-The Vendor Compliance domain determines whether activation requirements have been satisfied.
+Vendor Registration does not authorise trading.
+
+Compliance and Activation remain separate business processes.
 
 ## 3.3 Vendor Activation
 
@@ -102,7 +105,7 @@ Compliance rules are owned by the Vendor Compliance domain.
 
 ## 3.4 Trading Characteristics
 
-Trading Characteristics describe the characteristics of a Vendor's trading operation that are used to determine compliance requirements.
+Trading Characteristics describe the characteristics of a Vendor's trading operation that are used to determine Compliance Requirements.
 
 Trading Characteristics consist of:
 
@@ -115,24 +118,51 @@ Trading Characteristics describe operating characteristics and do not determine 
 
 ### 3.4.1 Trading Location
 
-The controlled classification of the location from which a Vendor conducts its trading operation.
+Trading Location is a controlled business classification of the location from which a Vendor conducts its trading operation.
 
-Values:
+| Value | Description |
+|-------|-------------|
+| Restaurant | Restaurant, Café, Takeaway or Food Market Hall. A customer-facing permanent premises. |
+| Stall | Mobile Food Unit or Market Stall. |
+| Kitchen | Dark Kitchen, Ghost Kitchen or Home Kitchen. A non-customer-facing food preparation venue that trades exclusively online. |
 
-- Customer-Facing Permanent Premises — A fixed premises that customers may visit.
-- Mobile Food Unit or Market Stall — A mobile or market-based trading location.
-- Home or Dark Kitchen — A home-based or non-customer-facing food preparation location.
+### 3.4.2 Opening Hours
+
+Opening Hours are represented by:
+
+- Start Time
+- End Time
+
+Opening Hours may legitimately span midnight. Validation must not require Start Time to be earlier than End Time.
+
+### 3.4.3 Service Includes Hot Food
+
+Indicates whether the Vendor supplies food or drink heated above ambient room temperature.
+
+This information is used together with Opening Hours to determine applicable Compliance Requirements.
+
+### 3.4.4 Alcohol Service
+
+Indicates whether the Vendor supplies alcohol.
+
+This information is used to determine applicable Compliance Requirements.
 
 ## 3.5 Registration Session
 
-The temporary process through which a prospective Vendor supplies registration information.
+A transient application concept used to collect registration information before a Vendor exists.
 
 A Registration Session:
 
-- Exists only while registration is being completed
-- Is discarded if abandoned
-- Is not part of the Vendor lifecycle
-- Is not a persistent business concept after registration completes
+- exists only while registration is being completed
+- is not a business entity
+- is not part of the Vendor lifecycle
+- may be implemented using any suitable transient persistence mechanism
+- expires automatically after inactivity
+- cannot be resumed
+- is discarded completely if abandoned
+- produces no business events
+
+> Completion of Vendor Registration represents a deliberate expression of intent to become a Vendor on the platform. Registration Sessions are intentionally transient and cannot be resumed.
 
 ## 3.6 Vendor Status
 
@@ -140,12 +170,14 @@ Represents the lifecycle state of the Vendor.
 
 Examples include:
 
-- Draft
 - Pending Activation
 - Active
 - Suspended
+- Deactivated
 
 Vendor Status reflects administrative state.
+
+The Vendor lifecycle begins when the Vendor is created.
 
 Pending Activation means the Vendor exists but has not yet satisfied all activation requirements.
 
@@ -217,11 +249,9 @@ Examples include:
 
 ## 3.14 Address
 
-The physical trading location of the Vendor.
+The Address Domain owns address search, retrieval and validation.
 
-Address data is owned by the Address domain.
-
-The Vendor domain stores only the address reference and any locally required snapshot or reference data.
+The Vendor Domain stores an approved snapshot of the Business Address as Registered Information.
 
 ## 3.15 Registered Information
 
@@ -237,9 +267,11 @@ Registered Information includes:
 - Contact Email
 - Contact Telephone
 - Business Address
+- Food Registration Authority
+- Primary Trading Authority (where applicable)
 - Trading Characteristics
 
-Registered Information becomes read-only to the Vendor once Vendor Registration has been successfully submitted and the Vendor enters PendingActivation.
+Registered Information becomes read-only to the Vendor once Vendor Registration has been successfully submitted and the Vendor enters Pending Activation.
 
 Changes to Registered Information are performed only by authorised platform operators using administrative processes.
 
@@ -251,6 +283,27 @@ Examples include:
 
 - Website
 - Business Description
+
+## 3.17 Food Registration Authority
+
+The competent local authority responsible for Food Business Registration for the Vendor's trading premises.
+
+Food Registration Authority:
+
+- is derived from the approved Business Address
+- is not manually selected by the Vendor
+- is supplied by the Address Domain
+- forms part of Registered Information
+
+## 3.18 Primary Trading Authority
+
+The local authority responsible for the Vendor's declared primary trading area.
+
+Primary Trading Authority:
+
+- is required only for Trading Location = Stall
+- is derived through the Address Domain
+- is used to determine applicable Compliance Requirements
 
 # 4. Business Concepts
 
@@ -325,10 +378,10 @@ Examples include:
 - Vendor Brought Online
 - Trading Name Changed
 - Contact Details Updated
-- Registration Session Started
-- Registration Session Abandoned
 - Activation Requirements Satisfied
 - Vendor Deactivated
+
+Registration Session is not a business concept and therefore does not generate domain events.
 
 Event names should always be expressed in the past tense.
 
@@ -345,8 +398,8 @@ Examples include:
 - Change Trading Name
 - Update Contact Details
 - Set Trading Preference
-- Start Registration Session
-- Complete Registration
+
+Registration Session is an application concern rather than a business command.
 
 Command names should always be expressed as imperative verbs.
 
@@ -364,11 +417,15 @@ Command names should always be expressed as imperative verbs.
 | Suspension | Administrative prevention of trading |
 | Operational Availability | Whether Orders may currently be accepted, as determined by Vendor Status and Trading Preference |
 | Compliance | Verification of legal and regulatory obligations required before activation |
-| Trading Characteristics | Characteristics of a Vendor's trading operation used to determine compliance requirements |
-| Trading Location | Controlled classification of the location from which a Vendor conducts its trading operation |
-| Registered Information | Information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor |
+| Vendor Registration | Process through which a prospective Vendor supplies sufficient Registered Information to create a Vendor within the platform |
+| Trading Characteristics | Characteristics of a Vendor's trading operation used to determine Compliance Requirements |
+| Trading Location | Controlled business classification with the values Restaurant, Stall and Kitchen |
+| Address | Address information searched, retrieved and validated by the Address Domain; the approved Business Address snapshot is stored by the Vendor Domain as Registered Information |
+| Registered Information | Information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor, including applicable regulatory authorities and Trading Characteristics |
 | Vendor Managed Information | Information that may be maintained directly by the Vendor without affecting the registered identity of the business |
-| Registration Session | Temporary process through which a prospective Vendor supplies registration information |
+| Registration Session | Transient application concept used to collect registration information before a Vendor exists; it cannot be resumed and produces no business events |
+| Food Registration Authority | Competent local authority responsible for Food Business Registration for the Vendor's trading premises |
+| Primary Trading Authority | Local authority responsible for the Vendor's declared primary trading area; required only for Trading Location = Stall |
 | Activation Requirement | Business requirement that must be satisfied before activation |
 | Activation Policy | Policy determining when activation is permitted |
 | Pending Activation Closure Policy | Policy governing prolonged Pending Activation |

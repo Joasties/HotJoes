@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 1.2 |
+| **Version** | 1.3 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 20 July 2026 |
+| **Last Updated** | 22 July 2026 |
 
 ## Revision History
 
@@ -19,6 +19,7 @@
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
 | 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
 | 1.2 | 22 July 2026 | Introduced Trading Characteristics, Registered Information and Vendor Managed Information; refined Compliance Requirement derivation, Address Service integration, Pending Activation behaviour and Scheduled Suspension ownership. |
+| 1.3 | 22 July 2026 | Finalised Vendor Registration domain model following Epic 1 review. Clarified Registration Session, Business Address ownership, Regulatory Authorities, Trading Location, Company Registration validation and Business Address snapshot strategy. |
 
 ## Related Documents
 
@@ -26,7 +27,7 @@
 |---|---|---|
 | HJ-001 | HotJoes Project Vision | Draft |
 | HJ-002 | Architectural Principles | Draft |
-| HJ-003 | Ubiquitous Language Guide | Draft |
+| HJ-003 | Ubiquitous Language Guide | Approved |
 
 #
 # 1. Vendor Domain Analysis
@@ -45,19 +46,28 @@ Vendor trading preference;
 calculated operational availability.
 ## 1.2 Vendor Existence and Registration Boundary
 A Vendor does not exist in the HotJoes platform until a complete and valid Vendor Registration has been successfully submitted.
-Registration information entered before submission is transient.
-It may be retained only for the lifetime of the registration session. If the registration session expires before successful submission:
+Registration Session is a transient application construct that exists only while a prospective Vendor is completing Vendor Registration.
+It is not a Domain Entity, is not part of the Vendor aggregate and is not part of the Vendor lifecycle.
+It exists before a Vendor exists and may use transient persistence.
+It expires automatically after inactivity and cannot be resumed. If the Registration Session expires before successful submission:
 the incomplete information is discarded;
 no Vendor aggregate is created;
 no Vendor lifecycle state exists;
 the applicant must restart the registration process.
 HotJoes does not persist registration drafts in the initial implementation.
-This is a deliberate simplification based on the business rule that an applicant must complete the registration process in one registration session.
+Registration Sessions do not generate Vendor domain events.
+Vendor Registration is intentionally completed within a single Registration Session. Successful submission represents a deliberate expression of intent to become a Vendor. Incomplete registrations have no business significance and are discarded.
 Successful submission creates the Vendor directly in:
 VendorState = PendingActivation
 TradingPreference = Offline
 Vendor Registration captures the Vendor’s Trading Characteristics. Trading Characteristics are established during Vendor Registration and become an attribute of the Vendor.
 There is therefore no RegistrationProgress property or value object within the Vendor aggregate.
+
+flowchart TD
+    A[Prospective Vendor] --> B[Registration Session]
+    B --> C[Successful Registration]
+    C --> D[Vendor Created]
+    D --> E[PendingActivation]
 ## 1.3 Mandatory Vendor Registration Information
 A Vendor may be created only when all mandatory Vendor-domain registration information has been supplied and validated.
 ### Registered Information
@@ -66,7 +76,9 @@ LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where required by the Legal Operator Type
 PrimaryContact, containing contact name, email address and telephone number
-BusinessAddressId obtained through the Address Service abstraction
+BusinessAddressSnapshot supplied by the Address Domain
+FoodRegistrationAuthority
+PrimaryTradingAuthority, where applicable
 TradingCharacteristics
 ### Vendor Managed Information
 Website
@@ -75,7 +87,7 @@ BusinessDescription
 confirmation that the applicant is authorised to register the business;
 confirmation that the submitted information is accurate;
 acceptance of applicable HotJoes platform terms.
-Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Characteristics describe the Vendor’s trading operation and, together with Legal Operator Type and Business Address, determine applicable Compliance Requirements. These concepts must not be confused.
+Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Characteristics describe the Vendor’s trading operation and, together with Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable, determine Compliance Requirements. These concepts must not be confused.
 
 | Legal Operator Type | Legal Name Required | Trading Name Required | Legal Registration Number Required |
 |---|---|---|---|
@@ -97,7 +109,7 @@ maintaining the Vendor’s Trading Characteristics;
 maintaining Registered Information subject to authorised administrative control;
 maintaining Vendor Managed Information;
 maintaining Vendor contact information;
-maintaining references to Vendor addresses;
+maintaining the approved Business Address snapshot;
 controlling the Vendor lifecycle;
 controlling the Vendor’s trading preference;
 enforcing lifecycle transition rules;
@@ -107,7 +119,7 @@ preserving suspension history;
 publishing Vendor lifecycle events.
 The Vendor domain is not responsible for:
 persisting incomplete registration attempts;
-searching for or validating postal addresses;
+searching for, retrieving or validating postal addresses;
 managing regulatory evidence;
 deciding whether council registration evidence is genuine;
 deciding whether a trading licence is valid;
@@ -130,17 +142,18 @@ Vendor trading preference;
 activation and deactivation transitions;
 suspension decisions;
 contact details;
-references to addresses;
+approved Business Address snapshot;
 Vendor lifecycle history.
 ### Address Domain
 Owns:
 address search;
+address retrieval;
 address validation;
 canonical address data;
 integration with third-party UK address-data providers.
-Business Address is obtained through an Address Service abstraction. The Vendor domain stores an AddressId.
+The Address Domain supplies an approved Business Address snapshot to the Vendor Domain through the Address Service abstraction.
 The Address Domain implementation behind that abstraction is stubbed during Epic 1.
-The Vendor domain does not own postal address lookup or third-party address-provider integration.
+The Vendor Domain stores the approved Business Address snapshot as Registered Information. It does not own address validation or third-party address-provider integration.
 ### Vendor Compliance Domain
 Owns:
 compliance requirements;
@@ -196,11 +209,25 @@ Opening Hours
 Service Includes Hot Food
 Alcohol Service
 ### Trading Location
-The controlled classification of the location from which a Vendor conducts its trading operation.
-Values:
-Customer-Facing Permanent Premises
-Mobile Food Unit or Market Stall
-Home or Dark Kitchen
+The controlled business classification of the location from which a Vendor conducts its trading operation.
+
+| Value | Description |
+|---|---|
+| Restaurant | Restaurant, Café, Takeaway or Food Market Hall. A customer-facing permanent premises. |
+| Stall | Mobile Food Unit or Market Stall. |
+| Kitchen | Dark Kitchen, Ghost Kitchen or Home Kitchen. A non-customer-facing food preparation venue that trades exclusively online. |
+### Opening Hours
+Opening Hours are represented by:
+Start Time
+End Time
+Opening Hours may legitimately span midnight.
+Validation must not require Start Time to be earlier than End Time.
+### Service Includes Hot Food
+Defines whether the Vendor supplies food or drink heated above ambient room temperature.
+This contributes to Compliance Requirement generation.
+### Alcohol Service
+Defines whether the Vendor supplies alcohol.
+This contributes to Compliance Requirement generation.
 ### Registered Information
 The information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor.
 Registered Information comprises:
@@ -212,8 +239,10 @@ Contact Name
 Contact Email
 Contact Telephone
 Business Address
+Food Registration Authority
+Primary Trading Authority, where applicable
 Trading Characteristics
-Registered Information becomes read-only to the Vendor once Vendor Registration has been successfully submitted and the Vendor enters PendingActivation.
+Registered Information becomes read-only once the Vendor enters PendingActivation.
 Registered Information may only be amended by authorised platform operators using administrative processes.
 ### Vendor Managed Information
 Information that may be maintained directly by the Vendor without affecting the registered identity of the business.
@@ -231,8 +260,16 @@ Evidence Received
 Verification Status
 Expiry Date, where applicable
 ### Registration Session
-The temporary interaction during which an applicant enters Vendor Registration information.
-An expired registration session produces no Vendor.
+Registration Session is a transient application construct that exists only while a prospective Vendor is completing Vendor Registration.
+It is not a Domain Entity, is not part of the Vendor aggregate and is not part of the Vendor lifecycle.
+It exists before a Vendor exists, may use transient persistence, expires automatically after inactivity and cannot be resumed.
+An expired Registration Session is discarded, produces no Vendor and generates no Vendor domain events.
+### Food Registration Authority
+Represents the competent authority responsible for Food Business Registration.
+It is derived from the approved Business Address, supplied by the Address Domain and not manually editable by the Vendor.
+### Primary Trading Authority
+Represents the authority responsible for the Vendor's declared primary trading area.
+It is applicable only to Trading Location = Stall, is derived by the Address Domain, forms part of Registered Information and contributes to Compliance Requirement generation.
 ### Pending Activation
 The lifecycle condition of a successfully registered Vendor that has not yet satisfied all requirements for platform activation.
 ### Activation
@@ -282,6 +319,7 @@ deactivation rules;
 historical suspension data.
 The aggregate does not contain:
 incomplete registration drafts;
+Registration Session;
 Menu entities;
 Address entities;
 compliance evidence;
@@ -299,7 +337,9 @@ LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where applicable
 PrimaryContact
-BusinessAddressId
+BusinessAddressSnapshot
+FoodRegistrationAuthority
+PrimaryTradingAuthority, where applicable
 TradingCharacteristics
 Registered Information is read-only to the Vendor after successful registration and may only be amended by authorised platform operators.
 ### Vendor Managed Information
@@ -334,14 +374,27 @@ ServiceIncludesHotFood
 AlcoholService
 ### TradingLocation
 Enumeration or Reference Data with values:
-CustomerFacingPermanentPremises
-MobileFoodUnitOrMarketStall
-HomeOrDarkKitchen
-Trading Characteristics, Legal Operator Type and Business Address are used to derive Compliance Requirements.
+Restaurant
+Stall
+Kitchen
+### OpeningHours
+Contains:
+StartTime
+EndTime
+Opening Hours may legitimately span midnight. Validation must not require StartTime to be earlier than EndTime.
+### ServiceIncludesHotFood
+Boolean defining whether the Vendor supplies food or drink heated above ambient room temperature.
+### AlcoholService
+Boolean defining whether the Vendor supplies alcohol.
+Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable are used to derive Compliance Requirements.
 ### VendorName
 Validated legal or trading name.
 ### CompanyRegistrationNumber
-Validated company or organisational registration identifier where applicable.
+Company or organisational registration identifier required only when Legal Operator Type requires one.
+Format is validated using:
+`^(?:[A-Za-z]{2})?\d{6,8}$`
+Alphabetic prefixes are normalised to uppercase.
+Validation confirms format only. Existence or Companies House verification remains outside Epic 1.
 ### PrimaryContact
 Contains:
 contact name;
@@ -351,8 +404,13 @@ telephone number.
 Validated email-address value.
 ### TelephoneNumber
 Validated telephone-number value.
-### AddressId
-Reference to a Business Address obtained through the Address Service abstraction.
+### BusinessAddressSnapshot
+The approved snapshot of the Business Address supplied by the Address Domain and stored by the Vendor Domain as Registered Information.
+The Vendor Domain does not own address validation.
+### FoodRegistrationAuthority
+The competent authority responsible for Food Business Registration. It is derived from the approved Business Address, supplied by the Address Domain and not manually editable by the Vendor.
+### PrimaryTradingAuthority
+The authority responsible for the Vendor's declared primary trading area. It is present only when applicable to Trading Location = Stall and is derived by the Address Domain.
 ### SuspensionReason
 Contains:
 structured suspension category;
@@ -390,6 +448,7 @@ operational availability.
 
 ## 3.2 Registration
 A Vendor is created only after successful submission of complete and valid Vendor Registration information.
+A Vendor never exists prior to successful registration.
 A newly created Vendor has:
 VendorState = PendingActivation
 TradingPreference = Offline
@@ -484,7 +543,7 @@ with an explicit reason code.
 ## 4.2 Responsibilities
 The Pending Activation Process:
 requests Compliance Requirements through an abstraction after Vendor Registration;
-generates the request from Trading Characteristics, Legal Operator Type and Business Address;
+generates the request from Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable;
 determines applicable requirements from the response;
 monitors completion of the generated Compliance Requirements;
 obtains requirement status from the owning domains;
@@ -544,9 +603,12 @@ Compliance Requirements are derived from:
 
 Trading Characteristics
 Legal Operator Type
-Business Address
+Approved Business Address
+Food Registration Authority
+Primary Trading Authority, where applicable
 
 The Vendor Domain requests Compliance Requirements through an abstraction. The Compliance Domain implementation behind that abstraction is stubbed during Epic 1.
+The Vendor Domain does not contain regulatory decision logic.
 
 Food Business Registration is always required. Street Trading Licence applicability depends upon Trading Location and Business Address. Late Night Refreshment Licence applicability depends upon Opening Hours and Service Includes Hot Food. Alcohol licensing applicability depends upon Alcohol Service.
 
@@ -676,6 +738,7 @@ VendorSuspended
 VendorReactivated
 VendorDeactivated
 Scheduling is owned outside the Vendor aggregate. The Vendor aggregate raises VendorSuspended only when the suspension use case produces the lifecycle transition.
+Registration Sessions do not generate Vendor domain events.
 
 # 8. Aggregate Invariants
 The Vendor aggregate must enforce:
@@ -711,7 +774,9 @@ classDiagram
         +VendorName TradingName
         +CompanyRegistrationNumber? CompanyRegistrationNumber
         +PrimaryContact PrimaryContact
-        +AddressId BusinessAddressId
+        +BusinessAddressSnapshot BusinessAddress
+        +FoodRegistrationAuthority FoodRegistrationAuthority
+        +PrimaryTradingAuthority? PrimaryTradingAuthority
         +Uri? Website
         +string? BusinessDescription
         +VendorState State
@@ -751,13 +816,15 @@ classDiagram
 
     class TradingLocation {
         <<Enumeration or Reference Data>>
-        CustomerFacingPermanentPremises
-        MobileFoodUnitOrMarketStall
-        HomeOrDarkKitchen
+        Restaurant
+        Stall
+        Kitchen
     }
 
     class OpeningHours {
         <<Value Object>>
+        +TimeOnly StartTime
+        +TimeOnly EndTime
     }
 
     class VendorName {
@@ -787,9 +854,16 @@ classDiagram
         +string Value
     }
 
-    class AddressId {
-        <<External Reference>>
-        +Guid Value
+    class BusinessAddressSnapshot {
+        <<Value Object>>
+    }
+
+    class FoodRegistrationAuthority {
+        <<Registered Information>>
+    }
+
+    class PrimaryTradingAuthority {
+        <<Registered Information>>
     }
 
     class VendorState {
@@ -897,8 +971,8 @@ classDiagram
     class AddressService {
         <<Abstraction>>
         +searchAddress()
+        +retrieveAddress()
         +validateAddress()
-        +getAddress()
     }
 
     class AddressDomain {
@@ -914,7 +988,14 @@ classDiagram
 
     class ComplianceRequirementProvider {
         <<Abstraction>>
-        +getRequirements()
+        +getRequirements(tradingCharacteristics, legalOperatorType, businessAddress, authorities)
+    }
+
+    class RegistrationSession {
+        <<Transient Application Construct>>
+        +expiresAfterInactivity()
+        +cannotResume()
+        +discard()
     }
 
     class OperationalAvailability {
@@ -944,6 +1025,9 @@ classDiagram
     Vendor *-- PrimaryContact
     Vendor *-- VendorState
     Vendor *-- TradingPreference
+    Vendor *-- BusinessAddressSnapshot
+    Vendor *-- FoodRegistrationAuthority
+    Vendor o-- PrimaryTradingAuthority
     Vendor o-- SuspensionRecord
     Vendor o-- DeactivationDecision
 
@@ -951,9 +1035,12 @@ classDiagram
     PrimaryContact *-- EmailAddress
     PrimaryContact *-- TelephoneNumber
 
-    Vendor --> AddressId
-    AddressId ..> AddressService : obtained through
+    BusinessAddressSnapshot ..> AddressService : supplied through
+    FoodRegistrationAuthority ..> AddressService : derived through
+    PrimaryTradingAuthority ..> AddressService : derived through
     AddressService ..> AddressDomain : implemented by
+
+    RegistrationSession ..> Vendor : successful submission creates
 
     PendingActivationProcess o-- ComplianceRequirement : manages
     PendingActivationProcess ..> ComplianceRequirementProvider : requests requirements
@@ -1048,7 +1135,7 @@ flowchart TD
     C --> D[Monitor Requirement Completion]
     D --> E[Eligible for Activation]
 
-The process requests applicable requirements through an abstraction using Trading Characteristics, Legal Operator Type and Business Address. It monitors generated Compliance Requirements while retaining the responsibility, deadline, reminder and closure rules described above.
+The process requests applicable requirements through an abstraction using Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable. It monitors generated Compliance Requirements while retaining the responsibility, deadline, reminder and closure rules described above. The Vendor Domain contains no regulatory decision logic.
 
 # 13. State Transition Table
 #
@@ -1123,11 +1210,11 @@ The Vendor aggregate records only the resulting lifecycle transition.
 
 # 16. Design Decisions
 ## Decision 1: No persisted registration draft
-Incomplete registration information is transient and discarded when the registration session expires.
+Registration Session is a transient application construct, not a Domain Entity or part of the Vendor aggregate or lifecycle. It may use transient persistence, expires after inactivity, cannot be resumed and generates no Vendor domain events. Incomplete registration information is discarded when the Registration Session expires.
 ## Decision 2: A Vendor exists only after complete registration
-Successful registration creates the Vendor directly in PendingActivation.
+Successful registration creates the Vendor directly in PendingActivation. A Vendor never exists before successful registration.
 ## Decision 3: RegistrationProgress is removed
-Every persisted Vendor has completed registration. Registration completion is therefore not an ongoing aggregate property.
+Every persisted Vendor has completed registration. Registration completion is therefore not an ongoing aggregate property. Successful submission represents a deliberate expression of intent to become a Vendor; incomplete registrations have no business significance.
 ## Decision 4: Lifecycle and compliance remain separate
 Compliance, council registration and trading-licence statuses do not become Vendor lifecycle states.
 ## Decision 5: Pending Activation is managed as a process
@@ -1153,7 +1240,7 @@ All transitions to Deactivated require a structured business reason and decision
 ## Decision 15: Trading Characteristics are distinct from Legal Operator Type
 Legal Operator Type describes legal identity and registration obligations; Trading Characteristics describe the Vendor’s trading operation.
 ## Decision 16: Compliance Requirements are generated
-The Pending Activation Process requests requirements through an abstraction using Trading Characteristics, Legal Operator Type and Business Address rather than relying on a hard-coded set.
+The Pending Activation Process requests requirements through an abstraction using Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable rather than relying on a hard-coded set. Regulatory decision logic remains outside the Vendor Domain.
 ## Decision 17: Activation Policy evaluates Compliance Requirements
 VendorActivationPolicy evaluates generated Compliance Requirements rather than containing knowledge of individual licences or UK licensing legislation.
 ## Decision 18: Compliance evidence remains outside the Vendor aggregate
@@ -1161,12 +1248,18 @@ The Vendor aggregate contains TradingCharacteristics but does not contain compli
 
 # 17. Initial Implementation Scope
 The Vendor Registration epic should implement:
-a transient registration session;
+a transient Registration Session;
+single-session Vendor Registration;
+automatic Registration Session expiry after inactivity;
+no resumable registrations;
 entry and validation of mandatory Vendor information;
 conditional validation based on Legal Operator Type;
 capture and persistence of the Vendor’s Registered Information, including TradingCharacteristics;
 capture of initially supported Vendor Managed Information;
-Business Address selection through the Address Service abstraction;
+an approved Business Address snapshot supplied through the stubbed Address Domain;
+Food Registration Authority and Primary Trading Authority where applicable;
+Compliance Requirement requests through the stubbed Compliance Domain;
+one Vendor representing one trading location;
 successful creation of a Vendor;
 initial lifecycle state of PendingActivation;
 initial Trading Preference of Offline;
@@ -1175,6 +1268,9 @@ publication of VendorRegistered;
 retrieval of the registered Vendor.
 The first epic should not implement:
 persisted registration drafts;
+multiple premises;
+a Branch aggregate;
+a Registration Amendment workflow;
 the complete Compliance domain beyond the Epic 1 stub implementation;
 council-registration workflows;
 trading-licence workflows;
@@ -1184,6 +1280,14 @@ Menu management;
 operational opening-hours management beyond the registered Trading Characteristics;
 Operational Availability composition.
 Those capabilities are represented in the model so that the Vendor Registration implementation does not block their later introduction.
+
+Future phases may introduce:
+Branches;
+multiple premises;
+Registration Amendment capability;
+the full Address Domain;
+the full Compliance Domain.
+No implementation of these capabilities is required during Epic 1.
 
 # 18. Remaining Review Questions
 The following require future business decisions but do not block Vendor Registration:

@@ -4,7 +4,7 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
@@ -17,7 +17,8 @@
 | 0.1 | 16 July 2026 | Previous draft. |
 | 0.2 | 16 July 2026 | Updated Vendor Domain Models |
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
-| 1.1 | 20 July 2026 | Introduced Trading Model and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
+| 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
+| 1.2 | 22 July 2026 | Introduced Trading Characteristics, Registered Information and Vendor Managed Information; refined Compliance Requirement derivation, Address Service integration, Pending Activation behaviour and Scheduled Suspension ownership. |
 
 ## Related Documents
 
@@ -36,7 +37,9 @@ The model explicitly separates:
 completion of Vendor Registration;
 progression through the activation process;
 regulatory and compliance requirements;
-Legal Operator Type from Trading Model;
+Legal Operator Type from Trading Characteristics;
+Registered Information;
+Vendor Managed Information;
 Vendor lifecycle state;
 Vendor trading preference;
 calculated operational availability.
@@ -53,27 +56,26 @@ This is a deliberate simplification based on the business rule that an applicant
 Successful submission creates the Vendor directly in:
 VendorState = PendingActivation
 TradingPreference = Offline
-Vendor Registration captures sufficient information to determine the Vendor’s Trading Model. The Trading Model is established during Vendor Registration and becomes an attribute of the Vendor.
+Vendor Registration captures the Vendor’s Trading Characteristics. Trading Characteristics are established during Vendor Registration and become an attribute of the Vendor.
 There is therefore no RegistrationProgress property or value object within the Vendor aggregate.
 ## 1.3 Mandatory Vendor Registration Information
 A Vendor may be created only when all mandatory Vendor-domain registration information has been supplied and validated.
-### Business identity
+### Registered Information
 LegalOperatorType
-TradingModel
-LegalName
+LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where required by the Legal Operator Type
-### Primary contact
-contact name;
-email address;
-telephone number.
-### Trading location
-validated TradingAddressId supplied by the Address domain.
+PrimaryContact, containing contact name, email address and telephone number
+BusinessAddressId obtained through the Address Service abstraction
+TradingCharacteristics
+### Vendor Managed Information
+Website
+BusinessDescription
 ### Registration declarations
 confirmation that the applicant is authorised to register the business;
 confirmation that the submitted information is accurate;
 acceptance of applicable HotJoes platform terms.
-Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Model describes how the Vendor operates and determines applicable compliance requirements, required licences, regulatory obligations and activation requirements. Trading Model is independent of Legal Operator Type; these concepts must not be confused.
+Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Characteristics describe the Vendor’s trading operation and, together with Legal Operator Type and Business Address, determine applicable Compliance Requirements. These concepts must not be confused.
 
 | Legal Operator Type | Legal Name Required | Trading Name Required | Legal Registration Number Required |
 |---|---|---|---|
@@ -91,14 +93,16 @@ These rules must be enforced server-side. User-interface validation alone is ins
 The Vendor domain is responsible for:
 creating a Vendor after successful registration;
 maintaining the Vendor’s legal and trading identity;
-maintaining the Vendor’s Trading Model;
+maintaining the Vendor’s Trading Characteristics;
+maintaining Registered Information subject to authorised administrative control;
+maintaining Vendor Managed Information;
 maintaining Vendor contact information;
 maintaining references to Vendor addresses;
 controlling the Vendor lifecycle;
 controlling the Vendor’s trading preference;
 enforcing lifecycle transition rules;
 recording activation and deactivation decisions;
-recording immediate and scheduled suspensions;
+recording suspension lifecycle transitions;
 preserving suspension history;
 publishing Vendor lifecycle events.
 The Vendor domain is not responsible for:
@@ -108,7 +112,7 @@ managing regulatory evidence;
 deciding whether council registration evidence is genuine;
 deciding whether a trading licence is valid;
 managing menus;
-managing opening hours;
+managing operational opening-hours schedules beyond the registered Trading Characteristics;
 accepting orders;
 dispatching deliveries;
 processing payments;
@@ -120,7 +124,7 @@ Owns:
 Vendor identity;
 legal and trading names;
 Legal Operator Type;
-Trading Model;
+Trading Characteristics;
 Vendor lifecycle state;
 Vendor trading preference;
 activation and deactivation transitions;
@@ -134,8 +138,9 @@ address search;
 address validation;
 canonical address data;
 integration with third-party UK address-data providers.
-The Vendor domain stores an AddressId.
-It does not own postal address lookup or third-party address-provider integration.
+Business Address is obtained through an Address Service abstraction. The Vendor domain stores an AddressId.
+The Address Domain implementation behind that abstraction is stubbed during Epic 1.
+The Vendor domain does not own postal address lookup or third-party address-provider integration.
 ### Vendor Compliance Domain
 Owns:
 compliance requirements;
@@ -159,7 +164,6 @@ A Menu references a VendorId, but Menu entities are not part of the Vendor aggre
 Owns administrative workflows and authorisation for:
 immediate Vendor suspension;
 scheduled Vendor suspension;
-cancellation of a scheduled suspension;
 Vendor reactivation;
 administrative deactivation.
 The Vendor aggregate still enforces the resulting lifecycle invariants.
@@ -183,18 +187,39 @@ A business or legal operator that has successfully completed Vendor Registration
 ### Vendor Registration
 The submission of all mandatory Vendor information required to create a Vendor.
 Registration is complete only when the information is successfully validated and submitted.
-It captures sufficient information to determine the Vendor’s Trading Model, which is established during registration.
-### Trading Model
-The classification describing how a Vendor operates, independent of its Legal Operator Type.
-Initial supported values:
-Restaurant
-Takeaway
-Restaurant & Takeaway
-Mobile Food Truck
-Market Stall
-Home Kitchen
-Dark Kitchen
-Delivery Only
+It captures the Vendor’s Registered Information, including Trading Characteristics, during registration.
+### Trading Characteristics
+The characteristics of a Vendor’s trading operation that are used to determine Compliance Requirements.
+Trading Characteristics are composed of:
+Trading Location
+Opening Hours
+Service Includes Hot Food
+Alcohol Service
+### Trading Location
+The controlled classification of the location from which a Vendor conducts its trading operation.
+Values:
+Customer-Facing Permanent Premises
+Mobile Food Unit or Market Stall
+Home or Dark Kitchen
+### Registered Information
+The information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor.
+Registered Information comprises:
+Trading Name
+Legal Operator Name
+Legal Operator Type
+Company Registration Number
+Contact Name
+Contact Email
+Contact Telephone
+Business Address
+Trading Characteristics
+Registered Information becomes read-only to the Vendor once Vendor Registration has been successfully submitted and the Vendor enters PendingActivation.
+Registered Information may only be amended by authorised platform operators using administrative processes.
+### Vendor Managed Information
+Information that may be maintained directly by the Vendor without affecting the registered identity of the business.
+Initially it consists of:
+Website
+Business Description
 ### Compliance Requirement
 A legal or regulatory obligation that must be satisfied before a Vendor becomes eligible for activation.
 Each Compliance Requirement contains:
@@ -262,24 +287,25 @@ Address entities;
 compliance evidence;
 council-registration documents;
 trading-licence documents;
-opening-hours schedules;
 orders;
 payment data.
 
 ## 2.2 Vendor Properties
 ### Identity
 VendorId
-### Business identity
+### Registered Information
 LegalOperatorType
-TradingModel
-LegalName
+LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where applicable
-### Contact information
 PrimaryContact
-### Address references
-TradingAddressId
-RegisteredAddressId, where applicable
+BusinessAddressId
+TradingCharacteristics
+Registered Information is read-only to the Vendor after successful registration and may only be amended by authorised platform operators.
+### Vendor Managed Information
+Website
+BusinessDescription
+Vendor Managed Information remains editable where applicable.
 ### Lifecycle
 VendorState
 TradingPreference
@@ -288,9 +314,9 @@ ActivatedAt
 DeactivatedAt
 DeactivationDecision, where applicable
 ### Suspension
-ScheduledSuspension, where one exists
 CurrentSuspension, while suspended
 SuspensionHistory
+Scheduled Suspension is not part of the Vendor aggregate.
 ### Concurrency
 aggregate version or equivalent optimistic concurrency token.
 
@@ -300,8 +326,18 @@ Strongly typed identifier for a Vendor.
 ### LegalOperatorType
 Classification of the legal person or organisation operating the Vendor.
 It determines legal identity, legal registration requirements and mandatory registration fields.
-### TradingModel
-Enumeration or Reference Data classification describing how the Vendor operates. It is independent of LegalOperatorType and determines applicable compliance requirements, required licences, regulatory obligations and activation requirements.
+### TradingCharacteristics
+Composite value object containing:
+TradingLocation
+OpeningHours
+ServiceIncludesHotFood
+AlcoholService
+### TradingLocation
+Enumeration or Reference Data with values:
+CustomerFacingPermanentPremises
+MobileFoodUnitOrMarketStall
+HomeOrDarkKitchen
+Trading Characteristics, Legal Operator Type and Business Address are used to derive Compliance Requirements.
 ### VendorName
 Validated legal or trading name.
 ### CompanyRegistrationNumber
@@ -316,17 +352,11 @@ Validated email-address value.
 ### TelephoneNumber
 Validated telephone-number value.
 ### AddressId
-Reference to an Address owned by the Address domain.
+Reference to a Business Address obtained through the Address Service abstraction.
 ### SuspensionReason
 Contains:
 structured suspension category;
 explanatory note.
-### ScheduledSuspension
-Contains:
-effective date and time;
-suspension reason;
-scheduling date and time;
-administrator identifier.
 ### SuspensionRecord
 Contains:
 suspension identifier;
@@ -407,22 +437,17 @@ A Vendor cannot suspend itself.
 
 ## 3.7 Scheduled Suspension
 An authorised platform administrator may schedule a suspension to begin at a future date and time.
-A Vendor may have no more than one unresolved scheduled suspension at any time.
-This is an intentional current business constraint, not an unaddressed scalability defect.
-The administrative workflow must:
-display any existing scheduled suspension;
-prevent an administrator from creating a conflicting schedule;
-require a structured reason;
-record the responsible administrator.
-The Vendor aggregate must independently enforce the single-scheduled-suspension invariant.
+Scheduled Suspension is not part of the Vendor aggregate.
+A scheduling capability owns the schedule and is responsible for invoking the existing Vendor suspension use case at the scheduled time.
 Before the effective time:
 the Vendor remains in its current lifecycle state;
-its Trading Preference is unchanged;
-the scheduled decision is retained.
+its Trading Preference is unchanged.
 When the effective time is reached:
+the scheduling capability invokes the Vendor suspension use case;
 the Vendor transitions to Suspended;
 Trading Preference is forced to Offline;
 VendorSuspended is raised.
+The Vendor aggregate records only the resulting lifecycle transition.
 
 ## 3.8 Reactivation
 A suspended Vendor may return to Active only through an authorised platform decision.
@@ -458,8 +483,9 @@ with an explicit reason code.
 
 ## 4.2 Responsibilities
 The Pending Activation Process:
-generates Compliance Requirements after Vendor Registration using Vendor Registration information, Legal Operator Type, Trading Model and declared operating characteristics;
-determines applicable requirements according to both Trading Model and Legal Operator Type;
+requests Compliance Requirements through an abstraction after Vendor Registration;
+generates the request from Trading Characteristics, Legal Operator Type and Business Address;
+determines applicable requirements from the response;
 monitors completion of the generated Compliance Requirements;
 obtains requirement status from the owning domains;
 identifies actions assigned to the Vendor;
@@ -514,18 +540,15 @@ Premises Licence
 Personal Licence Holder
 Future Compliance Requirements
 
-| Trading Model | Food Business Registration | Street Trading Licence | Late Night Refreshment Licence | Alcohol Licence |
-|---|---|---|---|---|
-| Restaurant | Required | Not normally required | Conditional | Conditional |
-| Takeaway | Required | Not normally required | Conditional | Conditional |
-| Restaurant & Takeaway | Required | Not normally required | Conditional | Conditional |
-| Mobile Food Truck | Required | Required | Conditional | Conditional |
-| Market Stall | Required | Required | Conditional | Conditional |
-| Home Kitchen | Required | Not required | Conditional | Conditional |
-| Dark Kitchen | Required | Not required | Conditional | Conditional |
-| Delivery Only | Required | Not required | Conditional | Conditional |
+Compliance Requirements are derived from:
 
-Food Business Registration is always required. Street Trading Licence applicability depends upon Trading Model. Late Night Refreshment Licence applicability depends upon operating after 23:00. Alcohol licensing applicability depends upon selling alcohol.
+Trading Characteristics
+Legal Operator Type
+Business Address
+
+The Vendor Domain requests Compliance Requirements through an abstraction. The Compliance Domain implementation behind that abstraction is stubbed during Epic 1.
+
+Food Business Registration is always required. Street Trading Licence applicability depends upon Trading Location and Business Address. Late Night Refreshment Licence applicability depends upon Opening Hours and Service Includes Hot Food. Alcohol licensing applicability depends upon Alcohol Service.
 
 ## 4.4 Vendor Activation Policy
 The VendorActivationPolicy answers:
@@ -625,16 +648,14 @@ Initial Vendor commands include:
 RegisterVendor
 UpdateVendorBusinessDetails
 UpdateVendorPrimaryContact
-ChangeVendorTradingAddress
+ChangeVendorBusinessAddress
 ActivateVendor
 SetVendorOnline
 SetVendorOffline
-ScheduleVendorSuspension
-CancelScheduledVendorSuspension
 SuspendVendorImmediately
-ApplyScheduledVendorSuspension
 ReactivateVendor
 DeactivateVendor
+Commands that amend Registered Information require an authorised platform operator. Vendor Managed Information remains editable by the Vendor where applicable.
 Commands must express business intent.
 Avoid generic commands such as:
 UpdateVendorStatus
@@ -647,19 +668,14 @@ Likely Vendor domain events include:
 VendorRegistered
 VendorBusinessDetailsChanged
 VendorPrimaryContactChanged
-VendorTradingAddressChanged
+VendorBusinessAddressChanged
 VendorActivated
 VendorSetOnline
 VendorSetOffline
-VendorSuspensionScheduled
-VendorScheduledSuspensionCancelled
 VendorSuspended
 VendorReactivated
 VendorDeactivated
-Scheduling and applying a suspension are separate business facts:
-VendorSuspensionScheduled
-VendorSuspended
-They must not be represented by a single event.
+Scheduling is owned outside the Vendor aggregate. The Vendor aggregate raises VendorSuspended only when the suspension use case produces the lifecycle transition.
 
 # 8. Aggregate Invariants
 The Vendor aggregate must enforce:
@@ -674,8 +690,6 @@ A deactivated Vendor must be Offline.
 Activation must be explicit.
 Registration does not itself prove activation eligibility.
 Suspension requires an authorised administrator and a reason.
-A scheduled suspension must have a future effective date and time.
-A Vendor may have no more than one unresolved scheduled suspension.
 When suspension takes effect, Trading Preference is forced to Offline.
 Reactivation does not restore Online.
 Deactivation requires a structured reason.
@@ -692,31 +706,28 @@ classDiagram
         <<Aggregate Root>>
         +VendorId Id
         +LegalOperatorType LegalOperatorType
-        +TradingModel TradingModel
-        +VendorName LegalName
+        +TradingCharacteristics TradingCharacteristics
+        +VendorName LegalOperatorName
         +VendorName TradingName
         +CompanyRegistrationNumber? CompanyRegistrationNumber
         +PrimaryContact PrimaryContact
-        +AddressId TradingAddressId
-        +AddressId? RegisteredAddressId
+        +AddressId BusinessAddressId
+        +Uri? Website
+        +string? BusinessDescription
         +VendorState State
         +TradingPreference TradingPreference
         +DateTimeOffset RegisteredAt
         +DateTimeOffset? ActivatedAt
         +DateTimeOffset? DeactivatedAt
-        +ScheduledSuspension? ScheduledSuspension
         +CurrentSuspension? CurrentSuspension
         +register()
         +updateBusinessDetails()
         +updatePrimaryContact()
-        +changeTradingAddress()
+        +changeBusinessAddress()
         +activate()
         +setOnline()
         +setOffline()
-        +scheduleSuspension()
-        +cancelScheduledSuspension()
         +suspendImmediately()
-        +applyScheduledSuspension()
         +reactivate()
         +deactivate()
     }
@@ -730,16 +741,23 @@ classDiagram
         <<Enumeration or Reference Data>>
     }
 
-    class TradingModel {
+    class TradingCharacteristics {
+        <<Value Object>>
+        +TradingLocation TradingLocation
+        +OpeningHours OpeningHours
+        +bool ServiceIncludesHotFood
+        +bool AlcoholService
+    }
+
+    class TradingLocation {
         <<Enumeration or Reference Data>>
-        Restaurant
-        Takeaway
-        RestaurantAndTakeaway
-        MobileFoodTruck
-        MarketStall
-        HomeKitchen
-        DarkKitchen
-        DeliveryOnly
+        CustomerFacingPermanentPremises
+        MobileFoodUnitOrMarketStall
+        HomeOrDarkKitchen
+    }
+
+    class OpeningHours {
+        <<Value Object>>
     }
 
     class VendorName {
@@ -786,14 +804,6 @@ classDiagram
         <<Enumeration>>
         Online
         Offline
-    }
-
-    class ScheduledSuspension {
-        <<Value Object>>
-        +DateTimeOffset EffectiveFrom
-        +SuspensionReason Reason
-        +DateTimeOffset ScheduledAt
-        +AdministratorId ScheduledBy
     }
 
     class SuspensionRecord {
@@ -884,18 +894,27 @@ classDiagram
         +DeactivationReason? Reason
     }
 
-    class AddressDomain {
-        <<External Domain>>
+    class AddressService {
+        <<Abstraction>>
         +searchAddress()
         +validateAddress()
         +getAddress()
     }
 
+    class AddressDomain {
+        <<Stubbed External Domain in Epic 1>>
+    }
+
     class VendorCompliance {
-        <<External Domain>>
+        <<Stubbed External Domain in Epic 1>>
         +ComplianceStatus
         +CouncilRegistrationStatus
         +TradingLicenceStatus
+    }
+
+    class ComplianceRequirementProvider {
+        <<Abstraction>>
+        +getRequirements()
     }
 
     class OperationalAvailability {
@@ -917,25 +936,28 @@ classDiagram
 
     Vendor *-- VendorId
     Vendor *-- LegalOperatorType
-    Vendor *-- TradingModel
+    Vendor *-- TradingCharacteristics
+    TradingCharacteristics *-- TradingLocation
+    TradingCharacteristics *-- OpeningHours
     Vendor *-- VendorName
     Vendor o-- CompanyRegistrationNumber
     Vendor *-- PrimaryContact
     Vendor *-- VendorState
     Vendor *-- TradingPreference
-    Vendor o-- ScheduledSuspension
     Vendor o-- SuspensionRecord
     Vendor o-- DeactivationDecision
 
-    ScheduledSuspension *-- SuspensionReason
     SuspensionRecord *-- SuspensionReason
     PrimaryContact *-- EmailAddress
     PrimaryContact *-- TelephoneNumber
 
     Vendor --> AddressId
-    AddressId ..> AddressDomain : identifies address in
+    AddressId ..> AddressService : obtained through
+    AddressService ..> AddressDomain : implemented by
 
     PendingActivationProcess o-- ComplianceRequirement : manages
+    PendingActivationProcess ..> ComplianceRequirementProvider : requests requirements
+    ComplianceRequirementProvider ..> VendorCompliance : implemented by
     ComplianceRequirement *-- ComplianceRequirementType
     ComplianceRequirement *-- ComplianceRequirementStatus
     PendingActivationProcess --> VendorActivationPolicy
@@ -1021,12 +1043,12 @@ stateDiagram-v2
 
 # 12. Pending Activation Process Model
 flowchart TD
-    A[Vendor Registered] --> B[Determine Trading Model]
-    B --> C[Generate Compliance Requirements]
+    A[Vendor Registered] --> B[Capture Trading Characteristics]
+    B --> C[Request Compliance Requirements]
     C --> D[Monitor Requirement Completion]
     D --> E[Eligible for Activation]
 
-The process determines applicability from Vendor Registration information, Legal Operator Type, Trading Model and declared operating characteristics. It monitors generated Compliance Requirements while retaining the responsibility, deadline, reminder and closure rules described above.
+The process requests applicable requirements through an abstraction using Trading Characteristics, Legal Operator Type and Business Address. It monitors generated Compliance Requirements while retaining the responsibility, deadline, reminder and closure rules described above.
 
 # 13. State Transition Table
 #
@@ -1037,10 +1059,10 @@ The process determines applicability from Vendor Registration information, Legal
 | PendingActivation | Deactivate Vendor | Valid closure decision and reason | Deactivated | Offline |
 | Active | Set Vendor Online | No effective platform restriction | Active | Online |
 | Active | Set Vendor Offline | Always permitted | Active | Offline |
-| Active | Schedule Suspension | Authorised administrator; no existing unresolved schedule; future date; reason supplied | Active | Unchanged |
-| Active | Cancel Scheduled Suspension | Authorised administrator; suspension not effective | Active | Unchanged |
+| Active | Schedule Suspension | External scheduling capability records an authorised future suspension | Active | Unchanged |
+| Active | Cancel Scheduled Suspension | External scheduling capability cancels a suspension before it becomes effective | Active | Unchanged |
 | Active | Suspend Immediately | Authorised administrator; reason supplied | Suspended | Offline |
-| Active | Apply Scheduled Suspension | Effective time reached | Suspended | Offline |
+| Active | Scheduled suspension becomes effective | Scheduling capability invokes the existing Vendor suspension use case | Suspended | Offline |
 | Active | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
 | Suspended | Reactivate Vendor | Authorised; blocking issue resolved | Active | Offline |
 | Suspended | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
@@ -1058,7 +1080,7 @@ CanAcceptOrders =
     AND NoPlatformRestriction
 Each contributing value must come from an explicit published event, query contract or maintained read-model projection.
 The calculation must not obtain data by directly querying another domain’s internal persistence model.
-Operational Availability remains independent of Trading Model.
+Operational Availability remains independent of Trading Characteristics.
 
 | Vendor state | Trading Preference | Other conditions | Operational result |
 |---|---|---|---|
@@ -1074,39 +1096,30 @@ Operational Availability remains independent of Trading Model.
 sequenceDiagram
     actor Administrator
     participant AdminUI as Platform Administration
+    participant Scheduling as Scheduling Capability
     participant Application as Vendor Application
     participant Vendor as Vendor Aggregate
     participant Store as Vendor Repository
-    participant Scheduler as Suspension Processor
     participant Bus as Event Publisher
 
     Administrator->>AdminUI: Schedule Vendor suspension
-    AdminUI->>Application: ScheduleVendorSuspension
+    AdminUI->>Scheduling: Schedule suspension
+    Scheduling->>Scheduling: Retain schedule
 
+    Note over Scheduling: At or after EffectiveFrom
+
+    Scheduling->>Application: SuspendVendorImmediately
     Application->>Store: Load Vendor
-    Application->>Vendor: scheduleSuspension(effectiveFrom, reason, administrator)
-
-    alt Existing unresolved scheduled suspension
-        Vendor-->>Application: Reject command
-        Application-->>AdminUI: Scheduling conflict
-    else Schedule accepted
-        Vendor-->>Application: VendorSuspensionScheduled
-        Application->>Store: Save Vendor
-        Application->>Bus: Publish VendorSuspensionScheduled
-    end
-
-    Note over Scheduler: At or after EffectiveFrom
-
-    Scheduler->>Store: Load due Vendor
-    Scheduler->>Vendor: applyScheduledSuspension(now)
-    Vendor-->>Scheduler: VendorSuspended
-    Scheduler->>Store: Save Vendor
-    Scheduler->>Bus: Publish VendorSuspended
-The scheduled processor must be idempotent.
+    Application->>Vendor: suspendImmediately(reason, administrator)
+    Vendor-->>Application: VendorSuspended
+    Application->>Store: Save Vendor
+    Application->>Bus: Publish VendorSuspended
+The scheduling capability must invoke the suspension use case idempotently.
 Repeated processing must not:
 apply the same suspension more than once;
 create duplicate suspension history;
 publish misleading duplicate business events.
+The Vendor aggregate records only the resulting lifecycle transition.
 
 # 16. Design Decisions
 ## Decision 1: No persisted registration draft
@@ -1126,9 +1139,9 @@ A Vendor cannot be deactivated for inactivity while HotJoes or an external autho
 ## Decision 8: No self-service withdrawal
 A Vendor withdrawal command is not included because no business requirement has established it.
 ## Decision 9: Suspension is platform controlled
-Only an authorised platform administrator may schedule, cancel or immediately apply a suspension.
-## Decision 10: One unresolved scheduled suspension
-A Vendor may have no more than one unresolved scheduled suspension at a time.
+Only an authorised platform administrator may initiate immediate or scheduled suspension.
+## Decision 10: Scheduled Suspension is outside the Vendor aggregate
+A scheduling capability owns scheduled suspension and invokes the existing Vendor suspension use case at the scheduled time. The Vendor aggregate records only the resulting lifecycle transition.
 ## Decision 11: Suspension forces Offline
 This is a Vendor aggregate invariant.
 ## Decision 12: Reactivation leaves the Vendor Offline
@@ -1137,23 +1150,23 @@ The Vendor must deliberately choose to resume trading.
 It uses explicit contracts from contributing bounded contexts and is not owned by the Vendor aggregate.
 ## Decision 14: Deactivation requires a reason
 All transitions to Deactivated require a structured business reason and decision metadata.
-## Decision 15: Trading Model is independent of Legal Operator Type
-Legal Operator Type describes legal identity and registration obligations; Trading Model describes how the Vendor operates and drives applicable compliance obligations.
+## Decision 15: Trading Characteristics are distinct from Legal Operator Type
+Legal Operator Type describes legal identity and registration obligations; Trading Characteristics describe the Vendor’s trading operation.
 ## Decision 16: Compliance Requirements are generated
-The Pending Activation Process generates requirements from registration information, Legal Operator Type, Trading Model and declared operating characteristics rather than relying on a hard-coded set.
+The Pending Activation Process requests requirements through an abstraction using Trading Characteristics, Legal Operator Type and Business Address rather than relying on a hard-coded set.
 ## Decision 17: Activation Policy evaluates Compliance Requirements
 VendorActivationPolicy evaluates generated Compliance Requirements rather than containing knowledge of individual licences or UK licensing legislation.
 ## Decision 18: Compliance evidence remains outside the Vendor aggregate
-The Vendor aggregate contains TradingModel but does not contain compliance evidence or compliance documents.
+The Vendor aggregate contains TradingCharacteristics but does not contain compliance evidence or compliance documents.
 
 # 17. Initial Implementation Scope
 The Vendor Registration epic should implement:
 a transient registration session;
 entry and validation of mandatory Vendor information;
 conditional validation based on Legal Operator Type;
-capture of sufficient information to determine the Vendor’s Trading Model;
-establishment and persistence of TradingModel on the Vendor;
-address selection through the Address domain;
+capture and persistence of the Vendor’s Registered Information, including TradingCharacteristics;
+capture of initially supported Vendor Managed Information;
+Business Address selection through the Address Service abstraction;
 successful creation of a Vendor;
 initial lifecycle state of PendingActivation;
 initial Trading Preference of Offline;
@@ -1162,13 +1175,13 @@ publication of VendorRegistered;
 retrieval of the registered Vendor.
 The first epic should not implement:
 persisted registration drafts;
-the complete Compliance domain;
+the complete Compliance domain beyond the Epic 1 stub implementation;
 council-registration workflows;
 trading-licence workflows;
 the complete Pending Activation Process;
-suspension scheduling infrastructure;
+suspension scheduling infrastructure within the Vendor aggregate;
 Menu management;
-opening-hours management;
+operational opening-hours management beyond the registered Trading Characteristics;
 Operational Availability composition.
 Those capabilities are represented in the model so that the Vendor Registration implementation does not block their later introduction.
 
@@ -1179,7 +1192,7 @@ Which actions permit extensions?
 Who may approve an extension?
 What evidence makes a compliance failure terminal?
 Which declared operating characteristics, beyond operating after 23:00 and selling alcohol, generate conditional requirements?
-How are future Compliance Requirement types and Trading Models governed and versioned?
+How are future Compliance Requirement types and Trading Characteristics governed and versioned?
 When may a deactivated Vendor reapply?
 Is a reinstatement process ever required after deactivation?
 What retention period applies to suspension and deactivation records?

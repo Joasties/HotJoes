@@ -7,7 +7,7 @@ title: HJ-002 - Architectural Principles
 
   **Document Title**                  Architectural Principles
 
-  **Version**                         1.2
+  **Version**                         1.3
 
   **Status**                          Draft
 
@@ -15,7 +15,7 @@ title: HJ-002 - Architectural Principles
 
   **Owner**                           Project Architecture
 
-  **Last Updated**                    17 July 2026
+  **Last Updated**                    22 July 2026
   ----------------------------------- -----------------------------------
 
 Revision History
@@ -35,6 +35,12 @@ Revision History
                                                   principles and decision
                                                   checklist retained
                                                   unchanged.
+
+  1.3                     22 July 2026            Introduced AP-000 -
+                                                  Reliability over
+                                                  Convenience as the
+                                                  primary engineering
+                                                  philosophy.
   ----------------------- ----------------------- -----------------------
 
 Related Documents
@@ -88,6 +94,50 @@ Architectural Decision Record (ADR) explicitly documents and justifies
 an exception.
 
 3\. Business Principles
+
+## AP-000 - Reliability over Convenience
+
+**Statement\
+**The HotJoes platform shall prioritise correctness, reliability and
+recoverability over convenience of implementation.
+
+Software shall either complete successfully or fail in a controlled
+manner that preserves system integrity, supports deterministic recovery
+and provides sufficient diagnostic information to enable rapid
+investigation and resolution.
+
+Architectural decisions shall favour designs that minimise operational
+risk, prevent data corruption and make failures observable, even where
+those designs require additional engineering effort.
+
+**Rationale\
+**The HotJoes platform is intended to be a commercial-grade distributed
+system. Engineering decisions shall prioritise correctness, reliability
+and recoverability over implementation convenience or short-term
+development speed.
+
+The architecture shall minimise opportunities for defects, preserve
+system integrity during failure conditions and provide sufficient
+operational visibility to diagnose and recover from unexpected events.
+
+This principle reflects the project’s long-term engineering philosophy
+and shall influence all subsequent architectural, implementation and
+operational decisions.
+
+**Implications**
+
+Correctness takes precedence over implementation convenience.
+
+Business-critical data shall never be silently lost.
+
+Partial operations shall leave the system in a recoverable state.
+
+Failures shall be observable through appropriate logging, telemetry and
+alerting.
+
+Systems shall be designed for deterministic recovery wherever practical.
+
+Reliability considerations shall influence all architectural decisions.
 
 ## AP-001 - Business First
 
@@ -344,6 +394,10 @@ following questions.
 
   ----------------------------------- -----------------------------------
   **Question**                        **Relevant Principle**
+
+  Does this prioritise correctness,   AP-000
+  reliability and recoverability over
+  implementation convenience?
 
   Does this solve a genuine business  AP-001
   problem?

@@ -97,7 +97,7 @@ Compliance and Activation remain separate business processes.
 
 ## 3.3 Vendor Activation
 
-An administrative transition that moves a Vendor from Pending Activation to Active.
+An administrative transition that moves a Vendor from Pending Activation to Activated.
 
 Activation occurs only after all Activation Requirements have been satisfied and authorises the Vendor to trade on the platform.
 
@@ -171,7 +171,7 @@ Represents the lifecycle state of the Vendor.
 Examples include:
 
 - Pending Activation
-- Active
+- Activated
 - Suspended
 - Deactivated
 
@@ -185,7 +185,7 @@ It is not the same as whether the Vendor is currently accepting orders.
 
 ## 3.7 Trading Preference
 
-Represents whether an Active Vendor wishes to receive new Orders.
+Represents whether an Activated Vendor wishes to receive new Orders.
 
 Possible values include:
 
@@ -325,7 +325,7 @@ Whether the Vendor may currently receive new Orders.
 
 Operational Availability is determined by Vendor Status and Trading Preference.
 
-A Vendor must be Active before Trading Preference can enable trading.
+A Vendor must be Activated before Trading Preference can enable trading.
 
 ## 4.5 Compliance
 
@@ -411,7 +411,7 @@ Command names should always be expressed as imperative verbs.
 | Trading Name | Public business name |
 | Company Name | Legal registered organisation name |
 | Vendor Status | Administrative lifecycle state |
-| Trading Preference | Whether an Active Vendor wishes to accept Orders |
+| Trading Preference | Whether an Activated Vendor wishes to accept Orders |
 | Activation | Administrative process allowing trading |
 | Registration | Creation of a Vendor record |
 | Suspension | Administrative prevention of trading |

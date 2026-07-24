@@ -4,23 +4,24 @@
 |---|---|
 | **Document ID** | HJ-104 |
 | **Document Title** | Vendor Registration Fields Matrix |
-| **Version** | 1.0 |
+| **Version** | 2.0 |
 | **Status** | Approved |
 | **Classification** | Requirements |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 July 2026 |
+| **Last Updated** | 24 July 2026 |
 
 ## Revision History
 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 22 July 2026 | Approved the Vendor Registration baseline, including field definitions, controlled Trading Location values, regulatory authority fields, assumptions and resolved outstanding decisions. |
+| 1.1 | 24 July 2026 | Applied CR-010 to add mandatory Registration Declarations, introduce the Registration Declaration classification and clarify that declarations form part of the authoritative Vendor Registration contract. |
 
 ## 1. Purpose
 
 This document defines the fields required to register a Vendor during **Epic 1 – Vendor Registration**.
 
-It is intended to provide a single source of truth for:
+It is intended to provide a single source of truth for all Vendor Registration fields and **Registration Declarations** required by the Vendor Registration business contract, including:
 
 - User Interface
 - API Contract
@@ -50,6 +51,22 @@ This document intentionally excludes menu management, operational settings and c
 | 14 | Primary Trading Authority | Derived / Conditional | Conditional | Required for Trading Location = Stall. | Registered Information | Represents the primary authority responsible for the Vendor's declared trading area. |
 | 15 | Website | URL | No | Valid HTTPS URL | Vendor Managed Information | Optional |
 | 16 | Business Description | Text | No | Maximum 2,000 characters | Vendor Managed Information | Optional profile information |
+| 17 | Authorised to Register Business | Boolean | Yes | Must be explicitly accepted before registration may be submitted. | Registration Declaration | Confirms that the applicant is authorised to register the business. |
+| 18 | Information Accurate | Boolean | Yes | Must be explicitly accepted before registration may be submitted. | Registration Declaration | Confirms that the submitted information is accurate. |
+| 19 | Accept HotJoes Platform Terms | Boolean | Yes | Must be explicitly accepted before registration may be submitted. | Registration Declaration | Confirms acceptance of the applicable HotJoes platform terms and conditions. |
+
+### Registration Declaration Classification
+
+**Registration Declaration**
+
+Registration Declarations are mandatory inputs to the **Register Vendor** business operation.
+
+They are not part of:
+
+- Registered Information
+- Vendor Managed Information
+
+They do not describe the Vendor itself and therefore do not become part of the Vendor's registered business identity.
 
 ### Trading Location Controlled Values
 

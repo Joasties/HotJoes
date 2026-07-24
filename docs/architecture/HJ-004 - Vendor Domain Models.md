@@ -4,7 +4,7 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 1.3 |
+| **Version** | 2.0 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
@@ -19,7 +19,7 @@
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Architectural principles and decision checklist retained unchanged. |
 | 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
 | 1.2 | 22 July 2026 | Introduced Trading Characteristics, Registered Information and Vendor Managed Information; refined Compliance Requirement derivation, Address Service integration, Pending Activation behaviour and Scheduled Suspension ownership. |
-| 1.3 | 22 July 2026 | Finalised Vendor Registration domain model following Epic 1 review. Clarified Registration Session, Business Address ownership, Regulatory Authorities, Trading Location, Company Registration validation and Business Address snapshot strategy. |
+| 2.0 | 22 July 2026 | Finalised Vendor Registration domain model following Epic 1 review. Clarified Registration Session, Business Address ownership, Regulatory Authorities, Trading Location, Company Registration validation and Business Address snapshot strategy. |
 
 ## Related Documents
 
@@ -273,11 +273,11 @@ It is applicable only to Trading Location = Stall, is derived by the Address Dom
 ### Pending Activation
 The lifecycle condition of a successfully registered Vendor that has not yet satisfied all requirements for platform activation.
 ### Activation
-The explicit transition of a Vendor from PendingActivation to Active.
+The explicit transition of a Vendor from PendingActivation to Activated.
 Activation occurs only after all mandatory activation prerequisites are satisfied.
-### Active
+### Activated
 The lifecycle state of a Vendor that is permitted to participate in the HotJoes platform.
-Active does not necessarily mean that the Vendor is currently accepting orders.
+Activated does not necessarily mean that the Vendor is currently accepting orders.
 ### Trading Preference
 The Vendor-controlled indication of whether it presently intends to accept orders.
 Values:
@@ -294,7 +294,7 @@ immediate;
 scheduled to take effect at a future date and time.
 When suspension takes effect, the Vendor’s Trading Preference is forced to Offline.
 ### Reactivation
-An authorised platform decision that returns a suspended Vendor to Active.
+An authorised platform decision that returns a suspended Vendor to Activated.
 Reactivation does not automatically return the Vendor to Online.
 ### Deactivation
 The closure of the Vendor’s normal lifecycle relationship with HotJoes.
@@ -303,7 +303,7 @@ Deactivation requires a structured reason.
 A business-classified explanation for why a Vendor was moved to Deactivated.
 ### Pending Activation Process
 The long-running process that coordinates the actions required to move a Vendor from PendingActivation to either:
-Active; or
+Activated; or
 Deactivated.
 
 # 2. Vendor Aggregate
@@ -434,7 +434,7 @@ earliest reapplication date, where applicable.
 # 3. Vendor Lifecycle
 ## 3.1 Lifecycle States
 PendingActivation
-Active
+Activated
 Suspended
 Deactivated
 These states describe the Vendor’s platform lifecycle.
@@ -457,7 +457,7 @@ Registration completion is not stored as a separate ongoing state because every 
 
 ## 3.3 Pending Activation
 PendingActivation means:
-The Vendor has been successfully registered but has not yet satisfied every prerequisite required to become Active.
+The Vendor has been successfully registered but has not yet satisfied every prerequisite required to become Activated.
 A Vendor in PendingActivation:
 exists in the platform;
 cannot trade;
@@ -466,16 +466,16 @@ may have outstanding compliance or administrative actions;
 is managed through the Pending Activation Process.
 
 ## 3.4 Activation
-A Vendor may transition from PendingActivation to Active only when the VendorActivationPolicy confirms that every generated mandatory Compliance Requirement has been satisfied.
+A Vendor may transition from PendingActivation to Activated only when the VendorActivationPolicy confirms that every generated mandatory Compliance Requirement has been satisfied.
 Activation eligibility is determined by evaluating all generated Compliance Requirements.
 Activation is explicit.
 Registration alone does not activate the Vendor.
 
 ## 3.5 Trading Preference
-An Active Vendor may set itself:
+An Activated Vendor may set itself:
 Online;
 Offline.
-A Vendor may be Online only while its lifecycle state is Active.
+A Vendor may be Online only while its lifecycle state is Activated.
 A Vendor may voluntarily set itself Offline for:
 holidays;
 staff shortages;
@@ -486,7 +486,7 @@ any other temporary reason.
 Changing Trading Preference does not change the Vendor lifecycle state.
 
 ## 3.6 Immediate Suspension
-An authorised platform administrator may suspend an Active Vendor immediately.
+An authorised platform administrator may suspend an Activated Vendor immediately.
 The transition:
 records the suspension decision;
 changes the Vendor state to Suspended;
@@ -509,9 +509,9 @@ VendorSuspended is raised.
 The Vendor aggregate records only the resulting lifecycle transition.
 
 ## 3.8 Reactivation
-A suspended Vendor may return to Active only through an authorised platform decision.
+A suspended Vendor may return to Activated only through an authorised platform decision.
 Reactivation:
-changes the lifecycle state to Active;
+changes the lifecycle state to Activated;
 closes the current suspension record;
 leaves Trading Preference as Offline;
 raises VendorReactivated.
@@ -520,7 +520,7 @@ The Vendor must explicitly choose to return Online.
 ## 3.9 Deactivation
 A Vendor may transition to Deactivated from:
 PendingActivation;
-Active;
+Activated;
 Suspended.
 Deactivation:
 requires a structured reason;
@@ -535,7 +535,7 @@ A future reinstatement capability must be designed explicitly and must not be as
 ## 4.1 Purpose
 The Pending Activation Process coordinates the long-running work required to move a Vendor from PendingActivation to a terminal outcome.
 The successful outcome is:
-PendingActivation → Active
+PendingActivation → Activated
 An unsuccessful outcome is:
 PendingActivation → Deactivated
 with an explicit reason code.
@@ -614,7 +614,7 @@ Food Business Registration is always required. Street Trading Licence applicabil
 
 ## 4.4 Vendor Activation Policy
 The VendorActivationPolicy answers:
-Is this Vendor currently eligible to transition from PendingActivation to Active?
+Is this Vendor currently eligible to transition from PendingActivation to Activated?
 It may consider authoritative outcomes from:
 Vendor Registration;
 Vendor Compliance;
@@ -632,7 +632,7 @@ A Vendor must not be deactivated because:
 HotJoes has not reviewed submitted evidence;
 an external authority has not responded;
 the Vendor has completed its assigned action and is awaiting a decision;
-an authorised extension is active;
+an authorised extension is Activated;
 the matter is under formal review or dispute.
 
 ## 4.6 Vendor Non-Response
@@ -656,7 +656,7 @@ They must not be hard-coded into the Vendor aggregate.
 All generated mandatory Compliance Requirements satisfied
     → VendorActivationPolicy approves
     → ActivateVendor command
-    → VendorState = Active
+    → VendorState = Activated
 ### Compliance requirements not met
 Mandatory compliance requirement fails
     → no permitted remediation remains
@@ -747,7 +747,7 @@ A newly created Vendor begins in PendingActivation.
 A newly created Vendor begins Offline.
 Incomplete registration data does not create a Vendor.
 A PendingActivation Vendor cannot trade.
-A Vendor may be Online only while Active.
+A Vendor may be Online only while Activated.
 A suspended Vendor must be Offline.
 A deactivated Vendor must be Offline.
 Activation must be explicit.
@@ -869,7 +869,7 @@ classDiagram
     class VendorState {
         <<Enumeration>>
         PendingActivation
-        Active
+        Activated
         Suspended
         Deactivated
     }
@@ -1065,7 +1065,7 @@ classDiagram
 stateDiagram-v2
     [*] --> PendingActivation : Successful Vendor Registration
 
-    PendingActivation --> Active : Activate\n[all generated Compliance Requirements satisfied]
+    PendingActivation --> Activated: Activate\n[all generated Compliance Requirements satisfied]
 
     PendingActivation --> Deactivated : Compliance requirements not met
     PendingActivation --> Deactivated : Vendor action not completed
@@ -1073,11 +1073,11 @@ stateDiagram-v2
     PendingActivation --> Deactivated : Registration rejected
     PendingActivation --> Deactivated : Administrative closure
 
-    Active --> Suspended : Immediate suspension
-    Active --> Suspended : Scheduled suspension becomes effective
-    Active --> Deactivated : Administrative deactivation
+    Activated--> Suspended : Immediate suspension
+    Activated--> Suspended : Scheduled suspension becomes effective
+    Activated--> Deactivated : Administrative deactivation
 
-    Suspended --> Active : Authorised reactivation
+    Suspended --> Activated: Authorised reactivation
     Suspended --> Deactivated : Administrative deactivation
 
     Deactivated --> [*]
@@ -1088,9 +1088,9 @@ stateDiagram-v2
         are managed by the Pending Activation Process.
     end note
 
-    note right of Active
+    note right of Activated
         Vendor is permitted to participate.
-        Active does not necessarily mean Open.
+        Activated does not necessarily mean Open.
     end note
 
     note right of Suspended
@@ -1107,7 +1107,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> Offline
 
-    Offline --> Online : Vendor chooses Online\n[VendorState = Active]
+    Offline --> Online : Vendor chooses Online\n[VendorState = Activated]
     Online --> Offline : Vendor chooses Offline
 
     Online --> Offline : Suspension takes effect
@@ -1142,16 +1142,16 @@ The process requests applicable requirements through an abstraction using Tradin
 | Current lifecycle state | Command or trigger | Conditions | Resulting state | Trading Preference |
 |---|---|---|---|---|
 | None | Register Vendor | Complete, valid registration submitted | PendingActivation | Offline |
-| PendingActivation | Activate Vendor | Activation policy confirms that all generated Compliance Requirements are satisfied | Active | Offline |
+| PendingActivation | Activate Vendor | Activation policy confirms that all generated Compliance Requirements are satisfied | Activated | Offline |
 | PendingActivation | Deactivate Vendor | Valid closure decision and reason | Deactivated | Offline |
-| Active | Set Vendor Online | No effective platform restriction | Active | Online |
-| Active | Set Vendor Offline | Always permitted | Active | Offline |
-| Active | Schedule Suspension | External scheduling capability records an authorised future suspension | Active | Unchanged |
-| Active | Cancel Scheduled Suspension | External scheduling capability cancels a suspension before it becomes effective | Active | Unchanged |
-| Active | Suspend Immediately | Authorised administrator; reason supplied | Suspended | Offline |
-| Active | Scheduled suspension becomes effective | Scheduling capability invokes the existing Vendor suspension use case | Suspended | Offline |
-| Active | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
-| Suspended | Reactivate Vendor | Authorised; blocking issue resolved | Active | Offline |
+| Activated | Set Vendor Online | No effective platform restriction | Activated | Online |
+| Activated | Set Vendor Offline | Always permitted | Activated | Offline |
+| Activated | Schedule Suspension | External scheduling capability records an authorised future suspension | Activated | Unchanged |
+| Activated | Cancel Scheduled Suspension | External scheduling capability cancels a suspension before it becomes effective | Activated | Unchanged |
+| Activated | Suspend Immediately | Authorised administrator; reason supplied | Suspended | Offline |
+| Activated | Scheduled suspension becomes effective | Scheduling capability invokes the existing Vendor suspension use case | Suspended | Offline |
+| Activated | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
+| Suspended | Reactivate Vendor | Authorised; blocking issue resolved | Activated | Offline |
 | Suspended | Deactivate Vendor | Authorised decision and reason | Deactivated | Offline |
 | Deactivated | Any normal lifecycle command | Not permitted | Deactivated | Offline |
 
@@ -1159,7 +1159,7 @@ The process requests applicable requirements through an abstraction using Tradin
 Operational Availability is calculated outside the Vendor aggregate.
 A conceptual calculation is:
 CanAcceptOrders =
-    VendorState == Active
+    VendorState == Activated
     AND TradingPreference == Online
     AND WithinOpeningHours
     AND MenuAvailable
@@ -1172,10 +1172,10 @@ Operational Availability remains independent of Trading Characteristics.
 | Vendor state | Trading Preference | Other conditions | Operational result |
 |---|---|---|---|
 | PendingActivation | Offline | Any | Unavailable |
-| Active | Online | All satisfied | Open |
-| Active | Online | Opening hours closed | Closed |
-| Active | Online | Menu unavailable | Unavailable |
-| Active | Offline | Any | Offline |
+| Activated | Online | All satisfied | Open |
+| Activated | Online | Opening hours closed | Closed |
+| Activated | Online | Menu unavailable | Unavailable |
+| Activated | Offline | Any | Offline |
 | Suspended | Offline | Any | Suspended |
 | Deactivated | Offline | Any | Deactivated |
 

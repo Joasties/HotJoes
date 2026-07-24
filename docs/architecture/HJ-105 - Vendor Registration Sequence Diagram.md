@@ -4,17 +4,18 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 0.1 |
-| **Status** | Draft |
+| **Version** | 2.0 |
+| **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 July 2026 |
+| **Last Updated** | 24 July 2026 |
 
 ## Revision History
 
 | Version | Date | Description |
 |---|---|---|
 | 0.1 | 22 July 2026 | Initial Vendor Registration behavioural model for Epic 1, including the successful registration flow, validation failure, Registration Session expiry, Address Domain collaboration and Compliance Requirement initiation. |
+| 0.2 | 24 July 2026 | Applied CR-012 to explicitly include mandatory Registration Declarations in the registration request, server-side validation, validation checklist and sequence diagram guidance. |
 
 ## Related Documents
 
@@ -44,8 +45,8 @@ The sequence diagrams are implementation guidance. They do not replace the autho
 This document covers:
 
 - creation and use of a transient Registration Session;
-- collection of Registered Information and Vendor Managed Information;
-- server-side validation of submitted registration data;
+- collection of Registered Information, Vendor Managed Information and Registration Declarations;
+- server-side validation of submitted registration information and Registration Declarations;
 - Address Domain search, retrieval and validation;
 - derivation of Food Registration Authority;
 - derivation of Primary Trading Authority where Trading Location is `Stall`;
@@ -91,8 +92,8 @@ The registration flow applies the following principles from HJ-002.
 
 | Participant | Responsibility |
 |---|---|
-| Prospective Vendor | Supplies registration information and submits Vendor Registration. |
-| Registration UI | Collects information, performs convenience validation and presents results. It is not authoritative for business validation. |
+| Prospective Vendor | Supplies registration information, confirms the mandatory Registration Declarations and submits Vendor Registration. |
+| Registration UI | Collects information and Registration Declarations, performs convenience validation and presents results. It is not authoritative for business validation. |
 | Registration Session | Holds transient information while registration is being completed. It is not a Domain Entity and produces no domain events. |
 | Vendor Registration Application | Coordinates validation, Address Domain collaboration, Vendor creation, persistence and event publication. |
 | Address Service | Published abstraction for address search, retrieval, validation and regulatory-authority derivation. |
@@ -100,7 +101,7 @@ The registration flow applies the following principles from HJ-002.
 | Vendor Repository | Persists the Vendor aggregate owned by the Vendor Domain. |
 | Outbox / Event Publisher | Reliably records and publishes the completed business fact `VendorRegistered`. |
 | Compliance Requirement Provider | Published abstraction used to request applicable Compliance Requirements. |
-| Pending Activation Process | Coordinates the work required after registration to move the Vendor towards Active or Deactivated. |
+| Pending Activation Process | Coordinates the work required after registration to move the Vendor towards Activated or Deactivated. |
 
 # 5. Vendor Registration Happy Path
 
@@ -153,9 +154,13 @@ sequenceDiagram
     end
 
     Applicant->>UI: Submit Vendor Registration
-    UI->>Application: RegisterVendor(registration data)
+    UI->>Application: RegisterVendor(registration request)
+    Note over UI,Application: Request contains Registered Information,<br/>Vendor Managed Information and<br/>mandatory Registration Declarations
 
     Application->>Application: Validate complete request server-side
+    Application->>Application: Validate Authorised to Register Business declaration
+    Application->>Application: Validate Information Accurate declaration
+    Application->>Application: Validate Accept HotJoes Platform Terms declaration
     Application->>Application: Apply conditional Legal Operator Type rules
     Application->>Application: Validate Trading Characteristics
     Application->>Application: Validate regulatory authority requirements
@@ -203,10 +208,12 @@ sequenceDiagram
     participant Outbox as Outbox / Event Publisher
 
     Applicant->>UI: Submit Vendor Registration
-    UI->>Application: RegisterVendor(registration data)
+    UI->>Application: RegisterVendor(registration request)
+    Note over UI,Application: Successful registration requires mandatory<br/>registration information and mandatory<br/>Registration Declarations
     Application->>Application: Validate server-side
+    Application->>Application: Validate all mandatory Registration Declarations
 
-    alt Missing, invalid or inconsistent information
+    alt Missing, invalid or inconsistent information or declarations
         Application-->>UI: Structured validation errors
         UI-->>Applicant: Display fields requiring correction
         Note over Session: Registration Session remains transient<br/>until corrected or expired
@@ -223,6 +230,9 @@ sequenceDiagram
 Validation must include, as applicable:
 
 - all mandatory registration fields;
+- Authorised to Register Business declaration;
+- Information Accurate declaration;
+- Accept HotJoes Platform Terms declaration;
 - controlled Legal Operator Type;
 - conditional Company Registration Number;
 - Company Registration Number format and uppercase normalisation;
@@ -445,7 +455,7 @@ Epic 1 requires:
 - transient Registration Session handling;
 - automatic expiry and complete discard;
 - non-resumable registration;
-- registration field collection;
+- registration field and Registration Declaration collection;
 - authoritative server-side validation;
 - Address Service abstraction and stub implementation;
 - Business Address snapshot;
@@ -481,7 +491,7 @@ Registration Session is a transient application concept. It exists before the Ve
 
 ## Decision 2: Vendor creation is the registration transaction boundary
 
-The Vendor is created only after complete and valid registration information has been submitted.
+The Vendor is created only after complete and valid registration information and all mandatory Registration Declarations have been submitted and validated.
 
 ## Decision 3: Address ownership remains explicit
 
@@ -511,6 +521,7 @@ Before Epic 1 is considered complete, confirm that:
 - [ ] expired Registration Sessions cannot be resumed;
 - [ ] validation failure creates no Vendor;
 - [ ] all HJ-104 field rules are enforced server-side;
+- [ ] all mandatory Registration Declarations are enforced server-side;
 - [ ] Address Service ownership is respected;
 - [ ] an approved Business Address snapshot is stored;
 - [ ] Food Registration Authority is derived and stored;

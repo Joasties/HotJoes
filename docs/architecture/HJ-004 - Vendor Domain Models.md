@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 2.0 |
+| **Version** | 2.2 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 July 2026 |
+| **Last Updated** | 8 August 2026 |
 
 ## Revision History
 
@@ -20,14 +20,17 @@
 | 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and generated Compliance Requirements, including their effects on registration, pending activation and activation eligibility. |
 | 1.2 | 22 July 2026 | Introduced Trading Characteristics, Registered Information and Vendor Managed Information; refined Compliance Requirement derivation, Address Service integration, Pending Activation behaviour and Scheduled Suspension ownership. |
 | 2.0 | 22 July 2026 | Finalised Vendor Registration domain model following Epic 1 review. Clarified Registration Session, Business Address ownership, Regulatory Authorities, Trading Location, Company Registration validation and Business Address snapshot strategy. |
+| 2.1 | 27 July 2026 | Applied CR-015, CR-016, CR-019, CR-021 and CR-023 to model canonical Address identity, enforce creation and declaration invariants, separate domain and integration events, and move Registration Session outside the Vendor service boundary. |
+| 2.2 | 8 August 2026 | Applied CR-026 to define the Epic 1 Retrieve Registered Vendor query, its authoritative read source, purpose-specific result and side-effect-free outcomes. |
 
 ## Related Documents
 
 | Document ID | Title | Status |
 |---|---|---|
-| HJ-001 | HotJoes Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
+| HJ-001 | HotJoes Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
+| CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved |
 
 #
 # 1. Vendor Domain Analysis
@@ -45,29 +48,26 @@ Vendor lifecycle state;
 Vendor trading preference;
 calculated operational availability.
 ## 1.2 Vendor Existence and Registration Boundary
-A Vendor does not exist in the HotJoes platform until a complete and valid Vendor Registration has been successfully submitted.
-Registration Session is a transient application construct that exists only while a prospective Vendor is completing Vendor Registration.
-It is not a Domain Entity, is not part of the Vendor aggregate and is not part of the Vendor lifecycle.
-It exists before a Vendor exists and may use transient persistence.
-It expires automatically after inactivity and cannot be resumed. If the Registration Session expires before successful submission:
-the incomplete information is discarded;
-no Vendor aggregate is created;
-no Vendor lifecycle state exists;
-the applicant must restart the registration process.
-HotJoes does not persist registration drafts in the initial implementation.
-Registration Sessions do not generate Vendor domain events.
-Vendor Registration is intentionally completed within a single Registration Session. Successful submission represents a deliberate expression of intent to become a Vendor. Incomplete registrations have no business significance and are discarded.
-Successful submission creates the Vendor directly in:
+A Vendor does not exist in the HotJoes platform until a complete and valid **Register Vendor** request has been successfully processed.
+A Registration Session may be used by a client application or Backend-for-Frontend (BFF) as a transient interaction working set while a prospective Vendor assembles registration information.
+The Registration Session exists entirely outside the Vendor service boundary, is not known to the Vendor Domain, is not a Domain Entity, is not part of the Vendor aggregate and is not part of the Vendor lifecycle.
+The authoritative definition of Registration Session is maintained in **HJ-003 §3.5**.
+Once a **Register Vendor** request is submitted, the complete RegisterVendor request is the sole authoritative source of client-authored registration information and the approved Address Resolution reference. Address-owned information is obtained directly from the Address Domain using that reference.
+
+The Vendor Domain does not retrieve, inspect, reconcile or depend upon any Registration Session.
+Incomplete interaction state has no business significance within the Vendor Domain and creates no Vendor or Vendor domain event.
+Successful execution of **Register Vendor** creates the Vendor directly in:
 VendorState = PendingActivation
 TradingPreference = Offline
 Vendor Registration captures the Vendor’s Trading Characteristics. Trading Characteristics are established during Vendor Registration and become an attribute of the Vendor.
 There is therefore no RegistrationProgress property or value object within the Vendor aggregate.
 
 flowchart TD
-    A[Prospective Vendor] --> B[Registration Session]
-    B --> C[Successful Registration]
+    A[Prospective Vendor] --> B[Client or BFF interaction]
+    B --> C[Complete Register Vendor request]
     C --> D[Vendor Created]
     D --> E[PendingActivation]
+
 ## 1.3 Mandatory Vendor Registration Information
 A Vendor may be created only when all mandatory Vendor-domain registration information has been supplied and validated.
 ### Registered Information
@@ -76,6 +76,7 @@ LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where required by the Legal Operator Type
 PrimaryContact, containing contact name, email address and telephone number
+CanonicalAddressId supplied by the Address Domain
 BusinessAddressSnapshot supplied by the Address Domain
 FoodRegistrationAuthority
 PrimaryTradingAuthority, where applicable
@@ -87,6 +88,8 @@ BusinessDescription
 confirmation that the applicant is authorised to register the business;
 confirmation that the submitted information is accurate;
 acceptance of applicable HotJoes platform terms.
+
+Registration Declarations are mandatory transient business inputs to **Register Vendor**. They are not Registered Information or Vendor Managed Information, are not stored on the Vendor aggregate and do not become Vendor business state or appear in Vendor domain or integration events. Any audit retention is an application concern outside the Vendor Domain.
 Legal Operator Type determines the Vendor’s legal identity, legal registration requirements and mandatory registration fields. Trading Characteristics describe the Vendor’s trading operation and, together with Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable, determine Compliance Requirements. These concepts must not be confused.
 
 | Legal Operator Type | Legal Name Required | Trading Name Required | Legal Registration Number Required |
@@ -109,7 +112,8 @@ maintaining the Vendor’s Trading Characteristics;
 maintaining Registered Information subject to authorised administrative control;
 maintaining Vendor Managed Information;
 maintaining Vendor contact information;
-maintaining the approved Business Address snapshot;
+maintaining the relationship to the canonical Address through the stored Canonical Address Identifier;
+maintaining the immutable Business Address Snapshot supplied by the Address Domain;
 controlling the Vendor lifecycle;
 controlling the Vendor’s trading preference;
 enforcing lifecycle transition rules;
@@ -151,9 +155,22 @@ address retrieval;
 address validation;
 canonical address data;
 integration with third-party UK address-data providers.
-The Address Domain supplies an approved Business Address snapshot to the Vendor Domain through the Address Service abstraction.
+The Address Domain supplies the Canonical Address Identifier, immutable Business Address Snapshot and derived regulatory-authority information to the Vendor Domain through the Address Service abstraction.
 The Address Domain implementation behind that abstraction is stubbed during Epic 1.
-The Vendor Domain stores the approved Business Address snapshot as Registered Information. It does not own address validation or third-party address-provider integration.
+The Vendor maintains its relationship to the canonical Address exclusively through the stored Canonical Address Identifier while retaining an immutable Business Address Snapshot representing the approved address at the time of registration.
+
+**Address Ownership Invariant**
+
+The Vendor Domain owns neither canonical Address information nor regulatory-authority derivation.
+
+With respect to Address-owned information, the Vendor aggregate stores only:
+
+- the Canonical Address Identifier; and
+- the immutable Business Address Snapshot returned by the Address Domain.
+
+The Vendor Domain and any caller shall not supply, modify, normalise, derive or replace Business Address Snapshot content or regulatory-authority values. All Address Snapshot and authority information shall originate exclusively from the Address Domain.
+
+The Vendor Domain owns only its relationship to the Address and its immutable historical snapshot. It does not own address validation or third-party address-provider integration.
 ### Vendor Compliance Domain
 Owns:
 compliance requirements;
@@ -193,6 +210,9 @@ menu availability;
 ordering-service availability;
 platform restrictions.
 The Vendor aggregate does not directly reference or own entities from those domains.
+
+### Registration Session Boundary
+The Registration Session is a client- or BFF-owned interaction construct outside every Vendor service boundary. The Vendor Domain neither owns nor manages Registration Sessions. The authoritative definition is maintained in **HJ-003 §3.5**.
 
 ## 1.6 Ubiquitous Language
 ### Vendor
@@ -238,7 +258,8 @@ Company Registration Number
 Contact Name
 Contact Email
 Contact Telephone
-Business Address
+Canonical Address Identifier
+Business Address Snapshot
 Food Registration Authority
 Primary Trading Authority, where applicable
 Trading Characteristics
@@ -260,10 +281,11 @@ Evidence Received
 Verification Status
 Expiry Date, where applicable
 ### Registration Session
-Registration Session is a transient application construct that exists only while a prospective Vendor is completing Vendor Registration.
-It is not a Domain Entity, is not part of the Vendor aggregate and is not part of the Vendor lifecycle.
-It exists before a Vendor exists, may use transient persistence, expires automatically after inactivity and cannot be resumed.
-An expired Registration Session is discarded, produces no Vendor and generates no Vendor domain events.
+A Registration Session is a transient interaction working set owned by the client application or a Backend-for-Frontend.
+It exists outside every Vendor service boundary, is not known to the Vendor Domain and does not participate in Vendor business processing.
+Once a **Register Vendor** request is submitted, the complete RegisterVendor request is the sole authoritative source of client-authored registration information and the approved Address Resolution reference. Address-owned information is obtained directly from the Address Domain using that reference.
+The authoritative definition is maintained in **HJ-003 §3.5**.
+
 ### Food Registration Authority
 Represents the competent authority responsible for Food Business Registration.
 It is derived from the approved Business Address, supplied by the Address Domain and not manually editable by the Vendor.
@@ -306,6 +328,99 @@ The long-running process that coordinates the actions required to move a Vendor 
 Activated; or
 Deactivated.
 
+## 1.7 Registered Vendor Retrieval
+
+### Query Definition
+
+```text
+RetrieveRegisteredVendor(VendorId)
+```
+
+Retrieve Registered Vendor loads an existing Vendor from the Vendor Repository using VendorId and returns a Registered Vendor Details representation derived from persisted Vendor state.
+
+The query:
+
+- uses VendorId as the sole lookup criterion;
+- requires no Registration Session or search operation;
+- requires no Identity, Address Service or Compliance collaboration;
+- makes no change to the Vendor aggregate and causes no lifecycle transition;
+- records no Domain Event; and
+- creates no publication work and publishes no Integration Event.
+
+### Read Source
+
+The persisted Vendor aggregate is the authoritative read source for Retrieve Registered Vendor during Epic 1.
+
+No dedicated read model, projection store or eventually consistent query infrastructure is required for Epic 1. A later architecture may introduce an independently optimised read model if justified by future requirements.
+
+### Service Representation Boundary
+
+The Vendor aggregate shall not be exposed directly as the query or service response. The application shall map persisted Vendor state into a purpose-specific **Registered Vendor Details** representation.
+
+Registered Vendor Details contains the following persisted information established through registration:
+
+- VendorId;
+- RegisteredAt;
+- Vendor State;
+- Trading Preference;
+- Legal Operator Type;
+- Legal Operator Name;
+- Company Registration Number, where applicable;
+- Trading Name;
+- Trading Characteristics, containing Trading Location, Opening Hours, Service Includes Hot Food and Alcohol Service;
+- Contact Name;
+- Contact Email;
+- Contact Telephone;
+- Canonical Address Identifier;
+- immutable Business Address Snapshot;
+- Food Registration Authority;
+- Primary Trading Authority, where applicable;
+- Website, where supplied; and
+- Business Description, where supplied.
+
+Registered Vendor Details explicitly excludes:
+
+- Registration Declarations;
+- Compliance Requirements, evidence, state and decisions;
+- Activation decisions;
+- Domain Event and Integration Event representations;
+- outbox and publication metadata;
+- Identity information; and
+- internal persistence metadata.
+
+### Query Outcomes
+
+When VendorId identifies an existing Vendor, return Registered Vendor Details derived from persisted Vendor state.
+
+When VendorId does not identify an existing Vendor, return a controlled **Vendor Not Found** outcome. No additional business failure semantics are required for Epic 1.
+
+### Query Side-Effect Invariant
+
+Retrieve Registered Vendor is read-only. Execution shall not:
+
+- modify the Vendor aggregate;
+- change Vendor State or Trading Preference;
+- create or modify Registered Information or Vendor Managed Information;
+- record a Domain Event;
+- create publication work;
+- publish an Integration Event; or
+- initiate a Pending Activation Process.
+
+### Register Vendor Completion Semantics
+
+Successful completion of RegisterVendor establishes the Vendor as durable business state.
+
+Every successful RegisterVendor operation establishes, at a minimum:
+
+- VendorId; and
+- Vendor State = PendingActivation.
+
+RegisteredAt, Trading Preference and other persisted Vendor properties are also established during successful registration. They form part of the committed Vendor state rather than the minimum business outcome required to identify the newly created Vendor.
+
+Whether those additional persisted values are returned by RegisterVendor is determined by the application service contract rather than the Vendor Domain Model.
+
+The authoritative source for the complete committed Vendor state after successful registration is the persisted Vendor aggregate, exposed through RetrieveRegisteredVendor.
+
 # 2. Vendor Aggregate
 ## 2.1 Aggregate Root
 Vendor is the aggregate root.
@@ -337,6 +452,7 @@ LegalOperatorName
 TradingName
 CompanyRegistrationNumber, where applicable
 PrimaryContact
+CanonicalAddressId
 BusinessAddressSnapshot
 FoodRegistrationAuthority
 PrimaryTradingAuthority, where applicable
@@ -404,6 +520,9 @@ telephone number.
 Validated email-address value.
 ### TelephoneNumber
 Validated telephone-number value.
+### CanonicalAddressId
+Strongly typed, immutable identifier assigned by the Address Domain to the canonical Address.
+It represents the Vendor aggregate's durable relationship with the Address Domain without duplicating Address information owned by that bounded context.
 ### BusinessAddressSnapshot
 The approved snapshot of the Business Address supplied by the Address Domain and stored by the Vendor Domain as Registered Information.
 The Vendor Domain does not own address validation.
@@ -725,7 +844,10 @@ SetState
 PatchVendor
 Those commands bypass business rules and weaken the domain model.
 
-# 7. Domain Events
+# 7. Domain and Integration Events
+Domain events and integration events represent distinct architectural concerns. Their representations are not required to be identical, and this distinction does not prescribe a transport protocol, serialization format or messaging technology.
+
+## 7.1 Domain Events
 Likely Vendor domain events include:
 VendorRegistered
 VendorBusinessDetailsChanged
@@ -737,11 +859,63 @@ VendorSetOffline
 VendorSuspended
 VendorReactivated
 VendorDeactivated
+
+The **VendorRegistered domain event** is the internal event representing successful completion of Vendor creation. It records the completed business fact within the Vendor Domain and is not an external collaboration contract. No minimum payload is prescribed for the internal domain event.
+
 Scheduling is owned outside the Vendor aggregate. The Vendor aggregate raises VendorSuspended only when the suspension use case produces the lifecycle transition.
 Registration Sessions do not generate Vendor domain events.
+Registration Declarations never appear in Vendor domain events.
+
+## 7.2 Integration Events
+The **VendorRegistered integration event** is the published collaboration contract used to initiate downstream business processes. Reliable publication derives from successful completion of Vendor registration. The internal domain event and published integration event represent different architectural concerns and need not contain identical representations.
+
+### VendorRegistered Integration Event Contract
+The published **VendorRegistered integration event** shall contain, at a minimum:
+
+- VendorId;
+- RegisteredAt;
+- resulting Vendor State;
+- Trading Preference;
+- Legal Operator Type;
+- Trading Characteristics;
+- the approved registration-time Business Address information required by downstream Compliance processing;
+- Food Registration Authority; and
+- Primary Trading Authority where applicable.
+
+### Deferred Business Address Integration Schema
+
+The Business Address information included in the VendorRegistered Integration Event shall:
+- originate exclusively from the approved Address Domain result used during Vendor Registration;
+- represent the approved Business Address at the time the Vendor was registered;
+- contain sufficient business information for the Compliance capability to begin its downstream processing without synchronously querying the Vendor Domain; and
+- preserve the Address ownership and trust-boundary rules established by ADR-006.
+HJ-004 defines only these minimum business semantics. It does not define the concrete fields, nesting, serialization or wire representation of the Business Address element within the Integration Event.
+The concrete Address payload schema is deferred until the Compliance-facing integration contract is defined. No implementation shall infer or invent that schema from the Vendor aggregate or BusinessAddressSnapshot representation.
+The concrete schema must be agreed before the VendorRegistered Integration Event is used as a production integration contract. Any later incompatible change shall follow the project’s Integration Event versioning rules.
+
+The event shall contain sufficient information for the **Pending Activation Process** to begin without requiring an immediate synchronous query back into the Vendor Domain. A published event that requires downstream bounded contexts to retrieve these values directly from the Vendor Domain is not permitted.
+
+Registration Declarations never appear in Vendor integration events.
 
 # 8. Aggregate Invariants
 The Vendor aggregate must enforce:
+
+**Address Ownership Invariant**
+
+With respect to Address-owned information, the Vendor aggregate shall store only the Canonical Address Identifier and the immutable Business Address Snapshot supplied by the Address Domain. Neither the Vendor Domain nor any caller shall construct, modify or replace Address-owned information.
+
+**Registration Declaration Invariant**
+
+Registration Declarations are transient business inputs used solely to determine whether **Register Vendor** may proceed. They are never stored on the Vendor aggregate, never become Vendor business state and never appear in Vendor domain events or integration events.
+
+**Primary Trading Authority Invariant**
+
+When Trading Location is Stall, Primary Trading Authority shall be present. When Trading Location is any other approved value, Primary Trading Authority shall be absent.
+
+**Company Registration Number Invariant**
+
+Company Registration Number shall be present if and only if Legal Operator Type is Limited Company, Limited Liability Partnership or Charitable Incorporated Organisation. For every other approved Legal Operator Type, Company Registration Number shall be absent.
+
 A Vendor can be created only from complete and valid submitted registration data.
 A newly created Vendor begins in PendingActivation.
 A newly created Vendor begins Offline.
@@ -774,6 +948,7 @@ classDiagram
         +VendorName TradingName
         +CompanyRegistrationNumber? CompanyRegistrationNumber
         +PrimaryContact PrimaryContact
+        +CanonicalAddressId CanonicalAddressId
         +BusinessAddressSnapshot BusinessAddress
         +FoodRegistrationAuthority FoodRegistrationAuthority
         +PrimaryTradingAuthority? PrimaryTradingAuthority
@@ -850,6 +1025,11 @@ classDiagram
     }
 
     class TelephoneNumber {
+        <<Value Object>>
+        +string Value
+    }
+
+    class CanonicalAddressId {
         <<Value Object>>
         +string Value
     }
@@ -991,13 +1171,6 @@ classDiagram
         +getRequirements(tradingCharacteristics, legalOperatorType, businessAddress, authorities)
     }
 
-    class RegistrationSession {
-        <<Transient Application Construct>>
-        +expiresAfterInactivity()
-        +cannotResume()
-        +discard()
-    }
-
     class OperationalAvailability {
         <<Composed Read Model>>
         +VendorState VendorState
@@ -1023,6 +1196,7 @@ classDiagram
     Vendor *-- VendorName
     Vendor o-- CompanyRegistrationNumber
     Vendor *-- PrimaryContact
+    Vendor *-- CanonicalAddressId
     Vendor *-- VendorState
     Vendor *-- TradingPreference
     Vendor *-- BusinessAddressSnapshot
@@ -1035,12 +1209,11 @@ classDiagram
     PrimaryContact *-- EmailAddress
     PrimaryContact *-- TelephoneNumber
 
+    CanonicalAddressId ..> AddressService : supplied through
     BusinessAddressSnapshot ..> AddressService : supplied through
     FoodRegistrationAuthority ..> AddressService : derived through
     PrimaryTradingAuthority ..> AddressService : derived through
     AddressService ..> AddressDomain : implemented by
-
-    RegistrationSession ..> Vendor : successful submission creates
 
     PendingActivationProcess o-- ComplianceRequirement : manages
     PendingActivationProcess ..> ComplianceRequirementProvider : requests requirements
@@ -1209,8 +1382,8 @@ publish misleading duplicate business events.
 The Vendor aggregate records only the resulting lifecycle transition.
 
 # 16. Design Decisions
-## Decision 1: No persisted registration draft
-Registration Session is a transient application construct, not a Domain Entity or part of the Vendor aggregate or lifecycle. It may use transient persistence, expires after inactivity, cannot be resumed and generates no Vendor domain events. Incomplete registration information is discarded when the Registration Session expires.
+## Decision 1: Registration Session is outside the Vendor service boundary
+Registration Session is a client- or BFF-owned interaction construct outside the Vendor Domain model and every Vendor service boundary. The Vendor Domain neither persists nor manages its expiry, lifetime or disposal. Only a complete submitted **Register Vendor** request participates in Vendor business processing, and only successful execution creates durable business facts.
 ## Decision 2: A Vendor exists only after complete registration
 Successful registration creates the Vendor directly in PendingActivation. A Vendor never exists before successful registration.
 ## Decision 3: RegistrationProgress is removed
@@ -1245,18 +1418,18 @@ The Pending Activation Process requests requirements through an abstraction usin
 VendorActivationPolicy evaluates generated Compliance Requirements rather than containing knowledge of individual licences or UK licensing legislation.
 ## Decision 18: Compliance evidence remains outside the Vendor aggregate
 The Vendor aggregate contains TradingCharacteristics but does not contain compliance evidence or compliance documents.
+## Decision 19: Registered Vendor retrieval uses a purpose-specific representation
+For Epic 1, Retrieve Registered Vendor loads the persisted Vendor aggregate by VendorId as the authoritative read source and maps its state into Registered Vendor Details. The aggregate is not exposed as the service response, and no dedicated read-model infrastructure or cross-domain collaboration is introduced.
 
 # 17. Initial Implementation Scope
 The Vendor Registration epic should implement:
-a transient Registration Session;
-single-session Vendor Registration;
-automatic Registration Session expiry after inactivity;
-no resumable registrations;
+acceptance and validation of a complete, self-contained **Register Vendor** request;
+no dependency upon Registration Session retrieval, reconciliation, persistence, expiry or disposal;
 entry and validation of mandatory Vendor information;
 conditional validation based on Legal Operator Type;
 capture and persistence of the Vendor’s Registered Information, including TradingCharacteristics;
 capture of initially supported Vendor Managed Information;
-an approved Business Address snapshot supplied through the stubbed Address Domain;
+a Canonical Address Identifier and immutable Business Address Snapshot supplied through the stubbed Address Domain;
 Food Registration Authority and Primary Trading Authority where applicable;
 Compliance Requirement requests through the stubbed Compliance Domain;
 one Vendor representing one trading location;
@@ -1264,9 +1437,11 @@ successful creation of a Vendor;
 initial lifecycle state of PendingActivation;
 initial Trading Preference of Offline;
 persistence of the Vendor aggregate;
-publication of VendorRegistered;
-retrieval of the registered Vendor.
+recording of the internal VendorRegistered domain event and reliable publication of the VendorRegistered integration event;
+retrieval of one Vendor by VendorId;
+mapping of persisted Vendor state to Registered Vendor Details;
 The first epic should not implement:
+Registration Session persistence, expiry or lifecycle management within the Vendor Domain;
 persisted registration drafts;
 multiple premises;
 a Branch aggregate;
@@ -1278,7 +1453,15 @@ the complete Pending Activation Process;
 suspension scheduling infrastructure within the Vendor aggregate;
 Menu management;
 operational opening-hours management beyond the registered Trading Characteristics;
-Operational Availability composition.
+Operational Availability composition;
+Vendor search, filtering, paging or multiple-Vendor retrieval;
+lookup by Trading Name or Legal Operator Name;
+retrieval authentication, authorisation or caller-to-Vendor ownership checks;
+Identity Domain integration for retrieval;
+Address re-resolution or Address search during retrieval;
+Compliance state or Compliance Requirement retrieval;
+dedicated read-model or eventual-consistency infrastructure;
+post-registration editing through the retrieval capability.
 Those capabilities are represented in the model so that the Vendor Registration implementation does not block their later introduction.
 
 Future phases may introduce:

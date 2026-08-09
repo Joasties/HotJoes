@@ -1,54 +1,37 @@
-**HJ-009 -- AI Operating Guide**
+# HJ-009 - AI Operating Guide
 
-  ------------------------- ---------------------------------------------
-  **Document ID**           **HJ-009**
+| Property | Value |
+|----------|-------|
+| **Document ID** | HJ-009 |
+| **Document Title** | AI Operating Guide |
+| **Version** | 1.0 |
+| **Status** | Approved |
+| **Classification** | Guide |
+| **Owner** | Project Architecture |
+| **Last Updated** | 9 August 2026 |
 
-  **Document Title**        AI Operating Guide
+## Revision History
 
-  **Version**               0.2
+| Version | Date | Description |
+|---------|------|-------------|
+| 0.1 | 21 July 2026 | Initial draft. |
+| 0.2 | 21 July 2026 | Introduced the human-orchestrated AI operating model, human review between AI roles, AI self-review, tool-usage guidance, structured role hand-offs, escalation guidance, prompt lifecycle controls, and revised workflow diagrams and Golden Rules. |
+| 1.0 | 9 August 2026 | Completed human review and promoted the AI Operating Guide from Draft to Approved. Existing AI operating behaviour and human-governance rules were retained unchanged. Markdown presentation was aligned with the current HotJoes documentation standard and related-document status references were reconciled. |
 
-  **Status**                Draft
+## Related Documents
 
-  **Classification**        Guide
+| Document ID | Title | Status |
+|-------------|-------|--------|
+| HJ-001 | Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
+| HJ-003 | Ubiquitous Language Guide | Approved |
+| HJ-004 | Vendor Domain Models | Approved |
+| HJ-005 | Coding Standards | Approved |
+| HJ-006 | Testing Strategy and Standards | Approved |
+| HJ-007 | Enforcement Strategy | Approved |
+| HJ-008 | AI Roles and Responsibilities | Approved |
 
-  **Owner**                 Project Architecture
-
-  **Last Updated**          21 July 2026
-  ------------------------- ---------------------------------------------
-
-**Revision History**
-
-  -------------- ----------------- --------------------------------------
-  **Version**    **Date**          **Description**
-
-  0.1            21 July 2026      Initial draft.
-
-  0.2            21 July 2026      Introduced the human-orchestrated AI operating model, human review between AI roles, AI self-review, tool-usage guidance, structured role hand-offs, escalation guidance, prompt lifecycle controls, and revised workflow diagrams and Golden Rules.
-  -------------- ----------------- --------------------------------------
-
-**Related Documents**
-
-  ------------------ ---------------------------------- -----------------
-  **Document ID**    **Title**                          **Status**
-
-  HJ-001             Project Vision                     Draft
-
-  HJ-002             Architectural Principles           Draft
-
-  HJ-003             Ubiquitous Language Guide          Draft
-
-  HJ-004             Vendor Domain Models               Draft
-
-  HJ-005             Coding Standards                   Draft
-
-  HJ-006             Testing Strategy and Standards     Draft
-
-  HJ-007             Enforcement Strategy               Draft
-
-  HJ-008             AI Roles and Responsibilities      Draft
-  ------------------ ---------------------------------- -----------------
-
-**1. Purpose**
+# 1. Purpose
 
 This document defines the operational rules governing the use of
 Artificial Intelligence throughout the HotJoes project.
@@ -63,39 +46,39 @@ This document does not define AI roles and responsibilities. Those are
 defined in **HJ-008 AI Roles and Responsibilities**. HJ-009 defines how
 those roles operate within a human-governed process.
 
-**2. Objectives**
+# 2. Objectives
 
 The objectives of this guide are to:
 
-ensure predictable AI behaviour
+- ensure predictable AI behaviour
 
-maximise engineering quality
+- maximise engineering quality
 
-minimise hallucination
+- minimise hallucination
 
-preserve architectural consistency
+- preserve architectural consistency
 
-provide repeatable delivery processes
+- provide repeatable delivery processes
 
-define human approval gates
+- define human approval gates
 
-ensure every AI decision is traceable
+- ensure every AI decision is traceable
 
-maintain human control of workflow progression
+- maintain human control of workflow progression
 
-prevent autonomous AI role chaining
+- prevent autonomous AI role chaining
 
-make every hand-off reviewable and traceable
+- make every hand-off reviewable and traceable
 
-ensure AI output is self-reviewed before human review
+- ensure AI output is self-reviewed before human review
 
-ensure tools are used to verify context and outputs where appropriate
+- ensure tools are used to verify context and outputs where appropriate
 
-**3. Guiding Principles**
+# 3. Guiding Principles
 
 The following principles govern all AI participation.
 
-**GP-001 AI Assists --- Humans Decide**
+## GP-001 AI Assists --- Humans Decide
 
 AI supports engineering decisions.
 
@@ -104,7 +87,7 @@ decisions.
 
 AI must never assume authority that has not been explicitly delegated.
 
-**GP-002 Documents Are the Source of Truth**
+## GP-002 Documents Are the Source of Truth
 
 AI must treat approved project documentation as authoritative.
 
@@ -112,25 +95,25 @@ If implementation conflicts with documentation:
 
 The documentation wins.
 
-**GP-003 Never Guess**
+## GP-003 Never Guess
 
 Where information is incomplete, AI must request clarification.
 
 AI must never invent:
 
-business rules
+- business rules
 
-domain concepts
+- domain concepts
 
-APIs
+- APIs
 
-data structures
+- data structures
 
-workflows
+- workflows
 
 without explicit approval.
 
-**GP-004 Preserve Existing Decisions**
+## GP-004 Preserve Existing Decisions
 
 AI must not redesign previously approved solutions unless requested.
 
@@ -140,19 +123,19 @@ Improvement suggestions are welcome.
 
 Unapproved redesign is prohibited.
 
-**GP-005 Explain Significant Decisions**
+## GP-005 Explain Significant Decisions
 
 Whenever AI makes a significant recommendation it should explain:
 
-why
+- why
 
-alternatives considered
+- alternatives considered
 
-trade-offs
+- trade-offs
 
-assumptions
+- assumptions
 
-**GP-006 Complete the Assigned Task First**
+## GP-006 Complete the Assigned Task First
 
 AI must complete the requested task before proposing additional
 improvements.
@@ -165,7 +148,7 @@ task.
 
 AI must not delay delivery by repeatedly proposing further analysis.
 
-**4. Human-Orchestrated AI Operating Model**
+# 4. Human-Orchestrated AI Operating Model
 
 AI roles are logical responsibilities. They are not necessarily separate
 autonomous agents. The same AI system may perform different roles at
@@ -202,7 +185,7 @@ Human Defines and Assigns Task
 Same AI Role   Human Selects Next Step
 ```
 
-**5. AI Workflow**
+# 5. AI Workflow
 
 AI work follows a repeating human-governed pattern.
 
@@ -264,22 +247,22 @@ Workflow stages must not be bypassed where they are applicable. The human
 determines which stages apply, and the human controls progression between
 them.
 
-**6. Context Management**
+# 6. Context Management
 
 Before beginning any task AI should identify the minimum context
 required.
 
 Examples include:
 
-Vision
+- Vision
 
-Architecture
+- Architecture
 
-Domain Model
+- Domain Model
 
-Coding Standards
+- Coding Standards
 
-Testing Standards
+- Testing Standards
 
 AI should identify the authoritative source for each material decision.
 
@@ -294,7 +277,7 @@ AI should avoid making decisions without sufficient context.
 When context is missing, it should request clarification rather than
 infer missing project decisions.
 
-**7. Reading Before Acting**
+# 7. Reading Before Acting
 
 Before performing any task AI should determine:
 
@@ -302,97 +285,95 @@ What information already exists?
 
 Examples include:
 
-previous design decisions
+- previous design decisions
 
-existing documentation
+- existing documentation
 
-architectural principles
+- architectural principles
 
-coding standards
+- coding standards
 
-existing source code
+- existing source code
 
 AI should use available retrieval and inspection tools before claiming
 that information is missing.
 
 AI should:
 
-search or read relevant project documents
+- search or read relevant project documents
 
-inspect the relevant source-code area
+- inspect the relevant source-code area
 
-verify referenced standards and decisions
+- verify referenced standards and decisions
 
-avoid guessing from partial excerpts
+- avoid guessing from partial excerpts
 
-confirm the actual content of an attached or referenced file before
-modifying it
+- confirm the actual content of an attached or referenced file before modifying it
 
 AI should read before writing.
 
-**8. Working with Documentation**
+# 8. Working with Documentation
 
 Documentation is considered a first-class deliverable.
 
 AI should:
 
-preserve document structure
+- preserve document structure
 
-preserve document identifiers
+- preserve document identifiers
 
-preserve revision history
+- preserve revision history
 
-maintain terminology defined in the Ubiquitous Language Guide
+- maintain terminology defined in the Ubiquitous Language Guide
 
-avoid duplicate concepts
+- avoid duplicate concepts
 
-cross-reference related documents
+- cross-reference related documents
 
 Documentation should evolve incrementally.
 
-**9. Working with Source Code**
+# 9. Working with Source Code
 
 Before generating code AI should understand:
 
-project architecture
+- project architecture
 
-domain model
+- domain model
 
-coding standards
+- coding standards
 
-testing strategy
+- testing strategy
 
-existing implementation patterns
+- existing implementation patterns
 
 AI should extend existing patterns rather than invent new ones.
 
 Consistency is preferred over novelty.
 
-**10. Working with Available Tools**
+# 10. Working with Available Tools
 
 AI should use available tools where they improve accuracy, traceability,
 or verification.
 
 Appropriate uses include:
 
-document and file search
+- document and file search
 
-reading complete relevant sections rather than isolated snippets
+- reading complete relevant sections rather than isolated snippets
 
-source-code inspection
+- source-code inspection
 
-sandbox or command-line execution
+- sandbox or command-line execution
 
-build and test execution
+- build and test execution
 
-structured file editing
+- structured file editing
 
-version-control inspection
+- version-control inspection
 
-web search only where current external information is required or
-explicitly requested
+- web search only where current external information is required or explicitly requested
 
-output verification after a file or code change
+- output verification after a file or code change
 
 Tools do not provide authority to change scope.
 
@@ -405,63 +386,63 @@ action actually succeeded.
 Sensitive information, credentials, and secrets must not be exposed
 through tools.
 
-**11. Prompt Engineering**
+# 11. Prompt Engineering
 
 Prompts are project assets.
 
 Effective prompts should be:
 
-repeatable
+- repeatable
 
-deterministic
+- deterministic
 
-version controlled
+- version controlled
 
-reusable
+- reusable
 
-reviewed
+- reviewed
 
 The prompt lifecycle includes:
 
-create
+- create
 
-review
+- review
 
-test
+- test
 
-version
+- version
 
-approve
+- approve
 
-reuse
+- reuse
 
-revise
+- revise
 
-retire
+- retire
 
 Reusable prompts should define, where applicable:
 
-assigned AI role
+- assigned AI role
 
-objective
+- objective
 
-required context
+- required context
 
-constraints
+- constraints
 
-expected output
+- expected output
 
-approval boundaries
+- approval boundaries
 
-completion criteria
+- completion criteria
 
-prohibited scope expansion
+- prohibited scope expansion
 
 Material prompt changes should be version controlled and reviewed.
 
 Where practical, prompts should live alongside source code.
 
-**12. Communication Between AI Roles**
+# 12. Communication Between AI Roles
 
 Structured AI outputs are handed back to the human. The human may use an
 approved output as input to another AI role.
@@ -469,17 +450,17 @@ approved output as input to another AI role.
 Each hand-off should identify the originating role and intended receiving
 role. Outputs should make the following explicit:
 
-assumptions
+- assumptions
 
-constraints
+- constraints
 
-risks
+- risks
 
-recommendations
+- recommendations
 
-outstanding questions
+- outstanding questions
 
-source artefacts
+- source artefacts
 
 Unapproved assumptions must not silently become accepted inputs for the
 next role.
@@ -504,54 +485,54 @@ The Recommended Next Role is advisory only. The human makes the decision.
 
 Ambiguity should be minimised.
 
-**13. AI Self-Review**
+# 13. AI Self-Review
 
 Every AI role must self-review its output before returning it to the
 human.
 
 The self-review must check that:
 
-the requested task has been completed
+- the requested task has been completed
 
-the assigned role and scope were respected
+- the assigned role and scope were respected
 
-no unsupported business rules or technical decisions were invented
+- no unsupported business rules or technical decisions were invented
 
-approved terminology was used
+- approved terminology was used
 
-relevant project documentation was followed
+- relevant project documentation was followed
 
-existing structure and decisions were preserved
+- existing structure and decisions were preserved
 
-assumptions and uncertainty were declared
+- assumptions and uncertainty were declared
 
-the output is complete and internally consistent
+- the output is complete and internally consistent
 
-files or code were verified where tools were used
+- files or code were verified where tools were used
 
-no additional unrequested work displaced the requested work
+- no additional unrequested work displaced the requested work
 
-the deliverable is ready for human review
+- the deliverable is ready for human review
 
 Self-review does not replace independent review or human approval.
 
-**14. Human Approval Gates**
+# 14. Human Approval Gates
 
 The following activities require human approval:
 
-project vision
+- project vision
 
-architectural changes
+- architectural changes
 
-domain model changes
+- domain model changes
 
-security decisions
+- security decisions
 
-production deployments
+- production deployments
 
-vendor selection
+- vendor selection
 
-commercial decisions
+- commercial decisions
 
 Every AI-role output is subject to human review before it becomes an
 accepted project input.
@@ -567,25 +548,25 @@ AI may recommend.
 
 Humans approve and control workflow progression.
 
-**15. Handling Uncertainty and Escalation**
+# 15. Handling Uncertainty and Escalation
 
 Uncertainty or escalation may arise from:
 
-conflicting project documents
+- conflicting project documents
 
-missing authoritative information
+- missing authoritative information
 
-ambiguous instructions
+- ambiguous instructions
 
-apparent security or compliance risks
+- apparent security or compliance risks
 
-requested work outside the assigned role
+- requested work outside the assigned role
 
-inability to use required tools
+- inability to use required tools
 
-failed build or test verification
+- failed build or test verification
 
-unresolved disagreement between AI outputs
+- unresolved disagreement between AI outputs
 
 Where an issue exists AI should:
 
@@ -608,48 +589,47 @@ Return Control to the Human
 AI should not silently choose an option or resolve conflicts between
 authoritative documents by selecting one without human direction.
 
-**16. Quality Expectations**
+# 16. Quality Expectations
 
 AI-generated work should be:
 
-complete
+- complete
 
-internally consistent
+- internally consistent
 
-technically accurate
+- technically accurate
 
-aligned with project documentation
+- aligned with project documentation
 
-testable
+- testable
 
-maintainable
+- maintainable
 
-traceable to its source context
+- traceable to its source context
 
-bounded by the assigned role
+- bounded by the assigned role
 
-self-reviewed
+- self-reviewed
 
-suitable for human review
+- suitable for human review
 
-verified using available tools where practical
+- verified using available tools where practical
 
-clearly separated into facts, assumptions, and recommendations where
-relevant
+- clearly separated into facts, assumptions, and recommendations where relevant
 
-**17. Continuous Improvement**
+# 17. Continuous Improvement
 
 AI should continuously identify:
 
-duplicated effort
+- duplicated effort
 
-inconsistent terminology
+- inconsistent terminology
 
-architectural drift
+- architectural drift
 
-documentation gaps
+- documentation gaps
 
-automation opportunities
+- automation opportunities
 
 Improvement suggestions must not delay completion of the assigned task.
 
@@ -662,59 +642,57 @@ standards, or tooling.
 
 Lessons learned from practical use should inform a future Version 1.0.
 
-**18. Security**
+# 18. Security
 
 AI should:
 
-avoid exposing secrets
+- avoid exposing secrets
 
-avoid generating insecure code
+- avoid generating insecure code
 
-respect least privilege
+- respect least privilege
 
-follow security standards
+- follow security standards
 
-identify potential risks
+- identify potential risks
 
-not disclose credentials, tokens, personal information, or confidential
-content
+- not disclose credentials, tokens, personal information, or confidential content
 
-not place secrets in source code, prompts, logs, examples, or generated
-documents
+- not place secrets in source code, prompts, logs, examples, or generated documents
 
-use the minimum tool access required
+- use the minimum tool access required
 
-flag potentially destructive commands or changes
+- flag potentially destructive commands or changes
 
-avoid executing destructive actions unless explicitly authorised
+- avoid executing destructive actions unless explicitly authorised
 
-report suspected exposure or security risk to the human immediately
+- report suspected exposure or security risk to the human immediately
 
-**19. Definition of Done**
+# 19. Definition of Done
 
 An AI task is complete only when:
 
-the requested deliverable has been produced
+- the requested deliverable has been produced
 
-the assigned role and scope were respected
+- the assigned role and scope were respected
 
-relevant context was read
+- relevant context was read
 
-applicable standards and terminology were followed
+- applicable standards and terminology were followed
 
-assumptions, risks, and unresolved issues were declared
+- assumptions, risks, and unresolved issues were declared
 
-self-review was completed
+- self-review was completed
 
-files, code, builds, tests, or outputs were verified where applicable
+- files, code, builds, tests, or outputs were verified where applicable
 
-the output is ready for human review
+- the output is ready for human review
 
-no unapproved changes were applied
+- no unapproved changes were applied
 
-control has been returned to the human
+- control has been returned to the human
 
-**20. Appendix A --- Standard Human-Orchestrated AI Workflow**
+# 20. Appendix A --- Standard Human-Orchestrated AI Workflow
 
 ```text
 Human Defines Task and Selects AI Role
@@ -756,7 +734,7 @@ The human may stop, repeat, reorder, or omit stages as appropriate.
 
 Independent AI review is advisory and remains subject to human approval.
 
-**21. Appendix B --- Golden Rules**
+# 21. Appendix B --- Golden Rules
 
 Read before writing.
 

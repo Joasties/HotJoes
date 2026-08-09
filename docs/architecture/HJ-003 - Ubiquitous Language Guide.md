@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-003 |
 | **Document Title** | Ubiquitous Language Guide |
-| **Version** | 2.0 |
+| **Version** | 2.2 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 July 2026 |
+| **Last Updated** | 8 August 2026 |
 
 ## Revision History
 
@@ -20,14 +20,17 @@
 | 1.1 | 20 July 2026 | Introduced Vendor operating classification concepts and aligned the language with the Vendor Registration lifecycle. |
 | 1.2 | 22 July 2026 | Introduced Trading Characteristics, Trading Location, Registered Information, Vendor Managed Information and registered-information controls. |
 | 2.0 | 22 July 2026 | Approved Vendor Registration terminology. Clarified Registration Session, Trading Characteristics, Regulatory Authorities, Vendor lifecycle, Registered Information and Address ownership. |
+| 2.1 | 27 July 2026 | Applied CR-020 and CR-023 to clarify Legal Operator terminology, place Registration Session outside the Vendor service boundary and establish the submitted Register Vendor request as authoritative. |
+| 2.2 | 8 August 2026 | Applied CR-026 to define registered Vendor retrieval for Epic 1 and aligned the lifecycle term Vendor State with HJ-004. |
 
 ## Related Documents
 
 | Document ID | Title | Status |
 |-------------|-------|--------|
-| HJ-001 | HotJoes Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
-| HJ-004 | Vendor Domain Models | Draft |
+| HJ-001 | HotJoes Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
+| HJ-004 | Vendor Domain Models | Approved |
+| CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved |
 
 # 1. Purpose
 
@@ -149,22 +152,15 @@ This information is used to determine applicable Compliance Requirements.
 
 ## 3.5 Registration Session
 
-A transient application concept used to collect registration information before a Vendor exists.
+A Registration Session is a transient, client- or BFF-owned interaction working set used to collect registration information before a Vendor exists.
 
-A Registration Session:
+It is not known to the Vendor Domain, is not part of any Vendor service boundary, produces no domain events, cannot be resumed, and is discarded by its owner following abandonment or successful submission.
 
-- exists only while registration is being completed
-- is not a business entity
-- is not part of the Vendor lifecycle
-- may be implemented using any suitable transient persistence mechanism
-- expires automatically after inactivity
-- cannot be resumed
-- is discarded completely if abandoned
-- produces no business events
+Once a **Register Vendor** command is submitted, the Registration Session has fulfilled its purpose and no longer participates in the registration workflow.
 
-> Completion of Vendor Registration represents a deliberate expression of intent to become a Vendor on the platform. Registration Sessions are intentionally transient and cannot be resumed.
+The complete RegisterVendor request is the sole authoritative source of client-authored registration information and the approved Address Resolution reference. Address-owned information is obtained directly from the Address Domain using that reference.
 
-## 3.6 Vendor Status
+## 3.6 Vendor State
 
 Represents the lifecycle state of the Vendor.
 
@@ -175,7 +171,7 @@ Examples include:
 - Suspended
 - Deactivated
 
-Vendor Status reflects administrative state.
+Vendor State reflects administrative state.
 
 The Vendor lifecycle begins when the Vendor is created.
 
@@ -210,35 +206,40 @@ The public name under which a Vendor trades.
 
 Customers interact with the Trading Name rather than the legal organisation.
 
-## 3.10 Legal Operator
+## 3.10 Legal Operator Type
 
-The legally recognised organisation responsible for operating the Vendor.
+Legal Operator Type defines the classification of the legal organisation or individual responsible for operating the Vendor business.
 
 Examples include:
 
 - Sole Trader
 - General Partnership
-- Limited Company (Ltd)
-- Limited Liability Partnership (LLP)
-- Charitable Incorporated Organisation (CIO)
-- Registered Charity
-- Other legally recognised organisations
+- Limited Company
+- Limited Liability Partnership
+- Charitable Community Group
+- Charitable Incorporated Organisation
 
 Legal Operator Type determines legal identity. Trading Characteristics describe the operating characteristics of the Vendor.
 
-## 3.11 Company Name
+## 3.11 Legal Operator Name
 
-The registered legal name of the Legal Operator.
+**Legal Operator Name** is the authoritative business term for the registered legal name of the entity or individual responsible for operating the Vendor business.
 
-This may differ from the Trading Name.
+All new architectural artefacts, domain models, commands, events, APIs, service contracts and documentation shall use **Legal Operator Name** when referring to this business field.
 
-## 3.12 Registration Number
+## 3.12 Company Name
+
+**Company Name** is retained solely as a historical synonym for **Legal Operator Name** to preserve compatibility with earlier project artefacts.
+
+It is not the preferred architectural term and shall not be introduced into new architectural documentation, commands, events, APIs, service contracts or domain models.
+
+## 3.13 Registration Number
 
 The government-issued registration identifier of the Legal Operator where applicable.
 
 Whether mandatory depends upon the Legal Operator Type.
 
-## 3.13 Contact Details
+## 3.14 Contact Details
 
 The information used to communicate with the Vendor.
 
@@ -247,13 +248,13 @@ Examples include:
 - Email Address
 - Telephone Number
 
-## 3.14 Address
+## 3.15 Address
 
 The Address Domain owns address search, retrieval and validation.
 
 The Vendor Domain stores an approved snapshot of the Business Address as Registered Information.
 
-## 3.15 Registered Information
+## 3.16 Registered Information
 
 The information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor.
 
@@ -275,7 +276,7 @@ Registered Information becomes read-only to the Vendor once Vendor Registration 
 
 Changes to Registered Information are performed only by authorised platform operators using administrative processes.
 
-## 3.16 Vendor Managed Information
+## 3.17 Vendor Managed Information
 
 Information that may be maintained directly by the Vendor without affecting the registered identity of the business.
 
@@ -284,7 +285,7 @@ Examples include:
 - Website
 - Business Description
 
-## 3.17 Food Registration Authority
+## 3.18 Food Registration Authority
 
 The competent local authority responsible for Food Business Registration for the Vendor's trading premises.
 
@@ -295,7 +296,7 @@ Food Registration Authority:
 - is supplied by the Address Domain
 - forms part of Registered Information
 
-## 3.18 Primary Trading Authority
+## 3.19 Primary Trading Authority
 
 The local authority responsible for the Vendor's declared primary trading area.
 
@@ -304,6 +305,24 @@ Primary Trading Authority:
 - is required only for Trading Location = Stall
 - is derived through the Address Domain
 - is used to determine applicable Compliance Requirements
+
+## 3.20 Vendor Administrator
+
+A **Vendor Administrator** is the trusted Epic 1 administrative actor that may retrieve an existing Vendor directly using its VendorId.
+
+Authentication and authorisation of the Vendor Administrator are outside the scope of Epic 1. The term does not imply an Identity Domain dependency within Epic 1.
+
+## 3.21 Retrieve Registered Vendor
+
+**Retrieve Registered Vendor** is a read-only Vendor query that retrieves an existing Vendor using its VendorId and returns the Vendor details established through Vendor Registration.
+
+The query does not modify Vendor state and produces no Domain Event or Integration Event.
+
+## 3.22 Registered Vendor Details
+
+**Registered Vendor Details** is the read representation returned by Retrieve Registered Vendor.
+
+It is derived from persisted Vendor state and contains the Vendor information established through successful Vendor Registration. It is a service/query representation and is not the Vendor aggregate itself.
 
 # 4. Business Concepts
 
@@ -323,7 +342,7 @@ Accepting and fulfilling Customer Orders.
 
 Whether the Vendor may currently receive new Orders.
 
-Operational Availability is determined by Vendor Status and Trading Preference.
+Operational Availability is determined by Vendor State and Trading Preference.
 
 A Vendor must be Activated before Trading Preference can enable trading.
 
@@ -409,13 +428,15 @@ Command names should always be expressed as imperative verbs.
 |------|------------|
 | Vendor | A business selling food through HotJoes |
 | Trading Name | Public business name |
-| Company Name | Legal registered organisation name |
-| Vendor Status | Administrative lifecycle state |
+| Legal Operator Type | Classification of the legal organisation or individual responsible for operating the Vendor business; examples include Sole Trader, Limited Company, Limited Liability Partnership and Charitable Incorporated Organisation |
+| Legal Operator Name | Authoritative business term for the registered legal name of the entity or individual responsible for operating the Vendor business; preferred terminology for all new architectural artefacts |
+| Company Name | Historical synonym for Legal Operator Name retained solely for continuity with legacy documentation; not an active architectural term and not to be used in new artefacts |
+| Vendor State | Administrative lifecycle state |
 | Trading Preference | Whether an Activated Vendor wishes to accept Orders |
 | Activation | Administrative process allowing trading |
 | Registration | Creation of a Vendor record |
 | Suspension | Administrative prevention of trading |
-| Operational Availability | Whether Orders may currently be accepted, as determined by Vendor Status and Trading Preference |
+| Operational Availability | Whether Orders may currently be accepted, as determined by Vendor State and Trading Preference |
 | Compliance | Verification of legal and regulatory obligations required before activation |
 | Vendor Registration | Process through which a prospective Vendor supplies sufficient Registered Information to create a Vendor within the platform |
 | Trading Characteristics | Characteristics of a Vendor's trading operation used to determine Compliance Requirements |
@@ -423,9 +444,12 @@ Command names should always be expressed as imperative verbs.
 | Address | Address information searched, retrieved and validated by the Address Domain; the approved Business Address snapshot is stored by the Vendor Domain as Registered Information |
 | Registered Information | Information supplied during Vendor Registration that establishes the legal identity and operating characteristics of a Vendor, including applicable regulatory authorities and Trading Characteristics |
 | Vendor Managed Information | Information that may be maintained directly by the Vendor without affecting the registered identity of the business |
-| Registration Session | Transient application concept used to collect registration information before a Vendor exists; it cannot be resumed and produces no business events |
+| Registration Session | Transient interaction working set owned by the client application or a BFF and existing outside every Vendor service boundary; it is not known to the Vendor Domain, and the submitted Register Vendor request becomes authoritative once registration is submitted |
 | Food Registration Authority | Competent local authority responsible for Food Business Registration for the Vendor's trading premises |
 | Primary Trading Authority | Local authority responsible for the Vendor's declared primary trading area; required only for Trading Location = Stall |
+| Vendor Administrator | Trusted Epic 1 administrative actor that may retrieve an existing Vendor directly using its VendorId; authentication and authorisation are outside the Epic 1 scope |
+| Retrieve Registered Vendor | Read-only Vendor query that retrieves one existing Vendor by VendorId and returns Registered Vendor Details without changing state or producing events |
+| Registered Vendor Details | Purpose-specific service/query representation derived from persisted Vendor state and containing the information established through successful Vendor Registration; not the Vendor aggregate |
 | Activation Requirement | Business requirement that must be satisfied before activation |
 | Activation Policy | Policy determining when activation is permitted |
 | Pending Activation Closure Policy | Policy governing prolonged Pending Activation |
@@ -463,6 +487,7 @@ Examples:
 - Get Vendor
 - Search Vendors
 - Get Vendor Summary
+- Retrieve Registered Vendor
 
 ## 8.4 Value Objects
 

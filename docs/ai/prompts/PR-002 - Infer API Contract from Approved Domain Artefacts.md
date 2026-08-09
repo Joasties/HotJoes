@@ -1,19 +1,19 @@
 # HotJoes AI Prompt
-## PR-002 - Infer API Contract from Approved Domain Artefacts
+## PR-002 - Infer Service Contract from Approved Domain Artefacts
 
 ### Objective
 
 Act as a **Senior Business Analyst** with extensive experience in:
 
 - Domain-Driven Design (DDD)
-- API Contract Definition
+- Service Contract Definition
 - Event-Driven Architecture
 - Enterprise Solution Architecture
 - Regulated Marketplace Platforms
 
-Use the attached HotJoes architectural artefacts as the **authoritative baseline** to infer the **Vendor Registration API Contract**.
+Use the attached HotJoes architectural artefacts as the **authoritative baseline** to infer the **Vendor Registration Service Contract**.
 
-The purpose of this exercise is to translate the approved business model into a complete API contract suitable for review prior to implementation.
+The purpose of this exercise is to translate the approved business model into a complete service contract suitable for review prior to implementation.
 
 ---
 
@@ -41,13 +41,13 @@ Infer the complete business contract required to support the Vendor Registration
 
 The objective is **not** to redesign the domain.
 
-The objective **is** to expose the approved business model as a complete API contract that can later be implemented.
+The objective **is** to expose the approved business model as a complete service contract that can later be implemented.
 
 ---
 
 # Scope
 
-Define only the API operations required to support Vendor Registration.
+Define only the service operations required to support Vendor Registration.
 
 At a minimum infer:
 
@@ -66,7 +66,7 @@ At a minimum infer:
 13. Domain Events.
 14. Integration Events.
 15. Business failures.
-16. Information intentionally excluded from the API.
+16. Information intentionally excluded from the service.
 
 ---
 
@@ -99,7 +99,7 @@ Preserve:
 
 ---
 
-# Business Contract vs Technical API Design
+# Business Contract vs Technical Service Design
 
 Separate the document into two distinct parts.
 
@@ -146,7 +146,7 @@ Produce a complete Markdown document using the following structure.
 
 ```
 Document ID: HJ-106
-Document Title: Vendor Registration API Contract
+Document Title: Vendor Registration Service Contract
 Version: 0.1
 Status: Draft
 Owner: Project Architecture
@@ -229,7 +229,7 @@ Provide a table containing:
 
 ## 5. Information Outside Scope
 
-Identify information intentionally excluded from the Vendor Registration API including:
+Identify information intentionally excluded from the Vendor Registration Service including:
 
 - Activation
 - Compliance decisions
@@ -311,7 +311,7 @@ Requirements:
 
 The completed document should be sufficiently detailed to become the baseline for:
 
-- API Design Review
+- Service Design Review
 - OpenAPI Specification
 - Application Command Design
 - Integration Test Design
@@ -326,4 +326,4 @@ Do **not**:
 - generate database mappings
 - generate an OpenAPI specification
 
-The output should describe **the API contract**, not its implementation.
+The output should describe **the service contract**, not its implementation.

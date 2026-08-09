@@ -26,10 +26,10 @@
 | ADR-000 | Architectural Decision Register | Accepted |
 | ADR-003 | Event-Driven Collaboration | Accepted |
 | ADR-004 | Vendor Registration Establishes Business Existence | Accepted |
-| HJ-001 | Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
-| HJ-003 | Ubiquitous Language Guide | Draft |
-| HJ-004 | Vendor Domain Models | Draft |
+| HJ-001 | Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
+| HJ-003 | Ubiquitous Language Guide | Approved |
+| HJ-004 | Vendor Domain Models | Approved |
 
 # 1. Context
 

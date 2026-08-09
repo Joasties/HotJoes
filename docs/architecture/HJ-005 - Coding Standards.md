@@ -3,11 +3,11 @@
 | Document ID | HJ-005 |
 | --- | --- |
 | Document Title | Coding Standards |
-| Version | 1.0 |
-| Status | Draft |
+| Version | 2.0 |
+| Status | Approved |
 | Classification | Architecture |
 | Owner | Project Architecture |
-| Last Updated | 21 July 2026 |
+| Last Updated | 9 August 2026 |
 
 ## Revision History
 
@@ -15,18 +15,19 @@
 | --- | --- | --- |
 | 0.1 | 16 July 2026 | Previous draft. |
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Coding standards unchanged. |
+| 2.0 | 9 August 2026 | Completed human review and promoted Coding Standards from Draft to Approved. Existing coding standards were retained unchanged. Related-document status references were reconciled with the approved repository baseline. |
 
 ## Related Documents
 
 | Document ID | Title | Status |
 | --- | --- | --- |
-| HJ-001 | Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
-| HJ-003 | Ubiquitous Language Guide | Draft |
-| HJ-004 | Vendor Domain Models | Draft |
-| HJ-006 | Testing Strategy and Standards | Draft |
-| HJ-007 | Enforcement Strategy | Draft |
-| HJ-008 | AI Roles and Responsibilities | Draft |
+| HJ-001 | Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
+| HJ-003 | Ubiquitous Language Guide | Approved |
+| HJ-004 | Vendor Domain Models | Approved |
+| HJ-006 | Testing Strategy and Standards | Approved |
+| HJ-007 | Enforcement Strategy | Approved |
+| HJ-008 | AI Roles and Responsibilities | Approved |
 
 ## 1. Purpose
 

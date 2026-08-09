@@ -4,30 +4,31 @@
 |-------|-------|
 | **Document ID** | HJ-007 |
 | **Document Title** | Enforcement Strategy |
-| **Version** | 1.0 |
-| **Status** | Draft |
+| **Version** | 2.0 |
+| **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 21 July 2026 |
+| **Last Updated** | 9 August 2026 |
 
 ## Revision History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | 1.0 | 21 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Enforcement Strategy first draft. |
+| 2.0 | 9 August 2026 | Completed human review and promoted Enforcement Strategy from Draft to Approved. Existing enforcement strategy was retained unchanged. Related-document status references were reconciled with the approved repository baseline. |
 
 ## Related Documents
 
 | Document ID | Title | Status |
 |------------|-------|--------|
-| HJ-001 | Project Vision | Draft |
-| HJ-002 | Architectural Principles | Draft |
-| HJ-003 | Ubiquitous Language Guide | Draft |
-| HJ-004 | Vendor Domain Models | Draft |
-| HJ-005 | Coding Standards | Draft |
-| HJ-006 | Testing Strategy and Standards | Draft |
-| HJ-008 | AI Roles and Responsibilities | Draft |
-| HJ-009 | AI Operating Guide | Draft |
+| HJ-001 | Project Vision | Approved |
+| HJ-002 | Architectural Principles | Approved |
+| HJ-003 | Ubiquitous Language Guide | Approved |
+| HJ-004 | Vendor Domain Models | Approved |
+| HJ-005 | Coding Standards | Approved |
+| HJ-006 | Testing Strategy and Standards | Approved |
+| HJ-008 | AI Roles and Responsibilities | Approved |
+| HJ-009 | AI Operating Guide | Approved |
 
 1. Purpose
 This document defines how engineering standards are enforced throughout the HotJoes project.

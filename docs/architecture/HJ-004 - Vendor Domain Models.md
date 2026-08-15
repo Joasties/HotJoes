@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 2.2 |
+| **Version** | 2.3 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 8 August 2026 |
+| **Last Updated** | 13 August 2026 |
 
 ## Revision History
 
@@ -22,6 +22,7 @@
 | 2.0 | 22 July 2026 | Finalised Vendor Registration domain model following Epic 1 review. Clarified Registration Session, Business Address ownership, Regulatory Authorities, Trading Location, Company Registration validation and Business Address snapshot strategy. |
 | 2.1 | 27 July 2026 | Applied CR-015, CR-016, CR-019, CR-021 and CR-023 to model canonical Address identity, enforce creation and declaration invariants, separate domain and integration events, and move Registration Session outside the Vendor service boundary. |
 | 2.2 | 8 August 2026 | Applied CR-026 to define the Epic 1 Retrieve Registered Vendor query, its authoritative read source, purpose-specific result and side-effect-free outcomes. |
+| 2.3 | 13 August 2026 | Applied CR-034 to remove delivery-slice implementation scope and recast HJ-004 as an enduring Vendor domain model. |
 
 ## Related Documents
 
@@ -31,12 +32,13 @@
 | HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
 | CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved |
+| CR-034 | Remove Delivery-Slice Scope from Enduring Vendor Architecture Artefacts | Approved |
 
 #
 # 1. Vendor Domain Analysis
 ## 1.1 Purpose
 The Vendor domain manages the identity, registration, lifecycle and platform-controlled trading eligibility of businesses that sell food through HotJoes.
-The initial implementation supports Vendor Registration while preserving a clean path to later Vendor Compliance, Menu and Ordering capabilities.
+The model supports Vendor Registration while preserving clear boundaries with Vendor Compliance, Menu and Ordering capabilities.
 The model explicitly separates:
 completion of Vendor Registration;
 progression through the activation process;
@@ -156,7 +158,6 @@ address validation;
 canonical address data;
 integration with third-party UK address-data providers.
 The Address Domain supplies the Canonical Address Identifier, immutable Business Address Snapshot and derived regulatory-authority information to the Vendor Domain through the Address Service abstraction.
-The Address Domain implementation behind that abstraction is stubbed during Epic 1.
 The Vendor maintains its relationship to the canonical Address exclusively through the stored Canonical Address Identifier while retaining an immutable Business Address Snapshot representing the approved address at the time of registration.
 
 **Address Ownership Invariant**
@@ -349,9 +350,9 @@ The query:
 
 ### Read Source
 
-The persisted Vendor aggregate is the authoritative read source for Retrieve Registered Vendor during Epic 1.
+The persisted Vendor aggregate is the authoritative read source for Retrieve Registered Vendor.
 
-No dedicated read model, projection store or eventually consistent query infrastructure is required for Epic 1. A later architecture may introduce an independently optimised read model if justified by future requirements.
+Retrieve Registered Vendor uses no dedicated read model, projection store or eventually consistent query infrastructure. An independently optimised read model requires a separate architectural decision justified by additional requirements.
 
 ### Service Representation Boundary
 
@@ -392,7 +393,7 @@ Registered Vendor Details explicitly excludes:
 
 When VendorId identifies an existing Vendor, return Registered Vendor Details derived from persisted Vendor state.
 
-When VendorId does not identify an existing Vendor, return a controlled **Vendor Not Found** outcome. No additional business failure semantics are required for Epic 1.
+When VendorId does not identify an existing Vendor, return a controlled **Vendor Not Found** outcome.
 
 ### Query Side-Effect Invariant
 
@@ -510,7 +511,7 @@ Company or organisational registration identifier required only when Legal Opera
 Format is validated using:
 `^(?:[A-Za-z]{2})?\d{6,8}$`
 Alphabetic prefixes are normalised to uppercase.
-Validation confirms format only. Existence or Companies House verification remains outside Epic 1.
+Validation confirms format only. Authoritative Companies House existence verification is not part of the Vendor Registration contract.
 ### PrimaryContact
 Contains:
 contact name;
@@ -726,7 +727,7 @@ Approved Business Address
 Food Registration Authority
 Primary Trading Authority, where applicable
 
-The Vendor Domain requests Compliance Requirements through an abstraction. The Compliance Domain implementation behind that abstraction is stubbed during Epic 1.
+The Vendor Domain requests Compliance Requirements through an abstraction owned at the boundary with the Compliance capability.
 The Vendor Domain does not contain regulatory decision logic.
 
 Food Business Registration is always required. Street Trading Licence applicability depends upon Trading Location and Business Address. Late Night Refreshment Licence applicability depends upon Opening Hours and Service Includes Hot Food. Alcohol licensing applicability depends upon Alcohol Service.
@@ -1156,11 +1157,11 @@ classDiagram
     }
 
     class AddressDomain {
-        <<Stubbed External Domain in Epic 1>>
+        <<Bounded Context>>
     }
 
     class VendorCompliance {
-        <<Stubbed External Domain in Epic 1>>
+        <<Bounded Context>>
         +ComplianceStatus
         +CouncilRegistrationStatus
         +TradingLicenceStatus
@@ -1419,60 +1420,9 @@ VendorActivationPolicy evaluates generated Compliance Requirements rather than c
 ## Decision 18: Compliance evidence remains outside the Vendor aggregate
 The Vendor aggregate contains TradingCharacteristics but does not contain compliance evidence or compliance documents.
 ## Decision 19: Registered Vendor retrieval uses a purpose-specific representation
-For Epic 1, Retrieve Registered Vendor loads the persisted Vendor aggregate by VendorId as the authoritative read source and maps its state into Registered Vendor Details. The aggregate is not exposed as the service response, and no dedicated read-model infrastructure or cross-domain collaboration is introduced.
+Retrieve Registered Vendor loads the persisted Vendor aggregate by VendorId as the authoritative read source and maps its state into Registered Vendor Details. The aggregate is not exposed as the service response, and the query introduces no dedicated read-model infrastructure or cross-domain collaboration.
 
-# 17. Initial Implementation Scope
-The Vendor Registration epic should implement:
-acceptance and validation of a complete, self-contained **Register Vendor** request;
-no dependency upon Registration Session retrieval, reconciliation, persistence, expiry or disposal;
-entry and validation of mandatory Vendor information;
-conditional validation based on Legal Operator Type;
-capture and persistence of the Vendor’s Registered Information, including TradingCharacteristics;
-capture of initially supported Vendor Managed Information;
-a Canonical Address Identifier and immutable Business Address Snapshot supplied through the stubbed Address Domain;
-Food Registration Authority and Primary Trading Authority where applicable;
-Compliance Requirement requests through the stubbed Compliance Domain;
-one Vendor representing one trading location;
-successful creation of a Vendor;
-initial lifecycle state of PendingActivation;
-initial Trading Preference of Offline;
-persistence of the Vendor aggregate;
-recording of the internal VendorRegistered domain event and reliable publication of the VendorRegistered integration event;
-retrieval of one Vendor by VendorId;
-mapping of persisted Vendor state to Registered Vendor Details;
-The first epic should not implement:
-Registration Session persistence, expiry or lifecycle management within the Vendor Domain;
-persisted registration drafts;
-multiple premises;
-a Branch aggregate;
-a Registration Amendment workflow;
-the complete Compliance domain beyond the Epic 1 stub implementation;
-council-registration workflows;
-trading-licence workflows;
-the complete Pending Activation Process;
-suspension scheduling infrastructure within the Vendor aggregate;
-Menu management;
-operational opening-hours management beyond the registered Trading Characteristics;
-Operational Availability composition;
-Vendor search, filtering, paging or multiple-Vendor retrieval;
-lookup by Trading Name or Legal Operator Name;
-retrieval authentication, authorisation or caller-to-Vendor ownership checks;
-Identity Domain integration for retrieval;
-Address re-resolution or Address search during retrieval;
-Compliance state or Compliance Requirement retrieval;
-dedicated read-model or eventual-consistency infrastructure;
-post-registration editing through the retrieval capability.
-Those capabilities are represented in the model so that the Vendor Registration implementation does not block their later introduction.
-
-Future phases may introduce:
-Branches;
-multiple premises;
-Registration Amendment capability;
-the full Address Domain;
-the full Compliance Domain.
-No implementation of these capabilities is required during Epic 1.
-
-# 18. Remaining Review Questions
+# 17. Remaining Review Questions
 The following require future business decisions but do not block Vendor Registration:
 What Pending Activation deadlines and reminder periods apply?
 Which actions permit extensions?
@@ -1484,4 +1434,4 @@ When may a deactivated Vendor reapply?
 Is a reinstatement process ever required after deactivation?
 What retention period applies to suspension and deactivation records?
 Which bounded context will own opening hours?
-These are explicit future decisions, not reasons to expand the initial Vendor Registration epic.
+These are explicit future decisions and do not alter the approved Vendor Registration domain model.

@@ -29,14 +29,18 @@ The attached artefacts may include:
 - HJ-004 – Vendor Domain Models
 - HJ-005 – Coding Standards
 - HJ-006 – Testing Strategy and Standards
+- HJ-007 – Enforcement Strategy
+- HJ-010 – Current Application Architectural Concerns
+- HJ-012 – Established Application Architecture Patterns
 - HJ-104 – Vendor Registration Fields Matrix
 - HJ-105 – Vendor Registration Sequence Diagram
 - HJ-106 – Vendor Registration Service Contract
+- the existing HJ-107 – Vendor Registration Test Catalogue when regenerating it
 - ADR-002 through ADR-008
 
-Treat the attached approved or accepted versions as the **single source of truth**.
+HJ-013 is a downstream complementary catalogue. It is not required or used as an HJ-107 behavioural-derivation, regeneration or stable-ID input.
 
-Use **HJ-106 Part A – Business Service Contract** as the primary test basis.
+Use **HJ-106 v1.1 Part A – Business Service Contract** as the primary normative behavioural test basis.
 
 Use upstream approved artefacts to:
 
@@ -48,6 +52,22 @@ Use upstream approved artefacts to:
 Where artefacts disagree, identify the conflict instead of attempting to resolve it.
 
 Change Requests are not normative inputs unless explicitly identified as approved source material.
+
+Use each artefact only within its authority:
+
+| Artefact | Authority in this prompt |
+|---|---|
+| **HJ-106 Part A** | Primary normative basis for HJ-107 behavioural test derivation. |
+| **Authoritative business/domain sources cited by HJ-106** | Confirm terminology, business rules, invariants, ownership and traceability already represented in HJ-106; they shall not silently expand the service contract. |
+| **HJ-106 Part B** | Non-normative proposed technical representation; may produce Proposed tests only. |
+| **HJ-010** | Identifies unresolved architectural concerns and dependencies that generation must preserve rather than resolve. |
+| **HJ-012** | Identifies approved implementation architecture; it may constrain interpretation but shall not introduce service behaviour absent from HJ-106 Part A. |
+| **HJ-006** | Authoritative Test Classification, Test Level and test-design standard. |
+| **HJ-005 and HJ-007** | Supporting implementation and enforcement standards; not sources of new Vendor Registration behaviour. |
+| **Existing HJ-107** | Sole regeneration baseline for preservation and reconciliation of the HJ-107-owned `VR-*` Test ID namespace, retained catalogue content and HJ-107 change history. |
+| **HJ-013** | Downstream owner of complementary architecture and implementation verification. PR-004 may reference the stable Document ID `HJ-013` when assigning responsibility boundaries, but shall not use an HJ-013 version, its contents or `AI-*` identifiers as HJ-107 behavioural or stable-ID inputs. |
+
+Where authoritative artefacts disagree, identify the conflict instead of attempting to resolve it. If a required authoritative source is unavailable, record the missing authority rather than inferring its contents.
 
 ---
 
@@ -155,6 +175,64 @@ Tests derived from Part B must be clearly labelled:
 
 Do not mix proposed HTTP behaviour with normative business tests.
 
+## Architectural Governance Inputs
+
+Use HJ-010 to identify Current Architectural Concerns whose unresolved decisions constrain test derivation or implementation. Carry the applicable `CON-xxx` references into dependency records and do not select their Approaches.
+
+Use HJ-012 to confirm approved implementation architecture. HJ-012 does not introduce Vendor Registration service behaviour absent from HJ-106 Part A.
+
+## HJ-107 and HJ-013 Responsibility Boundary
+
+HJ-107 owns behavioural test obligations for `RegisterVendor` and `RetrieveRegisteredVendor` derived from HJ-106 Part A and its authoritative sources.
+
+HJ-013 owns complementary architecture, dependency, persistence-mechanism, transaction-mechanism, reliable-publication-mechanism and runtime verification. HJ-107 shall not become an omnibus architecture and implementation test register.
+
+Apply these rules:
+
+- HJ-107 may verify observable persistence, atomicity, idempotency and publication outcomes required by HJ-106.
+- HJ-013 verifies implementation mechanisms that preserve those outcomes, including dependency enforcement, concrete mappings, transaction failure injection, outbox persistence, relay recovery and broker mechanics.
+- One guarantee may require distinct obligations in both catalogues at different boundaries.
+- Do not duplicate an identical obligation merely to create coverage in both catalogues.
+- State the HJ-107 behavioural boundary where potential overlap exists and leave complementary architecture or implementation verification to HJ-013.
+- Where an obligation belongs to complementary architecture or implementation verification, identify `HJ-013` as the owning catalogue without selecting or referencing an `AI-*` identifier.
+- Perform cross-catalogue reconciliation downstream when HJ-013 is generated from the current HJ-107.
+
+## Catalogue ID Ownership
+
+| Catalogue | Owned Namespace | Stable-ID Baseline | Permitted External References |
+|---|---|---|---|
+| **HJ-107** | `VR-*` | Previous HJ-107 | Authoritative source identifiers and `CON-*` dependencies; stable Document ID `HJ-013` for responsibility assignment only |
+| **HJ-013** | `AI-*` | Previous HJ-013, governed outside PR-004 | Current HJ-107 `VR-*` identifiers where behavioural coverage is delegated |
+
+Apply these rules:
+
+1. HJ-107 shall create, preserve, amend, retire and reconcile only `VR-*` Test IDs.
+2. The previous HJ-107 is the only stable-ID baseline for `VR-*` identifiers.
+3. HJ-107 shall not preserve, create, validate or reconcile `AI-*` identifiers.
+4. HJ-107 shall not require knowledge of the current HJ-013 version.
+5. HJ-107 shall not contain a version-specific HJ-013 dependency.
+6. HJ-107 shall not identify individual HJ-013 obligations as required inputs or outputs.
+7. HJ-013 may be named by stable Document ID when a complementary responsibility is assigned to that catalogue.
+
+## Regeneration Direction and Trigger Rule
+
+Apply the controlled generation order:
+
+```text
+authoritative behavioural sources + previous HJ-107
+    -> regenerate HJ-107 and reconcile VR-* IDs
+
+authoritative architecture sources + current HJ-107 + previous HJ-013
+    -> regenerate HJ-013 and reconcile AI-* IDs
+
+current HJ-107 + current HJ-013
+    -> perform cross-catalogue completion check
+```
+
+PR-004 governs the first stage only. The HJ-013 generation method governs the second stage and its `AI-*` reconciliation separately.
+
+An HJ-013 version change alone does not trigger HJ-107 regeneration. HJ-107 regeneration is triggered only by a controlled change to its behavioural sources, architectural dependency inputs, governing generation prompt or HJ-107 itself. HJ-107 does not become stale merely because HJ-013 is regenerated.
+
 ---
 
 # Architectural Constraints
@@ -212,7 +290,7 @@ The catalogue shall define:
 - what must be verified;
 - why it must be verified;
 - the authoritative source;
-- the required test level;
+- the required Test Classification and mapped Test Level;
 - preconditions;
 - input or stimulus;
 - expected observable outcome;
@@ -242,14 +320,20 @@ Those belong to later test design and implementation activities.
 
 Assign each test to the lowest appropriate level without losing confidence in the behaviour being verified.
 
-Use only the levels supported by HJ-006. Where HJ-006 does not define a required level, use the following classifications provisionally and flag them for review:
+Use the authoritative HJ-006 mapping:
 
-- **Domain** – aggregate invariants, value objects, lifecycle state and Domain Event behaviour.
-- **Application** – orchestration, validation, Address collaboration, idempotency coordination and failure handling.
-- **Persistence Integration** – aggregate persistence, atomic publication-work recording and retry state.
-- **Integration Contract** – Address and Compliance-facing published-contract obligations.
-- **API Contract** – proposed Part B request, response, headers and HTTP mappings.
-- **End-to-End** – only where behaviour cannot be proven reliably at a lower level.
+| Test Classification | Test Level |
+|---|---|
+| **Domain** | Unit |
+| **Application** | Unit |
+| **Persistence Integration** | Integration |
+| **Integration Contract** | Integration |
+| **API Contract** | API Integration |
+| **Contract Review** | Non-executable review |
+
+Every executable obligation shall identify exactly one approved Test Classification and its mapped Test Level.
+
+End-to-End remains an executable Test Level and shall be used only where a complete workflow cannot be verified adequately at a lower boundary. Do not introduce an Architecture Test classification or any additional HJ-006 category.
 
 Do not default every test to End-to-End.
 
@@ -277,7 +361,7 @@ A test is incomplete if it verifies only an error response but fails to verify p
 - no Vendor created;
 - no completed business fact recorded;
 - no Domain Event recorded;
-- no publication or outbox record created;
+- no durable publication record created;
 - no Integration Event published;
 - no Pending Activation Process initiated.
 
@@ -376,7 +460,7 @@ Verify that an identical successful replay using the same approved identity:
 - creates no additional Vendor;
 - records no additional completed business fact;
 - records no additional Domain Event;
-- creates no additional publication or outbox record;
+- creates no additional durable publication record;
 - publishes no additional Integration Event;
 - initiates no additional Pending Activation Process.
 
@@ -390,7 +474,7 @@ Verify that such processing:
 - creates no additional Vendor;
 - records no additional completed business fact;
 - records no additional VendorRegistered Domain Event;
-- creates no additional publication or outbox record;
+- creates no additional durable publication record;
 - publishes no additional VendorRegistered Integration Event; and
 - initiates no additional Pending Activation Process.
 
@@ -401,8 +485,15 @@ Verify that:
 - Vendor persistence and durable publication work commit atomically;
 - partial success is not reported;
 - publication retry does not rerun `RegisterVendor`;
-- Integration Event dispatch can recover independently after commit;
+- the required observable publication outcome remains recoverable after commit without repeating registration;
 - the internal Domain Event is not assumed to be identical to the published Integration Event.
+
+Keep the verification boundary explicit:
+
+- HJ-107 owns the behavioural guarantees that successful registration creates the durable publication obligation, failure creates no partial business outcome, retry does not repeat registration and the required observable publication outcome is preserved.
+- HJ-013 owns concrete Transactional Outbox implementation, database-boundary atomicity, failure injection, outbox persistence, relay restart/recovery and broker-delivery mechanics.
+
+CON-017 and HJ-012 may be referenced to show that Transactional Outbox is approved architecture. Do not make outbox representation part of a public request, response or Integration Event contract.
 
 ## Business Failures
 
@@ -425,40 +516,64 @@ For each failure verify:
 
 Do not invent behaviour for unresolved dependencies.
 
-Create explicit blocked or deferred catalogue entries for:
+Create explicit blocked or partially blocked catalogue entries for unresolved in-scope dependencies, including:
 
-- Address Resolution reference format, lifetime, reuse, revocation and expiry;
-- concrete Compliance-facing Business Address event schema;
-- Identity authentication, authorisation and caller-to-Vendor association;
-- idempotency retention duration;
-- payload-equivalence implementation;
-- any unapproved Part B HTTP convention.
+| Current Concern | Unresolved Area |
+|---|---|
+| CON-009 and CON-010 | Address Resolution reference contract and Address failure taxonomy/resilience treatment. |
+| CON-013 to CON-016 | Idempotency identity/equivalence, concurrency, outcome persistence and transaction boundary. |
+| CON-018 to CON-021 | Outbox relay, Domain-to-Integration Event translation, Integration Event schema and broker delivery semantics. |
+| CON-024 to CON-026 | Technical API contract, business-failure transport mapping and validation allocation. |
+| CON-028 | PostgreSQL mapping and constraints. |
+
+For every affected obligation:
+
+- derive the behavioural guarantee that is already normative;
+- identify the applicable `CON-xxx` dependency;
+- state what can already be tested;
+- state what remains blocked; and
+- do not select an Approach, schema, format, mapping, persistence mechanism, relay, broker policy or implementation framework.
+
+Identity authentication, authorisation and caller-to-Vendor association remain outside Epic 1. Record them as scope exclusions unless an approved source makes them dependencies of an in-scope obligation.
 
 Each blocked entry shall identify:
 
 - the missing contract;
+- the affected Test IDs;
+- the Current Concern ID or IDs;
 - why testing cannot be completed;
 - the owning capability or decision required;
+- what can already be tested;
+- what remains blocked; and
 - the effect on implementation readiness.
 
 ---
 
 # Required Output Structure
 
-Produce a complete Markdown document using the following structure.
+Produce a complete Markdown document using the following structure and apply the appropriate document-control mode.
 
-```text
-Document ID: HJ-107
-Document Title: Vendor Registration Test Catalogue
-Version: 0.1
-Status: Draft
-Classification: Test Catalogue
-Owner: Project Architecture
-```
+For initial generation, create HJ-107 using the applicable project document-control rules.
+
+For regeneration:
+
+- use the existing HJ-107 as the document baseline;
+- preserve Document ID, title and standard filename;
+- increment the internal document version according to the controlled change being applied;
+- set Status according to the applicable document-review decision rather than resetting it automatically;
+- update Last Updated and Revision History;
+- retain unaffected catalogue content; and
+- record the source baselines used, including HJ-106 v1.1.
+
+Do not append a version or status suffix to the filename.
 
 ## Revision History
 
 ## Related Documents
+
+Identify HJ-013 as **HJ-013 - Architecture and Implementation Test Catalogue**, using `Current` or omitting a version value. Describe it as the downstream complementary catalogue. Do not describe an HJ-013 version as a regeneration or source-authority input, and do not include `AI-*` identifiers.
+
+This rule applies when HJ-107 is next regenerated for a substantive reason. An existing HJ-013 version reference does not by itself require HJ-107 regeneration.
 
 ## 1. Purpose
 
@@ -474,12 +589,14 @@ For each attached artefact identify:
 - what authority it provides;
 - whether it is normative, supporting or non-normative.
 
+Do not list a particular HJ-013 version as a supplied source-authority or cross-catalogue review input. HJ-013 may be identified by stable Document ID only when explaining the complementary responsibility boundary.
+
 ## 3. Catalogue Conventions
 
 Define:
 
 - Test ID format;
-- test levels;
+- Test Classifications and their authoritative HJ-006 Test Level mapping;
 - priority levels;
 - automation status values;
 - dependency status values;
@@ -492,7 +609,7 @@ Provide a table containing:
 
 - Test Area;
 - Number of Test Obligations;
-- Primary Test Level;
+- Primary Test Classification / Level;
 - Source;
 - Coverage Status;
 - Open Dependencies.
@@ -542,7 +659,7 @@ For every test obligation provide a table row or structured entry containing:
 - Requirement;
 - Source Artefact;
 - Source Section;
-- Test Level;
+- Test Classification / Level;
 - Priority;
 - Preconditions;
 - Input / Stimulus;
@@ -551,6 +668,8 @@ For every test obligation provide a table row or structured entry containing:
 - Automation Recommendation;
 - Dependency Status;
 - Notes.
+
+Priority and Dependency Status are separate fields. Do not encode blocked state as Priority.
 
 ## 6. Proposed API Contract Tests
 
@@ -576,11 +695,14 @@ Do not treat them as approved business requirements.
 Provide a table containing:
 
 - Test Area;
+- affected Test IDs;
 - Missing Contract or Decision;
-- Owning Artefact or Capability;
-- Why Blocked;
-- Required Resolution;
-- Impact.
+- Current Concern ID or IDs;
+- authoritative owner or source required;
+- what can already be tested;
+- what remains blocked;
+- required resolution; and
+- implementation/readiness impact.
 
 ## 8. Requirement-to-Test Traceability Matrix
 
@@ -605,7 +727,11 @@ Identify:
 - blocked requirements;
 - non-testable statements;
 - potential duplicate tests;
+- behavioural obligations owned by HJ-107;
+- complementary architecture or implementation obligations owned by HJ-013;
 - any source ambiguity or conflict.
+
+Do not claim that HJ-107 completeness depends on a particular HJ-013 version or on the existence of particular `AI-*` obligations.
 
 Do **not** silently resolve gaps.
 
@@ -625,6 +751,23 @@ Classify each item as:
 
 Confirm that the Test Catalogue:
 
+- uses HJ-106 v1.1 Part A as its primary normative behavioural basis;
+- uses the approved HJ-006 Test Classification and Test Level mapping;
+- preserves stable Test IDs or records their controlled reconciliation;
+- preserves and reconciles only HJ-107-owned `VR-*` identifiers;
+- uses the previous HJ-107 as the sole `VR-*` stable-ID baseline;
+- does not use HJ-013 as a behavioural, regeneration or stable-ID input;
+- contains no version-specific HJ-013 dependency;
+- contains no `AI-*` identifiers;
+- uses stable Document ID `HJ-013` only to assign complementary verification responsibility;
+- does not treat an HJ-013-only change as an HJ-107 regeneration trigger;
+- reports preserved, materially changed, added and retired or restructured `VR-*` identifiers;
+- keeps Priority distinct from Dependency Status;
+- identifies applicable HJ-010 Current Concern dependencies;
+- does not select an unresolved architectural Approach;
+- does not duplicate HJ-013 architecture or implementation obligations;
+- treats HJ-012 as approved architecture rather than a source of new service behaviour;
+- treats Identity as outside Epic 1 unless an approved source establishes an in-scope dependency;
 - covers every normative statement in HJ-106 Part A;
 - preserves bounded-context ownership;
 - uses ubiquitous language consistently;
@@ -639,9 +782,31 @@ Confirm that the Test Catalogue:
 - keeps Domain and Integration Events distinct;
 - does not invent unresolved external contracts;
 - separates Part A business tests from Part B proposed API tests;
+- keeps all Part B-derived tests explicitly Proposed and non-normative;
 - identifies blocked dependencies explicitly;
 - contains complete requirement-to-test traceability;
 - contains no executable implementation code.
+
+## 12. Regeneration Reconciliation
+
+When regenerating an existing HJ-107, provide a table containing:
+
+- Test ID;
+- Previous Treatment;
+- Regenerated Treatment; and
+- Reason.
+
+Record preserved, materially changed, added, retired, merged, split and superseded `VR-*` obligations explicitly enough to make omissions and Test ID changes visible.
+
+Report completion totals for:
+
+- preserved `VR-*` IDs;
+- materially changed `VR-*` IDs;
+- newly added `VR-*` IDs;
+- retired, merged, split or superseded `VR-*` IDs; and
+- unresolved source or cross-catalogue responsibility references.
+
+No `AI-*` identifier shall appear in this reconciliation.
 
 ---
 
@@ -677,6 +842,21 @@ Suggested area codes:
 
 Do not encode implementation layer, class name or test framework into the identifier.
 
+## Stable Test ID Reconciliation
+
+When regenerating HJ-107:
+
+1. Preserve an existing Test ID when its behavioural obligation remains semantically unchanged.
+2. Amend the existing entry under the same Test ID when traceability, classification, dependency or wording changes without changing the essential obligation.
+3. Create a new Test ID only for a genuinely new and independently testable obligation.
+4. Do not reuse a retired Test ID for another obligation.
+5. Record removed, merged, split, superseded and newly added Test IDs explicitly.
+6. Produce the Regeneration Reconciliation required by the output structure.
+
+These rules apply exclusively to the HJ-107-owned `VR-*` namespace. Do not preserve, create, validate, reconcile or report `AI-*` identifiers. The previous HJ-107 is the sole stable-ID baseline.
+
+Do not renumber retained obligations merely to make identifiers contiguous.
+
 ---
 
 # Priority Classification
@@ -687,9 +867,22 @@ Classify test obligations as:
 - **Important** – protects required business behaviour, collaboration contracts, lifecycle outcomes or controlled failure behaviour.
 - **Standard** – validates supporting field rules, optional behaviour or non-critical boundaries.
 - **Proposed** – derived only from non-normative Part B technical conventions.
-- **Blocked** – cannot be completed until an external contract or decision exists.
 
 Do not assign every test the same priority.
+
+Blocked is a Dependency Status, not a Priority.
+
+---
+
+# Dependency Status Classification
+
+Use these controlled values:
+
+- **Ready** – the obligation is sufficiently defined for test implementation.
+- **Partially Blocked** – part of the obligation is testable, but identified assertions or cases depend on unresolved authority.
+- **Blocked** – the obligation cannot be implemented responsibly until the identified contract or decision is approved.
+
+If **Deferred** is required, use it only where an approved scope or sequencing decision deliberately defers the obligation. Do not use Deferred merely because required information is missing.
 
 ---
 

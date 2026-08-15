@@ -3,11 +3,11 @@
 | **Document ID** | ADR-008 |
 |-----------------|---------|
 | **Document Title** | Idempotent Operations and Reliable Event Publication |
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 28 July 2026 |
+| **Last Updated** | 13 August 2026 |
 
 ---
 
@@ -17,6 +17,7 @@
 |---------|------|-------------|
 | 1.0 | 24 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 28 July 2026 | Applied CR-024 to define the Register Vendor idempotency boundary and duplicate-submission behaviour, exclude Registration Session state, clarify the relationship between Domain Events and Integration Events, and strengthen reliable-publication testing and enforcement. |
+| 1.2 | 13 August 2026 | Applied CR-034 to remove delivery-slice Pending Activation assumptions from Register Vendor idempotency and testing semantics. |
 
 ---
 
@@ -31,6 +32,7 @@
 | HJ-006 | Testing Strategy and Standards | Approved |
 | HJ-007 | Enforcement Strategy | Approved |
 | HJ-105 | Vendor Registration Sequence Diagram | Approved |
+| CR-034 | Remove Delivery-Slice Scope from Enduring Vendor Architecture Artefacts | Approved |
 
 ---
 
@@ -82,8 +84,7 @@ Where a request carries the same idempotency identity and is semantically identi
 - create no additional Vendor;
 - record no additional `VendorRegistered` Domain Event or completed business fact;
 - create no additional publication or outbox record;
-- publish no additional `VendorRegistered` Integration Event; and
-- initiate no additional Pending Activation Process.
+- publish no additional `VendorRegistered` Integration Event.
 
 This business behaviour is mandatory regardless of implementation.
 
@@ -105,7 +106,7 @@ The operation shall therefore:
 - record no additional VendorRegistered Domain Event;
 - create no additional publication work;
 - publish no additional VendorRegistered Integration Event; and
-- initiate no additional Pending Activation Process.
+- leave previously committed Vendor state unchanged.
 
 The concrete response format, HTTP status code and payload are implementation conventions and are outside the scope of this Architectural Decision.
 
@@ -153,7 +154,7 @@ The architecture does not prescribe a particular persistence mechanism, outbox t
 
 - Most business operations remain naturally idempotent.
 - Operations that create new business state have an explicit idempotency safeguard.
-- Duplicate `RegisterVendor` processing cannot create duplicate Vendors, business facts, publication records, Integration Events or Pending Activation Processes.
+- Duplicate `RegisterVendor` processing cannot create duplicate Vendors, business facts, publication records or Integration Events.
 - Register Vendor idempotency is independent of Registration Session state and request-assembly behaviour.
 - Domain Events accurately represent genuine business state changes.
 - Domain Events and published Integration Events are treated as distinct architectural concepts.
@@ -227,8 +228,7 @@ For a request carrying the same idempotency identity and semantically identical 
 - creates no additional Vendor;
 - records no additional `VendorRegistered` Domain Event or completed business fact;
 - creates no additional publication or outbox record;
-- publishes no additional `VendorRegistered` Integration Event; and
-- initiates no additional Pending Activation Process.
+- publishes no additional `VendorRegistered` Integration Event.
 
 For a request carrying the same idempotency identity as a previously successful request but with semantically different registration information, tests shall verify that processing:
 
@@ -237,7 +237,7 @@ For a request carrying the same idempotency identity as a previously successful 
 - records no additional `VendorRegistered` Domain Event or completed business fact;
 - creates no additional publication or outbox record;
 - publishes no additional `VendorRegistered` Integration Event; and
-- initiates no additional Pending Activation Process.
+- leaves previously committed Vendor state unchanged.
 
 Architecture and code review shall verify that:
 

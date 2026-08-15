@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 3.2 |
+| **Version** | 3.4 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 8 August 2026 |
+| **Last Updated** | 13 August 2026 |
 
 ## Revision History
 
@@ -20,6 +20,8 @@
 | 3.0 | 28 July 2026 | Regenerated from the approved Vendor language, domain model and registration requirements and the accepted architectural decisions. Realigned Registration Session ownership, request and Address trust boundaries, creation invariants, idempotency, Domain and Integration Events, reliable publication and downstream activation initiation. |
 | 3.1 | 8 August 2026 | Applied CR-026 to add the separate Epic 1 Retrieve Registered Vendor sequence, including the successful and Vendor Not Found outcomes and query boundary constraints. |
 | 3.2 | 8 August 2026 | Applied CR-029 to incorporate the controlled idempotency-conflict behaviour defined by ADR-008 and update ADR-008 traceability references. No business behaviour changed beyond alignment with the approved architecture. |
+| 3.3 | 12 August 2026 | Applied CR-033 to align the Epic 1 runtime interactions, downstream event-consumer stub and client/BFF-owned Registration Session with HJ-011. |
+| 3.4 | 13 August 2026 | Applied CR-035 to remove delivery-slice scope and restore HJ-105 as the enduring Vendor Registration behavioural model. |
 
 ## Related Documents
 
@@ -37,10 +39,11 @@
 | ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted | Compliance boundary and activation dependency |
 | ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted | Idempotency and publication reliability |
 | CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved | Registered Vendor retrieval behaviour and scope |
+| CR-035 | Remove Delivery-Slice Scope from Vendor Registration Behavioural Model | Approved | Enduring behavioural-model scope and responsibility |
 
 # 1. Purpose and Authority
 
-This document defines the runtime interactions required to complete **Epic 1 – Vendor Registration**, including the associated minimal retrieval of a registered Vendor.
+This document defines the runtime interactions required for **Vendor Registration**, including the associated retrieval of a registered Vendor.
 
 It is the behavioural bridge between the approved registration language, registration-information contract, Vendor aggregate and accepted architectural decisions. It describes interaction order and responsibility; it does not redefine the underlying business rules.
 
@@ -51,13 +54,13 @@ The authoritative sources are applied in the following order for their respectiv
 - **HJ-004** for aggregate behaviour, creation invariants, resulting state and events;
 - the accepted ADRs for capability ownership, Address ownership, lifecycle boundaries, idempotency, reliable publication and cross-context collaboration.
 
-Approved Change Requests are applied through the revised production artefacts listed above. CR-026 is reflected directly to define the registered Vendor retrieval capability, and CR-029 is reflected directly to align controlled idempotency-conflict behaviour and ADR-008 traceability.
+HJ-105 defines interaction behaviour and does not determine delivery scope. Approved Change Requests are applied through the revised production artefacts listed above. CR-026 is reflected directly to define the registered Vendor retrieval capability, CR-029 aligns controlled idempotency-conflict behaviour and ADR-008 traceability, and CR-035 restores the enduring behavioural model.
 
 # 2. Scope and Boundary
 
 This document covers:
 
-- optional client/BFF assembly of registration information;
+- client or BFF assembly of registration information;
 - Address search and selection before registration submission;
 - submission of one complete, self-contained `RegisterVendor` request;
 - server-side validation of client-authored information and Registration Declarations;
@@ -66,7 +69,8 @@ This document covers:
 - Vendor persistence and durable Integration Event recording;
 - synchronous confirmation of successful registration;
 - asynchronous publication of `VendorRegistered`;
-- initiation of the Pending Activation Process;
+- downstream initiation of the Pending Activation Process through the published `VendorRegistered` Integration Event;
+- collaboration with the Compliance capability through its approved boundary;
 - validation, address, invariant, persistence and publication failures;
 - idempotent and concurrent duplicate processing;
 - retrieval of one registered Vendor by VendorId;
@@ -77,8 +81,7 @@ This document does not place Registration Session management inside the Vendor R
 
 - persisted or resumable registration drafts;
 - Identity account creation or authentication;
-- compliance evidence submission, evaluation or continuing monitoring;
-- completion of the Pending Activation Process;
+- Compliance evidence submission, evaluation or continuing monitoring;
 - Vendor Activation;
 - registration amendment;
 - multiple premises or Branches;
@@ -92,7 +95,7 @@ This document does not place Registration Session management inside the Vendor R
 
 | Rule | Behavioural application |
 |---|---|
-| Client interaction boundary | A Registration Session, if used, is owned entirely by the Registration UI or BFF and never participates in Vendor Registration service processing. |
+| Client interaction boundary | A Registration Session, if used, is owned entirely by the client application or BFF and never participates in Vendor Registration service processing. |
 | Registration boundary | Vendor Registration begins only when the service receives a complete `RegisterVendor` request. |
 | Request authority | The request is authoritative for client-authored registration information and the approved Address Resolution reference. |
 | Address authority | Address-owned values are retrieved directly from the Address Service using the approved reference and are never trusted from client-authored values. |
@@ -102,9 +105,9 @@ This document does not place Registration Session management inside the Vendor R
 | Event separation | The internal `VendorRegistered` Domain Event and published `VendorRegistered` Integration Event are distinct architectural concepts. |
 | Reliable publication | Vendor persistence and durable recording of publication work occur atomically. Publication may be retried without repeating registration. |
 | Idempotency | `RegisterVendor` uses an explicit idempotency identity or equivalent approved uniqueness constraint. Successful replay returns the original outcome without additional business effects. Reuse of the same identity with semantically different registration information returns a controlled idempotency-conflict outcome without creating or changing business state. |
-| Capability autonomy | The Pending Activation Process consumes the Integration Event and does not synchronously retrieve registration data from the Vendor Domain. |
+| Capability autonomy | The Pending Activation Process consumes the published `VendorRegistered` Integration Event and does not synchronously retrieve registration information from the Vendor Domain where that information is already present in the published contract. Compliance remains a downstream capability with its own behaviour and ownership. |
 | Retrieval lookup | `RetrieveRegisteredVendor` uses VendorId as its sole lookup input and performs no search. |
-| Retrieval authority | The persisted Vendor aggregate is the authoritative Epic 1 read source; the application maps it to Registered Vendor Details rather than exposing it directly. |
+| Retrieval authority | The persisted Vendor aggregate is the authoritative read source; the application maps it to Registered Vendor Details rather than exposing it directly. |
 | Retrieval isolation | Registered Vendor retrieval is read-only, has no events or lifecycle effects and invokes no other bounded context. |
 
 # 4. Participants and Responsibilities
@@ -120,10 +123,10 @@ This document does not place Registration Session management inside the Vendor R
 | Transactional Outbox | Durably records publication work in the same atomic unit as Vendor persistence. |
 | Integration Event Publisher | Publishes recorded Integration Events and retries failed publication without repeating registration. |
 | Event Bus | Delivers published contracts to subscribing capabilities. |
-| Pending Activation Process | Reacts to `VendorRegistered` and coordinates post-registration activation work. |
-| Compliance Requirement Provider | Determines applicable Compliance Requirements within the Compliance capability. |
+| Pending Activation Process | Reacts to `VendorRegistered` and coordinates post-registration work required to move the Vendor towards an activation outcome. |
+| Compliance Capability | Determines applicable Compliance Requirements through the approved Compliance boundary. |
 
-A Registration Session is deliberately absent from the server-side participant list. A client/BFF may use local interaction state, but the Vendor Registration Application neither knows nor depends on it.
+A Registration Session is deliberately absent from the server-side participant list. A client application or BFF may own transient interaction state, but the Vendor Registration Application neither knows nor depends on it.
 
 # 5. Complete RegisterVendor Request
 
@@ -161,7 +164,7 @@ sequenceDiagram
     autonumber
     actor Applicant as Prospective Vendor
     participant Client as Registration UI / BFF
-    participant LocalState as Client-owned interaction state
+    participant LocalState as Client/BFF-owned interaction state
     participant Address as Address Service
 
     Applicant->>Client: Begin Vendor Registration
@@ -196,7 +199,7 @@ sequenceDiagram
 
     Applicant->>Client: Confirm mandatory Registration Declarations
     Client->>Client: Assemble complete RegisterVendor request
-    Note over Client: Temporary interaction state remains client/BFF-owned.<br/>Vendor Registration has not yet begun.
+    Note over Client: Temporary interaction state remains client- or BFF-owned.<br/>Vendor Registration has not yet begun.
 ```
 
 The displayed Address result supports selection and user confirmation. It is not the authoritative source persisted by the Vendor. Authoritative Address-owned values are retrieved again by the Vendor Registration Application using the approved reference during request validation.
@@ -216,10 +219,10 @@ sequenceDiagram
     participant Publisher as Integration Event Publisher
     participant Bus as Event Bus
     participant Pending as Pending Activation Process
-    participant Compliance as Compliance Requirement Provider
+    participant Compliance as Compliance Capability
 
     Applicant->>Client: Submit Vendor Registration
-    Note over Client,Application: Client/BFF assembles the complete request before invocation.
+    Note over Client,Application: The Registration UI or BFF assembles the complete request before invocation.
     Client->>Application: RegisterVendor(complete request, idempotency identity)
 
     Application->>Application: Establish idempotency outcome
@@ -259,14 +262,14 @@ sequenceDiagram
     Publisher->>Outbox: Read unpublished Integration Event
     Publisher->>Bus: Publish VendorRegistered Integration Event
     Bus-->>Pending: Deliver VendorRegistered Integration Event
-    Pending->>Compliance: Get applicable Compliance Requirements<br/>using Integration Event information
+    Pending->>Compliance: Request applicable Compliance Requirements<br/>using Integration Event information
     Compliance-->>Pending: Applicable Compliance Requirements
     Pending->>Pending: Begin Pending Activation coordination
 ```
 
-The synchronous response confirms the committed Vendor state. Pending Activation and Compliance processing proceed asynchronously and do not change the successful registration response.
+The synchronous response confirms the committed Vendor state. Downstream Pending Activation and Compliance collaboration proceeds asynchronously and does not change that response.
 
-The Pending Activation Process obtains the information required to begin processing from the published Integration Event. It shall not synchronously query the Vendor Domain for registration values already known when registration completed.
+The Pending Activation Process obtains the registration information required to begin coordination from the published Integration Event and collaborates with the Compliance capability through the approved boundary. It shall not synchronously query the Vendor Domain for registration information already supplied by the published contract. Registration itself does not complete Compliance processing.
 
 # 8. Validation and Creation Failure
 
@@ -312,7 +315,7 @@ sequenceDiagram
     Note over Repository,Outbox: For every validation, Address or invariant failure:<br/>no Vendor is persisted;<br/>no completed business fact or Domain Event is recorded;<br/>no publication record or Integration Event exists.
 ```
 
-The Vendor Registration service retains no Registration Session after failure. The UI or BFF alone decides whether to retain client interaction state so the applicant can correct and resubmit information.
+The Vendor Registration service retains no Registration Session after failure. The client application or BFF alone decides whether to retain interaction state so the applicant can correct and resubmit information.
 
 Server-side validation shall enforce all HJ-104 rules, including:
 
@@ -338,7 +341,6 @@ sequenceDiagram
     participant Idempotency as Idempotency Safeguard
     participant Repository as Vendor Repository
     participant Outbox as Transactional Outbox
-    participant Pending as Pending Activation Process
 
     Client->>Application: RegisterVendor(request, idempotency identity)
     Application->>Idempotency: Establish or retrieve request outcome
@@ -353,11 +355,11 @@ sequenceDiagram
     else Same identity and semantically identical successful request
         Idempotency-->>Application: Previously successful outcome
         Application-->>Client: Return original successful outcome
-        Note over Repository,Pending: No additional Vendor, Domain Event,<br/>business fact, outbox record, Integration Event<br/>or Pending Activation Process.
+        Note over Repository,Outbox: No additional Vendor, Domain Event,<br/>business fact, outbox record<br/>or Integration Event publication.
     else Same identity and registration information is not semantically identical
         Idempotency-->>Application: Idempotency conflict
         Application-->>Client: Return controlled idempotency-conflict outcome
-        Note over Application,Pending: No Vendor is created or modified.<br/>No completed business fact, Domain Event,<br/>publication work, Transactional Outbox entry<br/>or Integration Event is recorded or published.<br/>No Pending Activation Process is initiated.<br/>Previously committed Vendor state remains unchanged.
+        Note over Application,Outbox: No Vendor is created or modified.<br/>No completed business fact, Domain Event,<br/>publication work, Transactional Outbox entry<br/>or Integration Event is recorded or published.<br/>Previously committed Vendor state remains unchanged.
     end
 ```
 
@@ -367,7 +369,7 @@ The three outcomes are distinct:
 - replay applies only to the same identity and the same semantically identical successful request and returns the original outcome; and
 - reuse of the same identity with registration information that is not semantically identical returns the controlled idempotency-conflict outcome.
 
-Conflict processing creates no Vendor, modifies no existing Vendor, records no completed business fact, Domain Event, publication work or Transactional Outbox entry, publishes no Integration Event, initiates no Pending Activation Process and leaves all previously committed Vendor state unchanged.
+Conflict processing creates no Vendor, modifies no existing Vendor, records no completed business fact, Domain Event, publication work or Transactional Outbox entry, publishes no Integration Event and leaves all previously committed Vendor state unchanged.
 
 Concurrent requests with the same identity and semantically identical information must converge on one processing owner and one successful outcome. Registration Session state is outside the idempotency boundary and shall never be consulted. The complete `RegisterVendor` request remains the idempotency boundary.
 
@@ -426,22 +428,24 @@ This sequence defines the required business semantics of the Address information
 The Address information must:
 - originate from the authoritative Address Domain result used to create the Vendor;
 - represent the approved registration-time Business Address;
-- be sufficient for the Pending Activation Process and Compliance capability to begin processing without synchronously querying the Vendor Domain; and
+- carry the approved registration-time information required by eventual downstream Compliance processing without a synchronous Vendor Domain callback; and
 - exclude client-authored or independently reconstructed Address information.
 The exact fields, structure, naming and serialization of this element are deferred until the Compliance-facing integration contract is defined.
 
+The contract purpose is to support downstream Compliance and Pending Activation processing without a synchronous Vendor callback.
+
 Registration Declarations shall never appear in the Integration Event. Implementation-specific metadata may be added provided the minimum business content and contract semantics are preserved.
 
-# 11. Client-Owned Registration Session Lifecycle
+# 11. Client / BFF-Owned Registration Session Lifecycle
 
-A Registration Session is optional client/BFF interaction state and is not part of Vendor Registration processing.
+A Registration Session, if used, is client- or BFF-owned interaction state and is not part of Vendor Registration processing.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Applicant as Prospective Vendor
     participant Client as Registration UI / BFF
-    participant LocalState as Client-owned interaction state
+    participant LocalState as Client/BFF-owned interaction state
 
     Applicant->>Client: Begin registration interaction
     opt Client uses a Registration Session
@@ -503,7 +507,6 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 
 - Return the original successful outcome for the same identity and semantically identical request.
 - Create no additional Vendor, business fact, Domain Event, publication record or Integration Event.
-- Initiate no additional Pending Activation Process.
 
 ## 12.7 Idempotency Conflict
 
@@ -511,7 +514,6 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 - Create no Vendor and modify no existing Vendor.
 - Record no completed business fact, Domain Event, publication work or Transactional Outbox entry.
 - Publish no Integration Event.
-- Initiate no Pending Activation Process.
 - Leave all previously committed Vendor state unchanged.
 
 # 13. Resulting Vendor State
@@ -535,8 +537,8 @@ After successful registration:
 | Registration Declarations | Not persisted and absent from both event types |
 | Internal `VendorRegistered` Domain Event | Records the completed business fact |
 | `VendorRegistered` Integration Event | Durably recorded and published |
-| Pending Activation Process | Initiated asynchronously from the Integration Event |
-| Compliance Requirements | Requested through the Compliance capability |
+| Pending Activation Process | Initiated asynchronously from the published Integration Event |
+| Compliance Requirements | Obtained through the approved Compliance capability |
 
 # 14. Retrieve Registered Vendor
 
@@ -546,11 +548,11 @@ This section defines the read-only registered Vendor retrieval capability. It is
 
 | Participant | Responsibility |
 |---|---|
-| Vendor Administrator | Supplies the VendorId and receives either Registered Vendor Details or the controlled Vendor Not Found outcome. Authentication and authorisation are outside the Epic 1 scope. |
+| Vendor Administrator | Supplies the VendorId and receives either Registered Vendor Details or the controlled Vendor Not Found outcome. Authentication and authorisation are outside the Retrieve Registered Vendor business behaviour defined by this sequence. |
 | Vendor Application | Accepts the query, requests the Vendor by VendorId and maps persisted Vendor state to Registered Vendor Details. |
-| Vendor Repository | Retrieves the existing persisted Vendor aggregate by VendorId as the authoritative Epic 1 read source. |
+| Vendor Repository | Retrieves the existing persisted Vendor aggregate by VendorId as the authoritative persisted read source. |
 
-No Registration UI, Registration Session, Address Service, Compliance Requirement Provider, Pending Activation Process, Identity capability, search infrastructure or event publisher participates in this sequence.
+No Registration UI / BFF, Registration Session, Address Service, Compliance capability, Pending Activation Process, Identity capability, search infrastructure or event publisher participates in this sequence.
 
 ## 14.2 Retrieval Sequence
 
@@ -587,56 +589,11 @@ It does not mutate the Vendor, alter lifecycle state, change Trading Preference,
 
 Neither the successful outcome nor the controlled Vendor Not Found outcome creates a Domain Event, Integration Event or business state.
 
-# 15. Epic 1 Implementation Boundary
-
-## 15.1 Required
-
-- complete, self-contained `RegisterVendor` request;
-- authoritative server-side validation of HJ-104 rules;
-- transient evaluation and disposal of Registration Declarations;
-- explicit idempotency safeguard over the complete request;
-- Address Service abstraction and Epic 1 stub implementation;
-- approved Address Resolution reference in the request;
-- direct retrieval of authoritative Address-owned values;
-- Canonical Address Identifier and immutable Business Address Snapshot;
-- applicable regulatory authorities;
-- explicit aggregate creation invariants;
-- Vendor creation in `PendingActivation` and `Offline`;
-- atomic Vendor persistence and durable publication recording;
-- distinct Domain and Integration Event representations;
-- reliable `VendorRegistered` Integration Event publication;
-- Pending Activation initiation without a synchronous Vendor Domain callback;
-- Compliance Requirement Provider abstraction and Epic 1 stub implementation;
-- retrieval of one Vendor using VendorId as the sole lookup criterion;
-- repository loading from persisted Vendor state;
-- mapping to Registered Vendor Details rather than direct aggregate exposure; and
-- controlled Vendor Found and Vendor Not Found outcomes without side effects.
-
-## 15.2 Outside the Vendor Registration Service
-
-- Registration Session creation, retrieval, reconciliation, storage, update, expiry or disposal;
-- incomplete interaction-state persistence;
-- client workflow implementation; and
-- permitted audit retention of Registration Declarations.
-
-## 15.3 Deferred
-
-- persisted registration drafts;
-- Branches and multiple premises;
-- registration amendment;
-- full external Address provider integration;
-- full Compliance Domain implementation;
-- evidence workflows;
-- completion of the Pending Activation Process;
-- Vendor Activation;
-- Menu and Ordering behaviour; and
-- Operational Availability composition.
-
-# 16. Design Decisions
+# 15. Design Decisions
 
 ## Decision 1: Registration Session is outside the service boundary
 
-Any Registration Session is optional, client/BFF-owned interaction state. It is unknown to the Vendor Registration service and has no Vendor business lifecycle.
+Any Registration Session is optional client- or BFF-owned interaction state. It is unknown to the Vendor Registration service and has no Vendor business lifecycle.
 
 ## Decision 2: One complete request starts Vendor Registration
 
@@ -672,15 +629,15 @@ Reprocessing the same successful business request returns the original outcome w
 
 ## Decision 10: Downstream capabilities consume the published contract
 
-The Pending Activation Process begins from the Integration Event and does not query back into the Vendor Domain for the event’s required registration information.
+The Pending Activation Process begins from the published `VendorRegistered` Integration Event and does not synchronously query the Vendor Domain for registration information already present in that contract. Compliance collaboration occurs through the approved Compliance boundary.
 
 ## Decision 11: Registered Vendor retrieval is isolated and read-only
 
 `RetrieveRegisteredVendor` loads one persisted Vendor by VendorId and maps its state to Registered Vendor Details. It exposes no aggregate, introduces no cross-domain dependency or dedicated read model, and creates no state change, lifecycle transition, event or publication work.
 
-# 17. Implementation Checklist
+# 16. Behavioural Conformance Checklist
 
-Before Epic 1 Vendor Registration is considered complete, confirm that:
+Confirm that the Vendor Registration behaviour conforms to the following requirements:
 
 - [ ] Registration Session state is never created, retrieved or managed by the Vendor Registration service;
 - [ ] `RegisterVendor` receives one complete, self-contained request;
@@ -689,7 +646,7 @@ Before Epic 1 Vendor Registration is considered complete, confirm that:
 - [ ] successful replay applies only to the same identity and semantically identical successful request;
 - [ ] reuse of the same identity with registration information that is not semantically identical returns a controlled idempotency-conflict outcome;
 - [ ] idempotency conflict creates or modifies no Vendor and records or publishes no business fact, Domain Event, publication work, Transactional Outbox entry or Integration Event;
-- [ ] idempotency conflict initiates no Pending Activation Process and leaves previously committed Vendor state unchanged;
+- [ ] idempotency conflict leaves previously committed Vendor state unchanged;
 - [ ] all HJ-104 field and conditional rules are validated server-side;
 - [ ] all mandatory Registration Declarations are explicitly accepted;
 - [ ] Registration Declarations are not persisted or included in either event type;
@@ -705,7 +662,7 @@ Before Epic 1 Vendor Registration is considered complete, confirm that:
 - [ ] the published `VendorRegistered` Integration Event satisfies the minimum contract;
 - [ ] publication retry does not repeat Vendor Registration;
 - [ ] the synchronous response reflects committed Vendor state;
-- [ ] the Pending Activation Process uses the Integration Event without a synchronous Vendor Domain callback;
+- [ ] the downstream Pending Activation Process consumes the published contract without synchronously querying the Vendor Domain for registration information already supplied by that contract;
 - [ ] `RetrieveRegisteredVendor` accepts VendorId as its only lookup input;
 - [ ] the Vendor Repository is the authoritative persisted read source;
 - [ ] a found Vendor is mapped to Registered Vendor Details without exposing the aggregate;
@@ -713,9 +670,9 @@ Before Epic 1 Vendor Registration is considered complete, confirm that:
 - [ ] an unknown VendorId produces the controlled Vendor Not Found outcome;
 - [ ] retrieval invokes no Address, Compliance or Identity capability;
 - [ ] retrieval changes no state and creates no Domain Event, Integration Event or publication work; and
-- [ ] no search, additional query infrastructure or other deferred capability has been introduced.
+- [ ] no search or additional query infrastructure has been introduced.
 
-# 18. Traceability
+# 17. Traceability
 
 | Behaviour | Authoritative source |
 |---|---|
@@ -731,7 +688,7 @@ Before Epic 1 Vendor Registration is considered complete, confirm that:
 | Atomic publication recording and retry | ADR-008 §2.6 |
 | Register Vendor idempotency and complete-request boundary | ADR-008 §§2.2 and 2.4 |
 | Controlled idempotency conflict | ADR-008 §2.3 |
-| Event-driven Pending Activation initiation | ADR-003; ADR-007; HJ-004 §§7 and 12 |
+| Event-driven Pending Activation and Compliance relationship | ADR-003; ADR-007; HJ-004 §§7 and 12 |
 | Retrieve Registered Vendor terminology and actor | HJ-003 §§3.20–3.22 |
 | Query definition, result content and read source | HJ-004 §1.7; CR-026 §4.2 |
 | Successful and Vendor Not Found retrieval behaviour | HJ-004 §1.7; CR-026 §4.3 |

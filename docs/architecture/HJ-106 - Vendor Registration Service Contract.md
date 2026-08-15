@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-106 |
 | **Document Title** | Vendor Registration Service Contract |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | Approved |
 | **Classification** | Service Contract |
 | **Owner** | Project Architecture |
-| **Last Updated** | 8 August 2026 |
+| **Last Updated** | 14 August 2026 |
 
 ## Revision History
 
@@ -16,6 +16,7 @@
 |---|---|---|
 | 0.1 | 8 August 2026 | Initial service contract regenerated from the updated Vendor Registration artefacts using PR-002, including Register Vendor, Retrieve Registered Vendor, controlled idempotency conflict behaviour and explicit Register Vendor completion semantics. |
 | 1.0 | 8 August 2026 | Regenerated from the latest approved Vendor artefacts using PR-002 and promoted as the Approved service-contract baseline. Reconciled HJ-105 v3.2 and removed the resolved idempotency alignment records without changing the approved business behaviour. |
+| 1.1 | 14 August 2026 | Applied CR-040. Assessed the contract against the first HJ-012 Approved architecture baseline; found no change to normative business behaviour; added architectural traceability and Current Concern dependencies; and aligned durable-publication terminology. |
 
 ## Related Documents
 
@@ -26,6 +27,8 @@
 | HJ-003 | Ubiquitous Language Guide | Approved | Authoritative Vendor terminology and query language |
 | HJ-004 | Vendor Domain Models | Approved | Vendor aggregate, lifecycle, invariants, events and retrieval model |
 | HJ-005 | Coding Standards | Approved | API boundary, validation, error and HTTP conventions |
+| HJ-010 v1.0 | Current Application Architectural Concerns | Approved | Identifies unresolved architectural concerns and their current Resolution States without replacing the authoritative business sources of this contract |
+| HJ-012 v1.0 | Established Application Architecture Patterns | Approved | Defines approved implementation architecture that fulfils applicable service guarantees without becoming part of the external service contract |
 | HJ-104 | Vendor Registration Fields Matrix | Approved | Authoritative registration information and business rules |
 | HJ-105 | Vendor Registration Sequence Diagram | Approved | Authoritative interaction order, outcomes and failure behaviour |
 | ADR-002 | Business Capabilities and Bounded Contexts | Accepted | Capability and persistence ownership |
@@ -35,6 +38,7 @@
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | Accepted | Address trust boundary and snapshot invariant |
 | ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted | Compliance and activation separation |
 | ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted | Register Vendor idempotency and publication reliability |
+| CR-040 | Align HJ-106 with the Approved Architecture Baseline | Applied | Records the architecture-impact assessment and authorises this traceability-only revision |
 
 # 1. Purpose
 
@@ -74,6 +78,8 @@ Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, pr
 | ADR-008 v1.1 | Defines mandatory reliability behaviour | Explicit Register Vendor idempotency safeguard; equivalent replay; controlled idempotency conflict; atomic persistence/publication recording; retry without repeated business effects |
 
 No contradictory business rule was found among the supplied source artefacts. HJ-105 v3.2 illustrates the controlled idempotency-conflict behaviour defined by ADR-008 and its traceability references align with the current ADR-008 structure. The approved business artefacts govern business behaviour; HJ-005 informs only the proposed technical representation.
+
+HJ-010 v1.0 and HJ-012 v1.0 were assessed as downstream architectural governance for this service contract. The seven Approved concern resolutions introduce no new operation, business rule, result, failure or externally observable guarantee. HJ-012 governs implementation architecture where it fulfils this contract; HJ-010 identifies unresolved architectural dependencies that downstream derivation must not decide implicitly. This assessment does not imply that every Current Architectural Concern has been resolved or that the complete Epic 1 implementation can be generated without further architectural decisions.
 
 # 3. Business Operation Summary
 
@@ -203,7 +209,7 @@ For the same identity and a semantically identical previously successful request
 - return the original successful outcome;
 - create no additional Vendor;
 - record no additional Domain Event or completed business fact;
-- create no additional outbox or publication record;
+- create no additional durable publication record;
 - publish no additional Integration Event; and
 - initiate no additional Pending Activation Process.
 
@@ -487,6 +493,10 @@ No idempotency header applies to the read-only retrieval query.
 | Retrieval source and projection | HJ-004 | §1.7 | Persisted aggregate is authoritative; application maps it to a purpose-specific representation |
 | Retrieval sequence and not-found outcome | HJ-105 | §14 | Repository lookup uses VendorId only and produces Found or controlled Not Found |
 | Retrieval exclusions and side effects | HJ-004; HJ-105 | HJ-004 §1.7; HJ-105 §§14–15 | No search, mutation, event, Identity, Address, Compliance or read-model dependency |
+| Approved Domain implementation architecture | HJ-012 | CON-001 to CON-005 | Aggregate, Value Object, Entity, Domain Event and Repository Approaches fulfil existing Domain and service guarantees without adding service behaviour |
+| Reliable publication implementation architecture | HJ-012 | CON-017 | Transactional Outbox is the approved implementation Approach for the existing atomic durable-publication guarantee; relay and broker details remain unresolved elsewhere |
+| Registered Vendor retrieval implementation architecture | HJ-012 | CON-027 | Query handler, Repository and response mapper fulfil the existing persisted-source, purpose-specific result and side-effect-free retrieval contract |
+| Unresolved architecture dependencies | HJ-010 | CON-009, CON-010, CON-013 to CON-016, CON-020, CON-024 to CON-026 and CON-028 | Downstream derivation must preserve the unresolved status of these matters and must not invent their Approaches |
 | Separate API models | HJ-005 | §§9.4, 16.1 | HTTP requests/results do not expose domain aggregate or persistence entities |
 | Controlled errors and HTTP guidance | HJ-005 | §§12.4, 16.3 | Technical mapping uses safe error bodies and result-appropriate status codes |
 
@@ -499,19 +509,20 @@ No idempotency header applies to the read-only retrieval query.
 | Confirmed | Register Vendor’s minimum business response identifies VendorId and Vendor State PendingActivation | RegisteredAt and Trading Preference are proposed additional response fields rather than mandatory minimum response content |
 | Confirmed | Semantically different reuse of an existing idempotency identity is an idempotency conflict | Return a controlled conflict and create or change no Vendor, event, publication work or Pending Activation Process |
 | Confirmed | Retrieve Registered Vendor is read-only and uses VendorId only | No search, cross-domain call or event belongs in the operation |
-| Technical Convention | `POST /vendors` and `GET /vendors/{vendorId}` | Route review is required before implementation |
-| Technical Convention | Camel-case JSON, flattened operation names and enum spellings | Serialization conventions require approval |
-| Technical Convention | `Idempotency-Key` carries the explicit identity | An equivalent uniqueness constraint remains architecturally permitted |
-| Technical Convention | Successful identical replay returns the same `201` response and body | Confirm whether replay should instead return `200` while preserving the business outcome |
-| Technical Convention | `Location` and `X-Correlation-Id` headers | Confirm header names and mandatory behaviour |
-| Missing Information | Idempotency identity format, retention duration, semantic-equivalence algorithm and storage | Define as application/infrastructure policy without using Registration Session state |
-| Missing Information | Concrete Business Address Snapshot schema in Register, Retrieve and Integration Event contracts | Agree the Address-owned contract; do not infer it from persistence or aggregate internals |
-| Missing Information | Exact approved Address Resolution reference representation and failure taxonomy | Define with the Address Service contract |
-| Missing Information | Exact UK telephone validation rule | Specify accepted forms before executable contract validation is produced |
-| Missing Information | Identifier, timestamp and time-of-day wire formats | Adopt explicit serialization standards before OpenAPI generation |
-| Missing Information | Null-versus-omission behaviour for optional and inapplicable result fields | Decide for Company Registration Number, Primary Trading Authority, Website and Business Description |
-| Missing Information | Authoritative service error-code catalogue and field-path convention | Agree before client integration and test-catalogue finalisation |
-| Missing Information | Availability/error distinction for Address rejection versus temporary Address Service failure | Define retry and HTTP mapping while preserving no-partial-registration behaviour |
+| Technical Convention | `POST /vendors` and `GET /vendors/{vendorId}` | CON-024: route review is required before implementation |
+| Technical Convention | Camel-case JSON, flattened operation names and enum spellings | CON-024: serialization conventions require approval |
+| Technical Convention | `Idempotency-Key` carries the explicit identity | CON-013: an equivalent uniqueness constraint remains architecturally permitted; do not select the representation here |
+| Technical Convention | Successful identical replay returns the same `201` response and body | CON-024 and CON-025: confirm the transport mapping while preserving the business outcome |
+| Technical Convention | `Location` and `X-Correlation-Id` headers | CON-024: confirm header names and mandatory behaviour |
+| Missing Information | Idempotency identity format, retention duration, semantic-equivalence algorithm, storage, concurrent coordination and transaction mechanics | CON-013 to CON-016: resolve through the architectural concern process without using Registration Session state |
+| Missing Information | Concrete Business Address Snapshot schema in Register, Retrieve and Integration Event contracts | CON-009, CON-010 and CON-020: agree the Address-owned and published contracts; do not infer them from persistence or aggregate internals |
+| Missing Information | Exact approved Address Resolution reference representation and failure taxonomy | CON-009 and CON-010: define with the Address Service contract |
+| Missing Information | Concrete `VendorRegistered` Integration Event schema, Business Address representation, metadata/envelope and compatibility rules | CON-020: approve the published contract without inferring a wire schema from Domain or persistence representations |
+| Missing Information | Exact UK telephone validation rule | CON-026: specify accepted forms through an approved business or validation source before executable contract validation is produced |
+| Missing Information | Identifier, timestamp and time-of-day wire formats | CON-024: adopt explicit serialization standards before OpenAPI generation |
+| Missing Information | Null-versus-omission behaviour for optional and inapplicable result fields | CON-024: decide for Company Registration Number, Primary Trading Authority, Website and Business Description |
+| Missing Information | Authoritative service error-code catalogue and field-path convention | CON-024 and CON-025: agree before client integration and test-catalogue finalisation |
+| Missing Information | Availability/error distinction for Address rejection versus temporary Address Service failure | CON-010, CON-024 and CON-025: define retry and transport mapping while preserving no-partial-registration behaviour |
 
 # 9. Review Checklist
 
@@ -533,3 +544,6 @@ No idempotency header applies to the read-only retrieval query.
 - [x] Introduces no unsupported search, Identity dependency, lifecycle state or read-model infrastructure.
 - [x] Separates inferred business requirements from proposed HTTP conventions.
 - [x] Records missing information and ambiguities instead of silently resolving them.
+- [x] Assesses the first HJ-012 Approved architecture batch without changing normative HJ-106 business behaviour.
+- [x] Keeps approved implementation patterns from becoming unnecessary service-contract requirements.
+- [x] Keeps unresolved architectural choices explicit and traceable to HJ-010 concerns.

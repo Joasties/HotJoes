@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-104 |
 | **Document Title** | Vendor Registration Fields Matrix |
-| **Version** | 3.1 |
+| **Version** | 3.2 |
 | **Status** | Approved |
 | **Classification** | Requirements |
 | **Owner** | Project Architecture |
-| **Last Updated** | 27 July 2026 |
+| **Last Updated** | 13 August 2026 |
 
 ## Revision History
 
@@ -19,10 +19,11 @@
 | 2.0 | 24 July 2026 | Consolidated prior revisions into the approved Vendor Registration Fields Matrix. |
 | 3.0 | 25 July 2026 | Applied CR-014 to redefine HJ-104 as the authoritative Vendor Registration Fields Matrix. Introduced Business Rules sections, enhanced Notes column with cross-references, updated Purpose, and refined Assumptions into Assumptions and Outstanding Decisions. |
 | 3.1 | 27 July 2026 | Applied CR-015, CR-016, CR-019, CR-020 and CR-023 to add Canonical Address identity, clarify Registration Declaration classification and lifecycle, link creation invariants, standardise Legal Operator terminology and remove server-side Registration Session assumptions. |
+| 3.2 | 13 August 2026 | Applied CR-034 to remove delivery-slice scope and recast HJ-104 as the enduring Vendor Registration information contract. |
 
 ## 1. Purpose
 
-This document is the **authoritative Vendor Registration Fields Matrix** for **Epic 1 – Vendor Registration**.
+This document is the **authoritative Vendor Registration Fields Matrix**.
 
 It is the single source of truth for the business semantics governing all Vendor Registration information and Registration Declarations. It defines:
 
@@ -112,11 +113,11 @@ These fields belong to the Identity capability rather than the Vendor domain.
 | Email Verification | Identity | Outside Vendor domain |
 | Multi-Factor Authentication | Identity | Outside Vendor domain |
 
-## 4. Fields Deferred from Epic 1
+## 4. Information Outside Vendor Registration
 
 The following information is intentionally excluded from Vendor Registration.
 
-| Field | Future Epic |
+| Information | Related / Owning Capability |
 |---|---|
 | Logo | Vendor Profile |
 | Banner Image | Vendor Profile |
@@ -229,7 +230,7 @@ The Canonical Address Identifier, Business Address Snapshot and applicable regul
 | Registration Session ownership and Register Vendor request processing | HJ-003 §3.5 / HJ-105 |
 | Address ownership, Canonical Address Identifier and Business Address Snapshot | ADR-006 / HJ-004 / HJ-105 |
 | Conditional registration rules and corresponding aggregate creation invariants | HJ-004 §8 |
-| Compliance Requirements determination from Trading Characteristics | Compliance Provider / related Architectural Decision Records |
+| Compliance Requirements determination from Trading Characteristics | Compliance capability / related Architectural Decision Records |
 | Identity separation | Identity capability boundary (outside Vendor bounded context) |
 
 ## 6. Assumptions and Outstanding Decisions
@@ -251,14 +252,12 @@ No server-side Registration Session is required, retrieved or examined during Ve
 
 ### Remaining Assumptions and Outstanding Decisions
 
-The following assumptions remain for Epic 1. Assumptions that have been elevated to approved business rules have been moved to Section 5.
+The following enduring assumptions and boundaries apply. Rules elevated to approved business rules are defined in Section 5.
 
 1. Vendor Registration operates upon a complete, self-contained **Register Vendor** request.
 2. Registration Session ownership belongs exclusively to the client application or Backend-for-Frontend.
 3. The Vendor Registration service neither owns nor retrieves Registration Sessions; Registration Session persistence, expiry and lifecycle management are outside the Vendor service boundary.
 4. Identity management is outside the Vendor bounded context.
-5. Compliance evidence is outside Epic 1.
-6. Business Address search, retrieval and validation are provided by a stubbed Address Service during Epic 1.
-7. Compliance Requirements are obtained through a stubbed Compliance Provider during Epic 1.
-8. A Vendor represents a single trading location during Epic 1.
-9. Support for multiple premises is deferred to a future epic.
+5. Compliance evidence is outside the Vendor Registration information contract.
+6. Business Address search, retrieval and validation are owned by the Address capability and consumed through the approved Address contract.
+7. Compliance Requirements are determined by the Compliance capability using the information made available through the approved downstream integration contract.

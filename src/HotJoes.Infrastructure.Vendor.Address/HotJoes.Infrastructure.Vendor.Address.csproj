@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HotJoes.Application.Address/HotJoes.Application.Address.csproj" />
+    <ProjectReference Include="../HotJoes.Application.Vendor/HotJoes.Application.Vendor.csproj" />
+  </ItemGroup>
+
+</Project>

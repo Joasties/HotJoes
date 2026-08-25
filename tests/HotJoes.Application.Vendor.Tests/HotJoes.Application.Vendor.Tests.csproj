@@ -15,11 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="../../src/HotJoes.Application.Vendor/HotJoes.Application.Vendor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HotJoes.Application.Vendor\HotJoes.Application.Vendor.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>

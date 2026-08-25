@@ -3,11 +3,11 @@
 | **Document ID** | ADR-008 |
 |-----------------|---------|
 | **Document Title** | Idempotent Operations and Reliable Event Publication |
-| **Version** | 1.2 |
+| **Version** | 1.4 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 13 August 2026 |
+| **Last Updated** | 22 August 2026 |
 
 ---
 
@@ -18,6 +18,8 @@
 | 1.0 | 24 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 28 July 2026 | Applied CR-024 to define the Register Vendor idempotency boundary and duplicate-submission behaviour, exclude Registration Session state, clarify the relationship between Domain Events and Integration Events, and strengthen reliable-publication testing and enforcement. |
 | 1.2 | 13 August 2026 | Applied CR-034 to remove delivery-slice Pending Activation assumptions from Register Vendor idempotency and testing semantics. |
+| 1.3 | 21 August 2026 | Defined the approved Epic 1 PostgreSQL concurrency authority, permanent replay-outcome persistence, atomic registration transaction and explicit EF Core mapping mechanics for CON-014–CON-016 and CON-028. |
+| 1.4 | 22 August 2026 | Applied CR-062. Defined pre-outbox VendorRegistered translation, immutable serialized-event staging and the approved versioned publication contract under CON-019 and CON-020. |
 
 ---
 
@@ -88,7 +90,9 @@ Where a request carries the same idempotency identity and is semantically identi
 
 This business behaviour is mandatory regardless of implementation.
 
-The concrete format of the idempotency identity, the uniqueness mechanism, retention duration, payload-equivalence rules and storage strategy are implementation conventions.
+For Epic 1, the approved composite identity and semantic-equivalence rules are defined by CON-013. PostgreSQL is the concurrency authority: a database-enforced unique constraint over the persisted normalized composite identity permits only one Vendor registration to commit. A competing request that loses the uniqueness race commits no business effect and resolves the committed registration record to either the original successful result or the controlled idempotency-conflict outcome. No process-local lock, distributed lock or separate request-coordination service is used.
+
+Each successful registration permanently persists the original Application result and a SHA-256 fingerprint of a versioned deterministic UTF-8 canonical representation of the materially relevant registration information. The exclusions defined by CON-013 remain authoritative. The persisted outcome does not expire, is retained for at least as long as the Vendor registration exists, and is not reconstructed from current Vendor lifecycle state. Epic 1 provides no expiry or deletion operation for it.
 
 ---
 
@@ -128,6 +132,8 @@ Integration Events are explicitly published contracts intended for consumption b
 
 Domain Events and Integration Events address different architectural concerns. A published Integration Event may be derived from a completed business fact, but the internal Domain Event and published Integration Event are not required to have identical representations or payloads.
 
+For Epic 1, an explicit Vendor Application mapper translates the completed `VendorRegistered` business fact and its registration-time information into the approved `VendorRegistered` Integration Event v1 before outbox persistence. The mapping is outside the Vendor Domain. Vendor Infrastructure serializes the resulting contract once and persists that immutable serialized event in the outbox as part of the registration transaction.
+
 Domain Events shall only be raised when a genuine business state change occurs. If an idempotent operation results in no business state change, no new Domain Event, completed business fact or corresponding Integration Event shall be produced.
 
 Reliable publication does not alter Domain behaviour. Publication concerns shall remain separate from business decision-making.
@@ -138,13 +144,29 @@ Reliable publication does not alter Domain behaviour. Publication concerns shall
 
 Where a completed business state change requires publication of an Integration Event, aggregate persistence and durable recording of the corresponding publication work shall occur atomically.
 
-The durable publication record may contain an Integration Event derived from the completed business fact. The Domain Event itself is not required to be the persisted publication record or outbox message.
+The durable publication record contains the serialized Integration Event derived from the completed business fact. The Domain Event itself is not the persisted publication record or outbox message.
 
 The implementation shall use a Transactional Outbox or an equivalent mechanism to ensure that committed Integration Events are not lost if publication fails.
 
 Publication may be retried without repeating the original business operation. Publication retry shall not create a new Domain Event, completed business fact, publication record or Integration Event.
 
-The architecture does not prescribe a particular persistence mechanism, outbox technology, transport, serialization format, messaging infrastructure or implementation framework, provided the required atomicity and observable business behaviour are preserved.
+Publication retry preserves the original EventId, EventVersion and serialized event. The relay publishes the stored event unchanged and shall not reconstruct its payload from current Vendor state.
+
+Except for the explicit Epic 1 persistence treatment in §2.7, the architecture does not prescribe a particular persistence mechanism, outbox technology, transport, serialization format, messaging infrastructure or implementation framework, provided the required atomicity and observable business behaviour are preserved.
+
+## 2.7 Epic 1 Registration Transaction and PostgreSQL Mapping
+
+For Epic 1, one explicit PostgreSQL transaction atomically commits:
+
+- the Vendor Aggregate and Registered Information;
+- the persisted composite identity, semantic fingerprint and original successful `RegisterVendor` Application result; and
+- exactly one durable outbox item for the genuine `VendorRegistered` occurrence.
+
+Any failure before commit leaves none of these records committed. Address resolution and pre-transaction validation occur before the transaction begins. Outbox dispatch occurs after commit and outside the registration transaction. The Vendor Application coordinates this boundary; EF Core and PostgreSQL mechanics remain in Vendor Infrastructure.
+
+Vendor Infrastructure uses explicit EF Core fluent mappings. PostgreSQL mappings define keys, lengths, nullability, conversions, enum representations, indexes and restrictive deletion behaviour. Persisted normalized Trading Name and Legal Operator Name together with `CanonicalAddressId` form the database-enforced unique constraint. A one-to-one registration-outcome record retains the semantic fingerprint and original result. Registration Declarations and the opaque Address Resolution reference are not Vendor state. Registration outcomes and outbox records do not cascade-delete.
+
+Schema-migration lifecycle, outbox relay mechanism and broker-delivery mechanics remain governed separately. The `VendorRegistered` Integration Event v1 contract and pre-outbox translation are governed by CON-019 and CON-020.
 
 ---
 
@@ -168,7 +190,7 @@ The architecture does not prescribe a particular persistence mechanism, outbox t
 - Idempotency identities or uniqueness constraints require governance and implementation support.
 - Reliable publication requires additional persistence infrastructure.
 - Monitoring of failed event publication remains necessary.
-- Payload-equivalence and idempotency-retention conventions must be defined by the implementation.
+- Permanent replay-outcome storage duplicates a limited representation of the successful registration result and requires governed canonical fingerprint versioning.
 
 ---
 
@@ -255,12 +277,12 @@ ADR-008 is the authoritative architectural source for idempotency and reliable-p
 
 HJ-105 applies these principles to the Vendor Registration workflow and shall remain consistent with this decision. Future regeneration or revision of HJ-105 shall use ADR-008 as the authoritative source for these concerns.
 
-ADR-008 does not prescribe:
+Outside the approved Epic 1 treatment in §§2.2 and 2.7, ADR-008 does not prescribe:
 
 - idempotency-key or uniqueness-token format;
 - storage technology or persistence mechanism;
-- retention duration;
-- payload-comparison implementation or hashing strategy;
+- retention duration for other operations;
+- payload-comparison implementation or hashing strategy for other operations;
 - outbox technology;
 - event transport technology or messaging infrastructure;
 - serialization format; or

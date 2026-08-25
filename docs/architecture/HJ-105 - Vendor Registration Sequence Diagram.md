@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 3.4 |
+| **Version** | 3.8 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 13 August 2026 |
+| **Last Updated** | 23 August 2026 |
 
 ## Revision History
 
@@ -22,6 +22,10 @@
 | 3.2 | 8 August 2026 | Applied CR-029 to incorporate the controlled idempotency-conflict behaviour defined by ADR-008 and update ADR-008 traceability references. No business behaviour changed beyond alignment with the approved architecture. |
 | 3.3 | 12 August 2026 | Applied CR-033 to align the Epic 1 runtime interactions, downstream event-consumer stub and client/BFF-owned Registration Session with HJ-011. |
 | 3.4 | 13 August 2026 | Applied CR-035 to remove delivery-slice scope and restore HJ-105 as the enduring Vendor Registration behavioural model. |
+| 3.5 | 17 August 2026 | Applied CR-051. Aligned Address search, selection, contextual reference resolution, application-port orchestration and semantic/technical failure behaviour with CON-006–CON-011. |
+| 3.6 | 19 August 2026 | Applied CR-058. Defined the CON-013 composite Vendor uniqueness identity and semantic replay outcomes, and moved identity evaluation after authoritative Address resolution supplies CanonicalAddressId. |
+| 3.7 | 22 August 2026 | Applied CR-064. Added the approved CON-019 pre-outbox mapping step and CON-020 VendorRegistered v1 envelope, payload, serialization and compatibility rules. |
+| 3.8 | 23 August 2026 | Applied CR-TBD-HJ105. Added the approved deterministic VendorRegistered v1 JSON representations to the publication behaviour and preserved the existing interaction sequence. |
 
 ## Related Documents
 
@@ -98,13 +102,15 @@ This document does not place Registration Session management inside the Vendor R
 | Client interaction boundary | A Registration Session, if used, is owned entirely by the client application or BFF and never participates in Vendor Registration service processing. |
 | Registration boundary | Vendor Registration begins only when the service receives a complete `RegisterVendor` request. |
 | Request authority | The request is authoritative for client-authored registration information and the approved Address Resolution reference. |
-| Address authority | Address-owned values are retrieved directly from the Address Service using the approved reference and are never trusted from client-authored values. |
+| Address authority | Address-owned values are retrieved through the Vendor Application Address Resolution port using the approved reference and the same Trading Location bound at selection; they are never trusted from client-authored values. |
+| Address result completeness | The client cannot submit RegisterVendor until Address selection returns a complete valid result containing a CanonicalAddressId and the required authority information. |
+| Address failure | Semantic rejection fails fast. Technical timeout, unavailability or transient failure returns a controlled retryable application failure without in-process automatic retry; Epic 1 has no circuit breaker. |
 | Server authority | User-interface validation is advisory; server-side validation and aggregate invariants are authoritative. |
 | Vendor existence | No Vendor exists before successful processing. A successful request creates the Vendor in `PendingActivation` and `Offline`. |
 | Declaration lifecycle | Registration Declarations influence the registration decision only and are never persisted or included in Domain or Integration Events. |
 | Event separation | The internal `VendorRegistered` Domain Event and published `VendorRegistered` Integration Event are distinct architectural concepts. |
 | Reliable publication | Vendor persistence and durable recording of publication work occur atomically. Publication may be retried without repeating registration. |
-| Idempotency | `RegisterVendor` uses an explicit idempotency identity or equivalent approved uniqueness constraint. Successful replay returns the original outcome without additional business effects. Reuse of the same identity with semantically different registration information returns a controlled idempotency-conflict outcome without creating or changing business state. |
+| Vendor uniqueness and replay | After authoritative Address resolution, `RegisterVendor` derives the Vendor uniqueness identity from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and `CanonicalAddressId`. An equivalent successful replay returns the original committed result without additional business effects. The same identity with materially different registration information returns `IdempotencyConflict` without creating or updating a Vendor. |
 | Capability autonomy | The Pending Activation Process consumes the published `VendorRegistered` Integration Event and does not synchronously retrieve registration information from the Vendor Domain where that information is already present in the published contract. Compliance remains a downstream capability with its own behaviour and ownership. |
 | Retrieval lookup | `RetrieveRegisteredVendor` uses VendorId as its sole lookup input and performs no search. |
 | Retrieval authority | The persisted Vendor aggregate is the authoritative read source; the application maps it to Registered Vendor Details rather than exposing it directly. |
@@ -117,7 +123,7 @@ This document does not place Registration Session management inside the Vendor R
 | Prospective Vendor | Supplies registration information, confirms all Registration Declarations and submits Vendor Registration. |
 | Registration UI / BFF | Owns any temporary interaction state, performs convenience validation, coordinates Address search and selection, assembles the complete request and presents the result. |
 | Address Service | Provides Address search and approved Address Resolution references; authoritatively returns canonical identity, immutable snapshot and applicable regulatory authorities. |
-| Vendor Registration Application | Establishes idempotency, validates the complete request, obtains Address-owned values, invokes the aggregate, coordinates persistence and returns the authoritative result. |
+| Vendor Registration Application | Validates the complete request, obtains Address-owned values, derives the composite Vendor identity and semantic registration fingerprint, determines the registration or replay outcome, invokes the aggregate only for first processing, coordinates persistence and returns the authoritative result. |
 | Vendor Aggregate | Enforces Vendor creation invariants, creates the Vendor and records the internal completed business fact. |
 | Vendor Repository | Persists the Vendor aggregate owned by the Vendor Domain. |
 | Transactional Outbox | Durably records publication work in the same atomic unit as Vendor persistence. |
@@ -132,7 +138,6 @@ A Registration Session is deliberately absent from the server-side participant l
 
 The Registration UI or BFF shall submit one complete, self-contained request containing:
 
-- an idempotency identity, unless the implementation uses an approved equivalent uniqueness constraint;
 - all client-authored Registered Information required by HJ-104;
 - optional Vendor Managed Information when supplied;
 - all mandatory Registration Declarations; and
@@ -182,13 +187,21 @@ sequenceDiagram
 
     Applicant->>Client: Search for Business Address
     Client->>Address: SearchAddress(search criteria)
-    Address-->>Client: Candidate addresses
-    Client-->>Applicant: Display candidate addresses
+    alt One complete matching address
+        Address-->>Client: Complete valid result + permanent opaque reference
+        Client-->>Applicant: Display selected address
+    else Reasonably small candidate set
+        Address-->>Client: Candidate addresses
+        Client-->>Applicant: Display candidate addresses
+    else Search requires refinement
+        Address-->>Client: Refinement required
+        Client-->>Applicant: Request refined search criteria
+    end
 
     Applicant->>Client: Select candidate address
-    Client->>Address: ResolveAddress(candidate reference)
+    Client->>Address: SelectAddress(candidate reference, Trading Location)
     alt Address Resolution approved
-        Address-->>Client: Approved Address Resolution reference and display result
+        Address-->>Client: Complete result + permanent opaque Address Resolution reference
         opt Temporary state is retained
             Client->>LocalState: Retain approved reference
         end
@@ -196,6 +209,8 @@ sequenceDiagram
         Address-->>Client: Address validation errors
         Client-->>Applicant: Correct search or select another address
     end
+
+    Note over Client,Address: An incomplete Address result is never a successful selection.<br/>The client cannot progress to RegisterVendor without a complete valid result.
 
     Applicant->>Client: Confirm mandatory Registration Declarations
     Client->>Client: Assemble complete RegisterVendor request
@@ -223,9 +238,8 @@ sequenceDiagram
 
     Applicant->>Client: Submit Vendor Registration
     Note over Client,Application: The Registration UI or BFF assembles the complete request before invocation.
-    Client->>Application: RegisterVendor(complete request, idempotency identity)
+    Client->>Application: RegisterVendor(complete request)
 
-    Application->>Application: Establish idempotency outcome
     Application->>Application: Validate request completeness and field rules
     Application->>Application: Validate all Registration Declarations
     Application->>Application: Validate Legal Operator and Trading Characteristics rules
@@ -239,6 +253,9 @@ sequenceDiagram
     Address-->>Application: Canonical Address Identifier<br/>immutable Business Address Snapshot<br/>applicable regulatory authorities
 
     Application->>Application: Reject or ignore any client-authored Address-owned values
+    Application->>Application: Derive composite Vendor identity<br/>from normalized names + CanonicalAddressId
+    Application->>Application: Derive semantic registration fingerprint
+    Application->>Application: Confirm first-processing outcome
     Application->>Vendor: Create Vendor(complete validated Domain input)
     Vendor->>Vendor: Enforce creation invariants
     Vendor->>Vendor: Create VendorId and RegisteredAt
@@ -285,7 +302,7 @@ sequenceDiagram
     participant Outbox as Transactional Outbox
 
     Applicant->>Client: Submit Vendor Registration
-    Client->>Application: RegisterVendor(complete request, idempotency identity)
+    Client->>Application: RegisterVendor(complete request)
     Application->>Application: Validate request and Registration Declarations
 
     alt Request or declaration validation fails
@@ -331,19 +348,30 @@ Server-side validation shall enforce all HJ-104 rules, including:
 
 # 9. Idempotent Replay and Concurrency
 
-`RegisterVendor` is not naturally idempotent. It shall use an explicit idempotency identity or an equivalent approved uniqueness constraint over the complete request boundary.
+`RegisterVendor` is not naturally idempotent. After resolving the approved Address Resolution reference, the Vendor Application derives a composite Vendor uniqueness identity from:
+
+- Trading Name compared after trimming and without regard to case;
+- Legal Operator Name compared after trimming and without regard to case; and
+- the authoritative `CanonicalAddressId` returned by the Address capability.
+
+The normalized name comparison forms do not replace the registered display values. The opaque Address Resolution reference is not part of the identity.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Client as Registration UI / BFF
     participant Application as Vendor Registration Application
+    participant Address as Address Service
     participant Idempotency as Idempotency Safeguard
     participant Repository as Vendor Repository
     participant Outbox as Transactional Outbox
 
-    Client->>Application: RegisterVendor(request, idempotency identity)
-    Application->>Idempotency: Establish or retrieve request outcome
+    Client->>Application: RegisterVendor(complete request)
+    Application->>Application: Validate client-authored request information
+    Application->>Address: Resolve permanent reference<br/>with declared Trading Location
+    Address-->>Application: CanonicalAddressId, snapshot and authorities
+    Application->>Application: Derive composite identity<br/>and semantic registration fingerprint
+    Application->>Idempotency: Determine outcome(identity, fingerprint)
 
     alt First processing of request
         Idempotency-->>Application: Processing ownership established
@@ -352,11 +380,11 @@ sequenceDiagram
         Application->>Outbox: Record one publication item
         Application->>Idempotency: Store successful outcome atomically or equivalently safely
         Application-->>Client: Original successful outcome
-    else Same identity and semantically identical successful request
+    else Same composite identity and semantically equivalent successful registration
         Idempotency-->>Application: Previously successful outcome
         Application-->>Client: Return original successful outcome
         Note over Repository,Outbox: No additional Vendor, Domain Event,<br/>business fact, outbox record<br/>or Integration Event publication.
-    else Same identity and registration information is not semantically identical
+    else Same composite identity and materially different registration information
         Idempotency-->>Application: Idempotency conflict
         Application-->>Client: Return controlled idempotency-conflict outcome
         Note over Application,Outbox: No Vendor is created or modified.<br/>No completed business fact, Domain Event,<br/>publication work, Transactional Outbox entry<br/>or Integration Event is recorded or published.<br/>Previously committed Vendor state remains unchanged.
@@ -366,14 +394,16 @@ sequenceDiagram
 The three outcomes are distinct:
 
 - first successful processing executes registration once;
-- replay applies only to the same identity and the same semantically identical successful request and returns the original outcome; and
-- reuse of the same identity with registration information that is not semantically identical returns the controlled idempotency-conflict outcome.
+- replay applies only to the same composite identity and semantically equivalent registration information and returns the original committed successful result; and
+- the same composite identity with materially different registration information returns `IdempotencyConflict`.
+
+Semantic registration equivalence compares all materially relevant registration information after its approved canonicalisation. It excludes transient Registration Declarations, the opaque Address Resolution reference, server-generated values and technical metadata.
 
 Conflict processing creates no Vendor, modifies no existing Vendor, records no completed business fact, Domain Event, publication work or Transactional Outbox entry, publishes no Integration Event and leaves all previously committed Vendor state unchanged.
 
-Concurrent requests with the same identity and semantically identical information must converge on one processing owner and one successful outcome. Registration Session state is outside the idempotency boundary and shall never be consulted. The complete `RegisterVendor` request remains the idempotency boundary.
+Concurrent requests with the same composite identity and semantically equivalent information must converge on one processing owner and one successful outcome. Registration Session state is outside the idempotency boundary and shall never be consulted.
 
-The idempotency-key format, retention duration, equivalence algorithm, storage mechanism and concurrency technique are implementation conventions governed by ADR-008.
+The concurrency technique, replay persistence and retention, transaction mechanics, and database enforcement are governed separately by CON-014, CON-015, CON-016 and CON-028. The exact fingerprint encoding and storage representation remain implementation concerns within those approved boundaries.
 
 # 10. Persistence and Publication Reliability
 
@@ -389,10 +419,11 @@ sequenceDiagram
     participant Publisher as Integration Event Publisher
     participant Bus as Event Bus
 
-    Application->>Repository: Persist Vendor and publication work
+    Application->>Application: Map completed VendorRegistered fact<br/>to Integration Event v1
+    Application->>Repository: Persist Vendor and serialized publication work
     Repository->>Store: Begin transaction
     Repository->>Store: Persist Vendor aggregate
-    Repository->>Outbox: Add VendorRegistered Integration Event record
+    Repository->>Outbox: Add immutable serialized VendorRegistered v1 record
     Outbox->>Store: Persist publication record
     Repository->>Store: Commit transaction
     Store-->>Application: Commit successful
@@ -406,7 +437,7 @@ sequenceDiagram
     end
 ```
 
-The internal Domain Event is not required to be the outbox message. The Integration Event is a published contract derived from the completed business fact and may have a different representation.
+The internal Domain Event is not the outbox message. Before outbox persistence, an explicit Vendor Application mapper translates the completed business fact and registration-time information into the approved Integration Event. Vendor Infrastructure serializes and stores that contract unchanged. The relay publishes the stored event and does not reconstruct it from current Vendor state.
 
 ## 10.1 Minimum VendorRegistered Integration Event Contract
 
@@ -422,15 +453,23 @@ The published `VendorRegistered` Integration Event shall contain, at a minimum:
 - Food Registration Authority; and
 - Primary Trading Authority, where applicable.
 
-### Business Address Payload Deferral
+### VendorRegistered v1 Business Address
 
-This sequence defines the required business semantics of the Address information carried by the VendorRegistered Integration Event, but it does not define its concrete wire schema.
 The Address information must:
 - originate from the authoritative Address Domain result used to create the Vendor;
 - represent the approved registration-time Business Address;
 - carry the approved registration-time information required by eventual downstream Compliance processing without a synchronous Vendor Domain callback; and
 - exclude client-authored or independently reconstructed Address information.
-The exact fields, structure, naming and serialization of this element are deferred until the Compliance-facing integration contract is defined.
+
+The Integration Event-owned `BusinessAddress` contains `CanonicalAddressId`, optional `RecipientOrOrganisationName`, required `AddressLine1`, optional `AddressLine2`, optional `AddressLine3`, required `PostTown`, required `Postcode` and optional `County`. It does not expose or reuse the Vendor Domain `BusinessAddressSnapshot` type.
+
+### VendorRegistered v1 Envelope and Compatibility
+
+The stable envelope contains `EventId`, `EventType` `VendorRegistered`, `EventVersion` `1`, `OccurredAt` and the immutable payload. The event is serialized once as UTF-8 camel-case JSON before outbox persistence and published unchanged. Optional values are explicitly `null`.
+
+The mapper and serializer produce the exact nested member structure and deterministic identifier, timestamp, time, enum and explicit-null representations defined by HJ-004 §7.2. The Integration Event contract owns those published representations and does not expose or reuse Vendor Domain Aggregate, Value Object or enum types. This representation requirement does not add another runtime interaction or change the sequence above.
+
+Compatible optional additions are permitted within v1 and consumers tolerate unknown fields. Removal, renaming, type or meaning changes require a new version. Retries retain the original EventId, version and serialized event.
 
 The contract purpose is to support downstream Compliance and Pending Activation processing without a synchronous Vendor callback.
 
@@ -478,10 +517,14 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 
 ## 12.2 Address Failure
 
-- Reject invalid, expired or unresolved Address Resolution references.
+- Return `InvalidReference` for an unknown or fabricated Address Resolution reference.
+- Return `InvalidAddressResult` when a known immutable result cannot satisfy the submitted Trading Location context or lacks required authoritative values.
 - Reject or ignore client-authored Address-owned values.
 - Persist no Vendor and record no event or publication work.
-- Return a controlled error suitable for correction or reselection.
+- Fail semantic outcomes immediately and return a controlled error suitable for correction or reselection.
+- For timeout, unavailability or transient dependency failure, return a controlled retryable application failure.
+- Permit a later caller-controlled RegisterVendor attempt to reuse the same permanent Address Resolution reference.
+- Perform no in-process automatic retry and use no Epic 1 circuit breaker.
 
 ## 12.3 Aggregate Invariant Failure
 
@@ -505,12 +548,12 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 
 ## 12.6 Duplicate or Concurrent Submission
 
-- Return the original successful outcome for the same identity and semantically identical request.
+- Return the original committed successful result for the same composite identity and semantically equivalent registration information.
 - Create no additional Vendor, business fact, Domain Event, publication record or Integration Event.
 
 ## 12.7 Idempotency Conflict
 
-- Return a controlled idempotency-conflict outcome when the same identity is associated with registration information that is not semantically identical to the previously successful request.
+- Return `IdempotencyConflict` when the same composite identity is associated with materially different registration information from the previously successful registration.
 - Create no Vendor and modify no existing Vendor.
 - Record no completed business fact, Domain Event, publication work or Transactional Outbox entry.
 - Publish no Integration Event.
@@ -625,7 +668,7 @@ Successful registration cannot be confirmed unless the Vendor and durable public
 
 ## Decision 9: RegisterVendor has explicit idempotency
 
-Reprocessing the same successful business request returns the original outcome without repeating any business effect. Reuse of the same identity with registration information that is not semantically identical returns a controlled idempotency-conflict outcome without creating or modifying business state.
+After Address resolution supplies `CanonicalAddressId`, RegisterVendor derives the composite Vendor identity from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and `CanonicalAddressId`. Reprocessing semantically equivalent registration information for that identity returns the original committed successful result without repeating any business effect. Materially different information for the same identity returns `IdempotencyConflict` without creating or modifying business state. Registration never updates an existing Vendor; that requires a separate future administration operation.
 
 ## Decision 10: Downstream capabilities consume the published contract
 
@@ -641,10 +684,13 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 
 - [ ] Registration Session state is never created, retrieved or managed by the Vendor Registration service;
 - [ ] `RegisterVendor` receives one complete, self-contained request;
-- [ ] the request contains an idempotency identity or an approved equivalent uniqueness safeguard exists;
+- [ ] authoritative Address resolution occurs before final Vendor identity and replay evaluation;
+- [ ] the Vendor uniqueness identity comprises normalized Trading Name, normalized Legal Operator Name and `CanonicalAddressId`;
+- [ ] registered Trading Name and Legal Operator Name display values are not replaced by their normalized comparison forms;
 - [ ] duplicate and concurrent requests converge on one successful outcome;
-- [ ] successful replay applies only to the same identity and semantically identical successful request;
-- [ ] reuse of the same identity with registration information that is not semantically identical returns a controlled idempotency-conflict outcome;
+- [ ] successful replay applies only to the same composite identity and semantically equivalent registration information;
+- [ ] semantic equivalence excludes transient declarations, the opaque Address Resolution reference, server-generated values and technical metadata;
+- [ ] the same composite identity with materially different registration information returns `IdempotencyConflict`;
 - [ ] idempotency conflict creates or modifies no Vendor and records or publishes no business fact, Domain Event, publication work, Transactional Outbox entry or Integration Event;
 - [ ] idempotency conflict leaves previously committed Vendor state unchanged;
 - [ ] all HJ-104 field and conditional rules are validated server-side;
@@ -678,6 +724,7 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 |---|---|
 | Registration Session ownership and service boundary | ADR-004; HJ-003 §3.5; HJ-004 §1.2 |
 | Complete request and field rules | HJ-104 §§2, 5 and 6 |
+| Composite Vendor uniqueness identity and semantic registration equivalence | HJ-010 CON-013; HJ-012 CON-013; HJ-104 §§5.3 and 5.6 |
 | Information classifications | ADR-005; HJ-104 §§2 and 5.5 |
 | Address Resolution reference and trust boundary | ADR-006 §2; HJ-104 §§5.4 and 6; HJ-004 §§1.5 and 8 |
 | Vendor creation and invariants | HJ-004 §§1.3, 2 and 8 |
@@ -686,8 +733,8 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 | Domain and Integration Event separation | HJ-004 §7; ADR-008 §2.5 |
 | Minimum Integration Event contract | HJ-004 §7.2 |
 | Atomic publication recording and retry | ADR-008 §2.6 |
-| Register Vendor idempotency and complete-request boundary | ADR-008 §§2.2 and 2.4 |
-| Controlled idempotency conflict | ADR-008 §2.3 |
+| Register Vendor replay behaviour | ADR-008 §§2.2 and 2.4; HJ-010 CON-013; HJ-012 CON-013 |
+| Controlled idempotency conflict | ADR-008 §2.3; HJ-010 CON-013; HJ-012 CON-013 |
 | Event-driven Pending Activation and Compliance relationship | ADR-003; ADR-007; HJ-004 §§7 and 12 |
 | Retrieve Registered Vendor terminology and actor | HJ-003 §§3.20–3.22 |
 | Query definition, result content and read source | HJ-004 §1.7; CR-026 §4.2 |

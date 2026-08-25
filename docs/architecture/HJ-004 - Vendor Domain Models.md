@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 2.3 |
+| **Version** | 2.7 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 13 August 2026 |
+| **Last Updated** | 23 August 2026 |
 
 ## Revision History
 
@@ -23,6 +23,10 @@
 | 2.1 | 27 July 2026 | Applied CR-015, CR-016, CR-019, CR-021 and CR-023 to model canonical Address identity, enforce creation and declaration invariants, separate domain and integration events, and move Registration Session outside the Vendor service boundary. |
 | 2.2 | 8 August 2026 | Applied CR-026 to define the Epic 1 Retrieve Registered Vendor query, its authoritative read source, purpose-specific result and side-effect-free outcomes. |
 | 2.3 | 13 August 2026 | Applied CR-034 to remove delivery-slice implementation scope and recast HJ-004 as an enduring Vendor domain model. |
+| 2.4 | 17 August 2026 | Applied CR-049. Defined the Vendor-owned BusinessAddressSnapshot field set and Address-to-Vendor translation boundary for CON-008. |
+| 2.5 | 17 August 2026 | Applied CR-057. Aligned the Vendor-owned BusinessAddressSnapshot translation boundary with the positional mapping defined by ADR-006 v1.3. |
+| 2.6 | 22 August 2026 | Applied CR-063. Replaced the deferred VendorRegistered published-contract wording with the approved CON-019/CON-020 pre-outbox translation and versioned v1 contract. |
+| 2.7 | 23 August 2026 | Applied CR-TBD-HJ004. Defined the approved concrete VendorRegistered v1 JSON member structure and deterministic wire representations without coupling the published contract to Vendor Domain types. |
 
 ## Related Documents
 
@@ -527,6 +531,18 @@ It represents the Vendor aggregate's durable relationship with the Address Domai
 ### BusinessAddressSnapshot
 The approved snapshot of the Business Address supplied by the Address Domain and stored by the Vendor Domain as Registered Information.
 The Vendor Domain does not own address validation.
+
+Its Vendor-owned immutable fields are:
+
+- `AddressLine1`;
+- optional `AddressLine2`;
+- optional `AddressLine3`;
+- `PostTown`;
+- `Postcode`;
+- optional `County`; and
+- optional `RecipientOrOrganisationName`.
+
+The application adapter supplies these Vendor-owned snapshot values according to the positional translation defined by ADR-006. The Vendor Domain does not interpret, shift, concatenate or normalise Address source lines. `RecipientOrOrganisationName` remains optional, is not compared with Legal Operator Name or Trading Name, and does not affect registration validity.
 ### FoodRegistrationAuthority
 The competent authority responsible for Food Business Registration. It is derived from the approved Business Address, supplied by the Address Domain and not manually editable by the Vendor.
 ### PrimaryTradingAuthority
@@ -883,16 +899,86 @@ The published **VendorRegistered integration event** shall contain, at a minimum
 - Food Registration Authority; and
 - Primary Trading Authority where applicable.
 
-### Deferred Business Address Integration Schema
+### VendorRegistered v1 Business Address Contract
 
 The Business Address information included in the VendorRegistered Integration Event shall:
 - originate exclusively from the approved Address Domain result used during Vendor Registration;
 - represent the approved Business Address at the time the Vendor was registered;
 - contain sufficient business information for the Compliance capability to begin its downstream processing without synchronously querying the Vendor Domain; and
 - preserve the Address ownership and trust-boundary rules established by ADR-006.
-HJ-004 defines only these minimum business semantics. It does not define the concrete fields, nesting, serialization or wire representation of the Business Address element within the Integration Event.
-The concrete Address payload schema is deferred until the Compliance-facing integration contract is defined. No implementation shall infer or invent that schema from the Vendor aggregate or BusinessAddressSnapshot representation.
-The concrete schema must be agreed before the VendorRegistered Integration Event is used as a production integration contract. Any later incompatible change shall follow the project’s Integration Event versioning rules.
+
+The Integration Event owns an independent `BusinessAddress` representation containing:
+
+- `CanonicalAddressId`;
+- optional `RecipientOrOrganisationName`;
+- required `AddressLine1`;
+- optional `AddressLine2`;
+- optional `AddressLine3`;
+- required `PostTown`;
+- required `Postcode`; and
+- optional `County`.
+
+This published representation does not expose or reuse the Vendor Domain `BusinessAddressSnapshot` type, even where the fields correspond structurally.
+
+### VendorRegistered v1 Envelope and Compatibility
+
+The Vendor-owned, transport-independent v1 contract uses a stable envelope containing `EventId`, `EventType` with value `VendorRegistered`, `EventVersion` with value `1`, `OccurredAt` and the immutable payload defined above. It is serialized once as UTF-8 camel-case JSON before outbox persistence. Optional values are represented explicitly as `null`.
+
+Compatible optional fields may be added within v1 and consumers shall tolerate unknown fields. Removing or renaming a field, changing its type or meaning, or otherwise making an incompatible change requires a new event version.
+
+The concrete v1 JSON representation uses the following rules:
+
+- `eventId` and `payload.vendorId` are lowercase canonical UUID strings in `D` format;
+- `occurredAt` and `payload.registeredAt` are converted to UTC and use invariant round-trip `O` format;
+- enum values are lower-camel-case strings matching the approved ubiquitous terms;
+- `payload.tradingCharacteristics` is a nested object containing `tradingLocation`, `openingHours`, `serviceIncludesHotFood` and `alcoholService`;
+- `openingHours` is a nested object containing `startTime` and `endTime` in invariant `HH:mm:ss` format without an offset;
+- `payload.businessAddress` is the independent Integration Event-owned representation defined above;
+- `foodRegistrationAuthority` and conditional `primaryTradingAuthority` are payload members; and
+- every optional member remains present with an explicit JSON `null` when absent.
+
+The Integration Event contract owns its identifier, timestamp, enum, Trading Characteristics, Opening Hours and Business Address representations. It does not expose or reuse Vendor Domain Aggregate, Value Object or enum types.
+
+The following example fixes the v1 member names, nesting and representative wire values. The identifier and timestamp values are illustrative; their formats are normative.
+
+```json
+{
+  "eventId": "00000000-0000-0000-0000-000000000000",
+  "eventType": "VendorRegistered",
+  "eventVersion": 1,
+  "occurredAt": "2026-08-23T10:15:30.0000000Z",
+  "payload": {
+    "vendorId": "00000000-0000-0000-0000-000000000000",
+    "registeredAt": "2026-08-23T10:15:30.0000000Z",
+    "vendorState": "pendingActivation",
+    "tradingPreference": "offline",
+    "legalOperatorType": "limitedCompany",
+    "tradingCharacteristics": {
+      "tradingLocation": "stall",
+      "openingHours": {
+        "startTime": "09:00:00",
+        "endTime": "17:00:00"
+      },
+      "serviceIncludesHotFood": true,
+      "alcoholService": false
+    },
+    "businessAddress": {
+      "canonicalAddressId": "canonical-address-001",
+      "recipientOrOrganisationName": null,
+      "addressLine1": "2 High Street",
+      "addressLine2": null,
+      "addressLine3": null,
+      "postTown": "GREENWICH",
+      "postcode": "SE10 8AA",
+      "county": null
+    },
+    "foodRegistrationAuthority": "Greenwich Borough Council",
+    "primaryTradingAuthority": "Greenwich Borough Council"
+  }
+}
+```
+
+The Vendor Application maps the completed internal business fact to this contract before outbox persistence. Vendor Infrastructure persists the serialized event unchanged in the registration transaction. Publication retries preserve the original EventId, version and serialized event; relay-time reconstruction from current Vendor state is prohibited.
 
 The event shall contain sufficient information for the **Pending Activation Process** to begin without requiring an immediate synchronous query back into the Vendor Domain. A published event that requires downstream bounded contexts to retrieve these values directly from the Vendor Domain is not permitted.
 

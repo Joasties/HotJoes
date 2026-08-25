@@ -3,11 +3,11 @@
 | **Document ID** | ADR-003 |
 |-----------------|---------|
 | **Document Title** | Event-Driven Collaboration |
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 July 2026 |
+| **Last Updated** | 22 August 2026 |
 
 ---
 
@@ -17,6 +17,7 @@
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 23 July 2026 | Clarified synchronous user interactions, business events as facts, and appropriate use of asynchronous collaboration. |
+| 1.2 | 22 August 2026 | Applied CR-061. Established pre-outbox Application mapping for VendorRegistered and prohibited relay-time reconstruction from current Vendor state under CON-019 and CON-020. |
 
 ---
 
@@ -62,6 +63,8 @@ Published events shall:
 - avoid exposing internal implementation details;
 - be immutable once published;
 - be versioned where incompatible changes are introduced.
+
+For `VendorRegistered`, the Vendor Application translates the completed internal business fact into the approved versioned Integration Event before outbox persistence. Vendor Infrastructure serializes and stores that event unchanged within the registration transaction. The Vendor Domain contains no Integration Event, outbox, serialization or broker representation. A relay publishes the stored event and shall not reconstruct it from current Vendor state.
 
 Bounded contexts remain autonomous and shall not assume knowledge of which consumers exist or how published events are subsequently used.
 

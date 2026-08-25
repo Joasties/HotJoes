@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-104 |
 | **Document Title** | Vendor Registration Fields Matrix |
-| **Version** | 3.2 |
+| **Version** | 3.5 |
 | **Status** | Approved |
 | **Classification** | Requirements |
 | **Owner** | Project Architecture |
-| **Last Updated** | 13 August 2026 |
+| **Last Updated** | 19 August 2026 |
 
 ## Revision History
 
@@ -20,6 +20,9 @@
 | 3.0 | 25 July 2026 | Applied CR-014 to redefine HJ-104 as the authoritative Vendor Registration Fields Matrix. Introduced Business Rules sections, enhanced Notes column with cross-references, updated Purpose, and refined Assumptions into Assumptions and Outstanding Decisions. |
 | 3.1 | 27 July 2026 | Applied CR-015, CR-016, CR-019, CR-020 and CR-023 to add Canonical Address identity, clarify Registration Declaration classification and lifecycle, link creation invariants, standardise Legal Operator terminology and remove server-side Registration Session assumptions. |
 | 3.2 | 13 August 2026 | Applied CR-034 to remove delivery-slice scope and recast HJ-104 as the enduring Vendor Registration information contract. |
+| 3.3 | 17 August 2026 | Applied CR-050. Defined the accepted Address Resolution reference and normalized Business Address Snapshot information contract for CON-008 and CON-009. |
+| 3.4 | 17 August 2026 | Applied CR-057. Aligned the Vendor Registration information contract with the positional Address-to-BusinessAddressSnapshot mapping defined by ADR-006 v1.3. |
+| 3.5 | 19 August 2026 | Applied CR-058. Defined the approved CON-013 composite Vendor uniqueness identity, semantic registration equivalence and equivalent-replay and conflict outcomes. |
 
 ## 1. Purpose
 
@@ -50,8 +53,8 @@ This document intentionally excludes:
 
 | # | Field | Type | Required | Validation / Rules | Classification | Notes |
 |---:|---|---|---|---|---|---|
-| 1 | Trading Name | Text | Yes | 1–160 characters | Registered Information | Public name displayed to customers. See §5.2. |
-| 2 | Legal Operator Name | Text | Yes | 1–160 characters | Registered Information | Registered legal entity or individual. See §5.2 and the Legal Operator Terminology note below. |
+| 1 | Trading Name | Text | Yes | 1–160 characters | Registered Information | Public name displayed to customers. Its trimmed, case-insensitive comparison form contributes to the Vendor uniqueness identity without replacing the registered display value. See §§5.2, 5.3 and 5.6. |
+| 2 | Legal Operator Name | Text | Yes | 1–160 characters | Registered Information | Registered legal entity or individual. Its trimmed, case-insensitive comparison form contributes to the Vendor uniqueness identity without replacing the registered display value. See §§5.2, 5.3 and 5.6 and the Legal Operator Terminology note below. |
 | 3 | Legal Operator Type | Lookup | Yes | Controlled list | Registered Information | Sole Trader, Ltd, LLP etc. See §5.1, §5.2. |
 | 4 | Company Registration Number | Text | Conditional | Mandatory where required by Legal Operator Type.<br>Must match UK Companies House registration number format: `^(?:[A-Za-z]{2})?\d{6,8}$`<br>Stored in canonical uppercase format.<br>Validation confirms format only. | Registered Information | Validation depends on Legal Operator Type. See §5.1, §5.2, §5.3. |
 | 5 | Trading Location | Lookup | Yes | Controlled list | Registered Information | Used to determine Compliance Requirements. See §5.1, §5.2. |
@@ -61,8 +64,8 @@ This document intentionally excludes:
 | 9 | Contact Name | Text | Yes | 1–100 characters | Registered Information | Primary business contact. See §5.2. |
 | 10 | Contact Email | Email | Yes | Valid email format | Registered Information | Business correspondence. See §5.2. |
 | 11 | Contact Telephone | Telephone | Yes | UK telephone validation | Registered Information | Primary contact number. See §5.2. |
-| 12 | Business Address | Address selection | Yes | An approved Address Resolution reference shall identify the selected address. Client-supplied snapshot or authority values are not accepted. | Registered Information | The Vendor supplies search or selection inputs only. The Address Domain supplies the Canonical Address Identifier, Business Address Snapshot and regulatory-authority information. See §5.4, §5.5, ADR-006, HJ-004 and HJ-105. |
-| 13 | Canonical Address Identifier | Derived | Yes | Supplied by the Address Domain from the approved Address Resolution. Not client-editable. | Registered Information | Supplied exclusively by the Address Domain; not entered, edited or overridden by the Vendor. Persisted with the Business Address Snapshot. See §5.4, §5.5, ADR-006 and HJ-004. |
+| 12 | Business Address | Address selection | Yes | A permanent opaque Address Resolution reference issued for a complete valid Address result bound to the declared Trading Location shall identify the selected address. The same Trading Location shall be supplied at registration. Client-supplied snapshot or authority values are not accepted. | Registered Information | The client cannot submit RegisterVendor before successful Address selection. The Address Domain supplies the Canonical Address Identifier, Business Address Snapshot and regulatory-authority information. See §5.4, §5.5, ADR-006, HJ-004 and HJ-105. |
+| 13 | Canonical Address Identifier | Derived | Yes | Supplied by the Address Domain from the approved Address Resolution. Not client-editable. | Registered Information | Supplied exclusively by the Address Domain; not entered, edited or overridden by the Vendor. Persisted with the Business Address Snapshot and contributes to the Vendor uniqueness identity. See §§5.4–5.6, ADR-006 and HJ-004. |
 | 14 | Food Registration Authority | Derived | Yes | Derived from the approved Business Address or mobile unit base address. | Registered Information | Provided by the Address Service. Not manually editable by the Vendor. See §5.4, §5.5. |
 | 15 | Primary Trading Authority | Derived / Conditional | Conditional | Required for Trading Location = Stall. | Registered Information | Represents the primary authority responsible for the Vendor's declared trading area. See §5.1, §5.4. |
 | 16 | Website | URL | No | Valid HTTPS URL | Vendor Managed Information | Optional. See §5.2, §5.5. |
@@ -188,7 +191,14 @@ Validation rules represent business constraints. Implementation-specific validat
 1. **Company Registration Number**
    When supplied, Company Registration Number is stored in canonical uppercase format before persistence.
 
+2. **Vendor uniqueness name comparison**
+   Trading Name and Legal Operator Name are each compared after trimming leading and trailing whitespace and without regard to case when deriving the Epic 1 Vendor uniqueness identity. These comparison forms do not replace or alter the registered display values.
+
 ### 5.4 Derived Information
+
+The Business Address Snapshot is translated positionally from Address source data. Address source Line 1 maps to optional `RecipientOrOrganisationName`; source Lines 2, 3 and 4 map respectively to required `AddressLine1`, optional `AddressLine2` and optional `AddressLine3`. Post Town, Postcode and optional County map directly to their corresponding snapshot fields. No source-line concatenation, compression, shifting or reordering occurs. `RecipientOrOrganisationName` is not compared with Legal Operator Name or Trading Name and does not affect registration validity.
+
+Every complete valid Address result supplies a Canonical Address Identifier and Food Registration Authority. When Trading Location is `Stall`, it also supplies Primary Trading Authority; otherwise Primary Trading Authority is absent.
 
 1. **Canonical Address Identifier**
    The Canonical Address Identifier is supplied exclusively by the Address Domain from the approved Address Resolution. It is not entered, edited or overridden by the Vendor. It forms part of Registered Information and is persisted with the Business Address Snapshot.
@@ -222,7 +232,28 @@ The Canonical Address Identifier, Business Address Snapshot and applicable regul
 5. **Derived fields**
    Food Registration Authority and Primary Trading Authority (where applicable) are derived at registration and form part of Registered Information thereafter.
 
-### 5.6 Traceability to Domain Model
+### 5.6 Vendor Uniqueness and Registration Equivalence
+
+Epic 1 identifies an existing Vendor registration by the composite of:
+
+- Trading Name compared after the normalization defined in §5.3;
+- Legal Operator Name compared after the normalization defined in §5.3; and
+- the authoritative Canonical Address Identifier returned by the Address Domain.
+
+The opaque Address Resolution reference is not part of this identity. The final composite identity can be established only after the Address Domain has resolved that reference and returned the Canonical Address Identifier.
+
+Semantic registration equivalence compares the complete materially relevant registration information after each value's approved canonicalisation. It excludes:
+
+- transient Registration Declarations;
+- the opaque Address Resolution reference;
+- server-generated values; and
+- technical metadata.
+
+A repeated `RegisterVendor` submission with the same composite identity and semantically equivalent registration information returns the original committed successful result without repeating any business effect. The same composite identity with materially different registration information returns `IdempotencyConflict`, does not update the existing Vendor and creates no new Vendor. Vendor updates require a separate future administration operation.
+
+The concurrency technique, replay persistence and retention, transaction mechanics, and database enforcement are governed separately by CON-014, CON-015, CON-016 and CON-028.
+
+### 5.7 Traceability to Domain Model
 
 | Business Rule Area | Architectural Source |
 |---|---|
@@ -230,6 +261,7 @@ The Canonical Address Identifier, Business Address Snapshot and applicable regul
 | Registration Session ownership and Register Vendor request processing | HJ-003 §3.5 / HJ-105 |
 | Address ownership, Canonical Address Identifier and Business Address Snapshot | ADR-006 / HJ-004 / HJ-105 |
 | Conditional registration rules and corresponding aggregate creation invariants | HJ-004 §8 |
+| Vendor uniqueness identity and semantic registration equivalence | HJ-010 CON-013 / HJ-012 CON-013 / HJ-105 §9 |
 | Compliance Requirements determination from Trading Characteristics | Compliance capability / related Architectural Decision Records |
 | Identity separation | Identity capability boundary (outside Vendor bounded context) |
 

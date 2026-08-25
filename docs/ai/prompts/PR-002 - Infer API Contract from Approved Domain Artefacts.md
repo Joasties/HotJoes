@@ -147,10 +147,22 @@ Produce a complete Markdown document using the following structure.
 ```
 Document ID: HJ-106
 Document Title: Vendor Registration Service Contract
-Version: 0.1
-Status: Draft
+Version: [0.1 for initial generation, otherwise the next controlled version]
+Status: [according to the applicable human review and publication decision]
 Owner: Project Architecture
 ```
+
+For initial generation, use version 0.1 and Draft status unless explicit approval evidence authorizes another treatment.
+
+For controlled regeneration:
+
+- use the current controlled HJ-106 as the document baseline;
+- preserve its Document ID, title and standard filename;
+- increment the internal version according to the controlled change;
+- set Status according to the applicable human review and publication decision rather than resetting it automatically;
+- retain unaffected contract content;
+- update Last Updated and Revision History; and
+- record the exact approved source baselines used.
 
 ## Revision History
 
@@ -289,6 +301,22 @@ Confirm that the proposed contract:
 - introduces no unsupported business concepts
 
 ---
+
+# Shared Baseline, Output and Verification Control
+
+This prompt is governed by **PR-008 - Global Output and Verification Rules** for baseline validation, filenames, output packaging, source-write boundaries, document control, common preflight verification, direct links and the human-review handoff.
+
+Use **HJ-000 - Current Approved Baseline Manifest** as a compact index when available. Validate required artefacts against their actual controlled metadata; HJ-000 never replaces source authority or approval evidence.
+
+For HJ-106 generation or regeneration:
+
+- use `HJ-106 - Vendor Registration Service Contract.md` as the output filename;
+- never append version or status to that filename;
+- include a concise regeneration summary;
+- include an HJ-000 candidate only when approval of the generated HJ-106 changes its indexed version or status; and
+- do not recreate HJ-106 after approval if the human has already applied the reviewed file unchanged.
+
+Complete the PR-008 common preflight verification before presenting the result. Any conflict between PR-008 and this prompt shall be reported rather than silently resolved.
 
 # Output Format
 

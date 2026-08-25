@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-003 |
 | **Document Title** | Ubiquitous Language Guide |
-| **Version** | 2.2 |
+| **Version** | 2.3 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 8 August 2026 |
+| **Last Updated** | 17 August 2026 |
 
 ## Revision History
 
@@ -22,6 +22,7 @@
 | 2.0 | 22 July 2026 | Approved Vendor Registration terminology. Clarified Registration Session, Trading Characteristics, Regulatory Authorities, Vendor lifecycle, Registered Information and Address ownership. |
 | 2.1 | 27 July 2026 | Applied CR-020 and CR-023 to clarify Legal Operator terminology, place Registration Session outside the Vendor service boundary and establish the submitted Register Vendor request as authoritative. |
 | 2.2 | 8 August 2026 | Applied CR-026 to define registered Vendor retrieval for Epic 1 and aligned the lifecycle term Vendor State with HJ-004. |
+| 2.3 | 17 August 2026 | Applied CR-048. Defined Address Resolution Reference, complete Address result, Business Address Snapshot structure and Address failure terms for CON-006–CON-010. |
 
 ## Related Documents
 
@@ -253,6 +254,26 @@ Examples include:
 The Address Domain owns address search, retrieval and validation.
 
 The Vendor Domain stores an approved snapshot of the Business Address as Registered Information.
+
+### Address Resolution Reference
+
+A permanent opaque reference issued by the Address Domain only after selection of a complete authoritative Address result containing a Canonical Address Identifier. It binds that result and the Trading Location declared at selection. It is non-expiring, non-revocable, reusable and non-consuming. Resolution with the same Trading Location deterministically returns the original immutable result; a mismatched Trading Location is rejected.
+
+### Complete Address Result
+
+An Address Domain success result containing a Canonical Address Identifier, the selected postal-address information and the regulatory-authority information required for the supplied Trading Location. Search refinement and incomplete search results are Address interaction outcomes, not successful Address selections.
+
+### Business Address Snapshot
+
+The immutable Vendor-owned historical representation translated from a complete Address result. It contains up to three address lines, Post Town, Postcode, optional County and optional Recipient or Organisation Name. It is not a live Address record.
+
+### Invalid Reference
+
+The semantic outcome returned when an Address Resolution Reference is unknown or fabricated.
+
+### Invalid Address Result
+
+The semantic outcome returned when a known Address Resolution Reference cannot supply a complete valid result for the Trading Location declared at registration.
 
 ## 3.16 Registered Information
 

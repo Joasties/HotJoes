@@ -6,11 +6,11 @@
 | --- | --- |
 | **Document ID** | HJ-011 |
 | **Document Title** | Epic 1 Vendor Registration Implementation Scope |
-| **Version** | 1.1 |
+| **Version** | 1.8 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 13 August 2026 |
+| **Last Updated** | 23 August 2026 |
 
 ## Revision History
 
@@ -18,6 +18,13 @@
 | --- | --- | --- |
 | 1.0 | 12 August 2026 | Initial approved version of the Epic 1 Vendor Registration Implementation Scope. |
 | 1.1 | 13 August 2026 | Applied CR-036 to include the Centralized Configuration Service in the Epic 1 scope. |
+| 1.2 | 17 August 2026 | Applied CR-052. Defined the Epic 1 Address port, typed stub adapter, contextual permanent reference, failure taxonomy and no-in-process-retry/no-circuit-breaker boundary. |
+| 1.3 | 18 August 2026 | Added the approved CON-012 transport-independent RegisterVendorCommand to the Epic 1 Vendor Application scope. |
+| 1.4 | 19 August 2026 | Added the approved CON-040 transport-independent `RegisterVendorResult` to the Epic 1 Vendor Application scope. |
+| 1.5 | 19 August 2026 | Added the approved CON-013 composite Vendor uniqueness identity and semantic registration-equivalence boundary to the Epic 1 RegisterVendor scope. |
+| 1.6 | 21 August 2026 | Added the approved CON-014–CON-016 and CON-028 PostgreSQL-backed concurrency, permanent replay-outcome, atomic transaction and explicit EF Core mapping boundaries to Epic 1. |
+| 1.7 | 22 August 2026 | Applied CR-065. Added the approved CON-019 pre-outbox VendorRegistered mapper and CON-020 versioned Integration Event v1 contract to Epic 1 delivery scope. |
+| 1.8 | 23 August 2026 | Applied CR-TBD-HJ011. Added the approved concrete VendorRegistered v1 JSON member structure and deterministic wire-format requirements to Epic 1 delivery scope. |
 
 ## Related Documents
 
@@ -27,7 +34,8 @@
 | HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
 | HJ-004 | Vendor Domain Models | Approved |
-| HJ-010 | Application Architecture and Implementation Pattern Map | Approved |
+| HJ-010 | Current Application Architectural Concerns | Approved v1.8 |
+| HJ-012 | Established Application Architecture Patterns | Approved v1.8 |
 | HJ-104 | Vendor Registration Fields Matrix | Approved |
 | HJ-105 | Vendor Registration Sequence Diagram | Approved |
 | HJ-106 | Vendor Registration Service Contract | Approved |
@@ -56,16 +64,29 @@ The wider HotJoes System Model describes the target architecture. Presence on th
 Epic 1 implements:
 
 - Vendor Registration.
+- An immutable, transport-independent `RegisterVendorCommand` owned by the Vendor Application as the complete registration-intent boundary.
+- A closed, immutable, transport-independent `RegisterVendorResult` owned by the Vendor Application as the RegisterVendor application-outcome boundary.
 - Creation of the Vendor aggregate and its initial lifecycle state.
 - Validation of mandatory and conditional Vendor Registration business rules.
 - Registered Information captured at registration.
 - Vendor Managed Information required during registration.
 - Creation of the internal `VendorRegistered` domain event.
 - Creation of the external `VendorRegistered` integration event.
+- Pre-outbox translation through an explicit Vendor Application-owned mapper.
 - Retrieval of Registered Vendor Details.
 - Register Vendor idempotency and duplicate-submission handling.
 
 No Vendor behaviour beyond that required to complete and retrieve the registration is included.
+
+The `RegisterVendorCommand` contains all client-authored registration fields, the opaque Address Resolution reference and transient Registration Declarations. It is independent of the HTTP request representation and any client/BFF Registration Session. It does not contain a Vendor Aggregate, authoritative Address-owned values, server-generated Vendor state, persistence or publication representations, or the derived uniqueness identity, semantic fingerprint and remaining idempotency mechanics governed by CON-013–CON-016.
+
+The `RegisterVendorResult` distinguishes committed success from the expected controlled HJ-106 failure outcomes. Committed success carries only the minimum committed Vendor identity and lifecycle state. Expected failures use stable Vendor Application-owned outcome kinds. The result contains no HTTP representation or status mapping, Address-provider representation, persistence or publication representation, Registration Session state, or framework type. Validation detail and HTTP mapping mechanics remain governed by their separate concerns.
+
+After authoritative Address resolution, RegisterVendor establishes the Vendor uniqueness identity from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and CanonicalAddressId. A repeated submission with that identity and semantically equivalent materially relevant registration information returns the original committed successful result without repeating any business effect. The same identity with materially different registration information returns `IdempotencyConflict` and does not update the Vendor. Vendor updates require a separate future administration operation outside Epic 1.
+
+PostgreSQL is the concurrency authority for that identity. One explicit PostgreSQL transaction atomically commits the Vendor Aggregate and Registered Information, the permanent persisted original `RegisterVendorResult` and versioned SHA-256 semantic fingerprint, and exactly one durable outbox item. A uniqueness-race loser commits no effects and resolves the committed record to the original result or `IdempotencyConflict`. Address resolution and pre-transaction validation precede the transaction; outbox dispatch follows commit. Epic 1 introduces no process-local or distributed registration lock and no expiry or deletion of the persisted replay outcome.
+
+For first processing, an explicit Vendor Application mapper translates the completed internal `VendorRegistered` fact and registration-time information into the Vendor-owned `VendorRegistered` Integration Event v1 before outbox persistence. Vendor Infrastructure serializes that event once as UTF-8 camel-case JSON and persists it unchanged inside the registration transaction. The Vendor Domain contains no Integration Event, outbox, serialization or broker representation. The relay shall publish the stored event and shall not reconstruct it from current Vendor state.
 
 ## 2.2 Client / Interaction
 
@@ -104,6 +125,9 @@ Epic 1 implements:
 - Vendor PostgreSQL persistence.
 - Persistence of the Vendor aggregate and Registered Information.
 - Persistence required to support Register Vendor idempotency.
+- Persistence support for the approved CON-013–CON-016 identity, equivalence, concurrency, permanent replay and atomic-transaction boundary.
+- Explicit EF Core fluent mapping of Vendor state, Registered Information, the one-to-one registration outcome and outbox data in Vendor Infrastructure.
+- A PostgreSQL unique constraint over persisted normalized Trading Name, normalized Legal Operator Name and CanonicalAddressId, with restrictive deletion behaviour and supporting indexes.
 - Persistence required for reliable integration-event publication.
 - Retrieval of persisted Registered Vendor Details.
 - Database schema creation and migration required by Epic 1.
@@ -116,6 +140,9 @@ Epic 1 implements:
 
 - a real Event Bus / Message Broker;
 - creation of the `VendorRegistered` integration event;
+- the Vendor-owned, transport-independent `VendorRegistered` Integration Event v1 envelope and payload;
+- an Integration Event-owned BusinessAddress representation containing CanonicalAddressId and the approved registration-time address fields without exposing the Domain snapshot type;
+- explicit-null representation of optional event values and the approved v1 compatibility rules;
 - atomic persistence of Vendor state and the obligation to publish the integration event;
 - reliable publication using the agreed outbox/reliability mechanism;
 - integration-event serialization and metadata;
@@ -124,7 +151,13 @@ Epic 1 implements:
 
 The asynchronous Epic 1 path is:
 
-`Vendor Domain → Outbox / Reliable Publication → Event Bus / Message Broker → Compliance Event Consumer Stub`
+`Vendor Domain fact → Vendor Application mapper → immutable serialized outbox event → Event Bus / Message Broker → Compliance Event Consumer Stub`
+
+The v1 envelope contains EventId, EventType `VendorRegistered`, EventVersion `1`, OccurredAt and the immutable payload. The payload contains VendorId, RegisteredAt, resulting VendorState, TradingPreference, LegalOperatorType, TradingCharacteristics, the independent BusinessAddress representation, FoodRegistrationAuthority and conditional PrimaryTradingAuthority. Registration Declarations and information not required to initiate Pending Activation and Compliance processing are excluded.
+
+Epic 1 implements the exact nested JSON member structure and deterministic wire representations defined by HJ-004 §7.2: lowercase canonical UUID `D` identifiers, UTC invariant round-trip `O` timestamps, invariant `HH:mm:ss` time-only values without offsets, lower-camel-case enum strings, contract-owned nested Trading Characteristics and Opening Hours representations, and explicit `null` for every absent optional member. No published representation exposes or reuses a Vendor Domain Aggregate, Value Object or enum type.
+
+Compatible optional fields may be added within v1; breaking changes require a new version. Publication retry preserves EventId, version and serialized event.
 
 ## 2.6 Configuration
 
@@ -275,6 +308,22 @@ The stub must support:
 - Food Registration Authority;
 - Primary Trading Authority where applicable; and
 - success and failure behaviour required by the Vendor Registration contract.
+
+The stub is consumed through the Vendor Application's Address port and a typed adapter. Stub and Address contract types shall not enter the Vendor Domain Model.
+
+The client-side Address journey may receive one result, a reasonably small selection list, or a request to refine the search. The client shall not progress to `RegisterVendor` submission until it has selected a complete valid result and received a permanent opaque Address Resolution reference.
+
+Successful selection binds a `CanonicalAddressId`, the original immutable result and the declared Trading Location. Resolution must supply that same Trading Location. References do not expire, cannot be revoked, and may be resolved repeatedly without consumption.
+
+The Epic 1 stub shall expose deterministic scenarios for:
+
+- valid and invalid Food Registration Authority outcomes;
+- valid and invalid Primary Trading Authority outcomes where Trading Location is `Stall`;
+- `InvalidReference` for an unknown or fabricated reference;
+- `InvalidAddressResult` for a known reference that cannot satisfy the supplied Trading Location context; and
+- technical timeout, unavailability and transient failure.
+
+Semantic failures fail fast. Technical failures return a controlled retryable application failure. The caller may retry `RegisterVendor` using the same permanent reference. The Vendor Application performs no in-process automatic retry, and no circuit breaker is included in Epic 1.
 
 The following are not implemented:
 

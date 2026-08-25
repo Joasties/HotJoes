@@ -632,6 +632,22 @@ If completion cannot be achieved, produce the valid partial catalogue and a prec
 
 ---
 
+# Shared Baseline, Output and Verification Control
+
+This prompt is governed by **PR-008 - Global Output and Verification Rules** for baseline validation, filenames, output packaging, source-write boundaries, document control, common preflight verification, direct links and the human-review handoff.
+
+Use **HJ-000 - Current Approved Baseline Manifest** as a compact index when available. Validate HJ-012, the active delivery scope, the current HJ-107, the previous HJ-013 and required supporting artefacts against their actual controlled metadata; HJ-000 never replaces source authority or either catalogue's ownership rules.
+
+For HJ-013 generation or regeneration:
+
+- use `HJ-013 - Architecture and Implementation Test Catalogue.md` as the output filename;
+- never append version or status to that filename;
+- include a concise regeneration and stable-ID reconciliation summary;
+- include an HJ-000 candidate only when approval of the generated HJ-013 changes its indexed version or status; and
+- do not recreate HJ-013 after approval if the human has already applied the reviewed file unchanged.
+
+Complete the PR-008 common preflight and catalogue-integrity verification before presenting the result. Any conflict between PR-008 and this prompt shall be reported rather than silently resolved.
+
 # Output Format
 
 Produce a complete GitHub-flavoured Markdown document suitable for controlled inclusion in the HotJoes repository.

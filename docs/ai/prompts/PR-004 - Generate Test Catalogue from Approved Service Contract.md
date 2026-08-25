@@ -40,7 +40,7 @@ The attached artefacts may include:
 
 HJ-013 is a downstream complementary catalogue. It is not required or used as an HJ-107 behavioural-derivation, regeneration or stable-ID input.
 
-Use **HJ-106 v1.1 Part A – Business Service Contract** as the primary normative behavioural test basis.
+Use Part A – Business Service Contract of the supplied current Approved HJ-106 baseline as the primary normative behavioural test basis. Record the exact HJ-106 version used in the generated catalogue.
 
 Use upstream approved artefacts to:
 
@@ -516,15 +516,19 @@ For each failure verify:
 
 Do not invent behaviour for unresolved dependencies.
 
-Create explicit blocked or partially blocked catalogue entries for unresolved in-scope dependencies, including:
+Derive the current unresolved in-scope dependency set from the supplied current HJ-010 baseline. Do not treat a concern as unresolved merely because an older prompt example or previous catalogue listed it as blocked.
 
-| Current Concern | Unresolved Area |
+Create explicit blocked or partially blocked catalogue entries for every currently unresolved in-scope dependency. Common dependency areas include:
+
+| Concern Area | Treatment |
 |---|---|
-| CON-009 and CON-010 | Address Resolution reference contract and Address failure taxonomy/resilience treatment. |
-| CON-013 to CON-016 | Idempotency identity/equivalence, concurrency, outcome persistence and transaction boundary. |
-| CON-018 to CON-021 | Outbox relay, Domain-to-Integration Event translation, Integration Event schema and broker delivery semantics. |
-| CON-024 to CON-026 | Technical API contract, business-failure transport mapping and validation allocation. |
-| CON-028 | PostgreSQL mapping and constraints. |
+| Address collaboration and failures | Include only concerns that are not Approved in the current HJ-010 baseline. Preserve already approved Address behaviour as Ready where its test boundary is complete. |
+| Idempotency, concurrency, replay persistence and transaction | Separate approved identity/equivalence behaviour from any still-unresolved concurrency, retention, persistence and transaction mechanisms. |
+| Publication relay, event translation, event schema and broker delivery | Carry the exact current `CON-*` dependencies without selecting their unresolved Approaches. |
+| Technical API contract, failure transport and validation allocation | Keep Part B tests proposed or blocked according to the current concern states. |
+| Database mapping and constraints | Preserve behavioural guarantees while assigning concrete mapping and constraint verification to the applicable current concern and HJ-013 boundary. |
+
+The concern identifiers and states recorded in the generated catalogue shall come from current HJ-010, not from this illustrative area list.
 
 For every affected obligation:
 
@@ -563,7 +567,7 @@ For regeneration:
 - set Status according to the applicable document-review decision rather than resetting it automatically;
 - update Last Updated and Revision History;
 - retain unaffected catalogue content; and
-- record the source baselines used, including HJ-106 v1.1.
+- record the exact source baselines used, including the version and Approved status of the supplied current HJ-106 baseline.
 
 Do not append a version or status suffix to the filename.
 
@@ -751,7 +755,7 @@ Classify each item as:
 
 Confirm that the Test Catalogue:
 
-- uses HJ-106 v1.1 Part A as its primary normative behavioural basis;
+- uses Part A of the supplied current Approved HJ-106 baseline as its primary normative behavioural basis and records the exact version used;
 - uses the approved HJ-006 Test Classification and Test Level mapping;
 - preserves stable Test IDs or records their controlled reconciliation;
 - preserves and reconciles only HJ-107-owned `VR-*` identifiers;
@@ -885,6 +889,22 @@ Use these controlled values:
 If **Deferred** is required, use it only where an approved scope or sequencing decision deliberately defers the obligation. Do not use Deferred merely because required information is missing.
 
 ---
+
+# Shared Baseline, Output and Verification Control
+
+This prompt is governed by **PR-008 - Global Output and Verification Rules** for baseline validation, filenames, output packaging, source-write boundaries, document control, common preflight verification, direct links and the human-review handoff.
+
+Use **HJ-000 - Current Approved Baseline Manifest** as a compact index when available. Validate HJ-106, the previous HJ-107 and required supporting artefacts against their actual controlled metadata; HJ-000 never replaces source authority, the previous HJ-107 stable-ID baseline or approval evidence.
+
+For HJ-107 generation or regeneration:
+
+- use `HJ-107 - Vendor Registration Test Catalogue.md` as the output filename;
+- never append version or status to that filename;
+- include a concise regeneration and stable-ID reconciliation summary;
+- include an HJ-000 candidate only when approval of the generated HJ-107 changes its indexed version or status; and
+- do not recreate HJ-107 after approval if the human has already applied the reviewed file unchanged.
+
+Complete the PR-008 common preflight and catalogue-integrity verification before presenting the result. Any conflict between PR-008 and this prompt shall be reported rather than silently resolved.
 
 # Output Format
 

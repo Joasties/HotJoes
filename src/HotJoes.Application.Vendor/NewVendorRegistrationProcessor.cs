@@ -39,16 +39,25 @@ public sealed class NewVendorRegistrationProcessor : INewVendorRegistrationProce
         ArgumentNullException.ThrowIfNull(fingerprint);
 
         DateTimeOffset registeredAt = _timeProvider.GetUtcNow();
-        VendorRegistrationInformation information = CreateRegistrationInformation(
-            command,
-            addressValues);
-        HotJoes.Domain.Vendor.Vendor vendor =
-            HotJoes.Domain.Vendor.Vendor.Register(
-                _identifierGenerator.CreateVendorId(),
+        VendorId vendorId = _identifierGenerator.CreateVendorId();
+        HotJoes.Domain.Vendor.Vendor vendor;
+
+        try
+        {
+            VendorRegistrationInformation information =
+                CreateRegistrationInformation(command, addressValues);
+            vendor = HotJoes.Domain.Vendor.Vendor.Register(
+                vendorId,
                 information,
                 CreateWebsite(command.Website),
                 command.BusinessDescription,
                 registeredAt);
+        }
+        catch (ArgumentException)
+        {
+            return RegisterVendorResult.AggregateInvariantFailed();
+        }
+
         VendorRegistered completedFact = vendor.DomainEvents
             .OfType<VendorRegistered>()
             .Single();

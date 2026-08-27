@@ -65,6 +65,7 @@ public sealed class RegisterVendorServiceConcurrentReconciliationTests
         INewVendorRegistrationProcessor processor)
     {
         return new RegisterVendorService(
+            new AcceptingRegisterVendorCommandValidator(),
             new AddressResolutionInvoker(
                 new SuccessfulAddressResolver(CreateAddressValues())),
             determiner,

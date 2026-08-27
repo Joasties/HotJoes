@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-106 |
 | **Document Title** | Vendor Registration Service Contract |
-| **Version** | 1.6 |
+| **Version** | 1.8 |
 | **Status** | Approved |
 | **Classification** | Service Contract |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 August 2026 |
+| **Last Updated** | 26 August 2026 |
 
 ## Revision History
 
@@ -22,6 +22,9 @@
 | 1.4 | 19 August 2026 | Regenerated using PR-002 from the approved CON-013 baseline, HJ-104 v3.5 and HJ-105 v3.6. Defined the composite Vendor uniqueness identity, semantic registration equivalence and post-Address-resolution replay sequencing; removed the obsolete caller-supplied idempotency identity convention. |
 | 1.5 | 22 August 2026 | Regenerated using PR-002 from the approved CON-019 and CON-020 baseline. Defined the Vendor Application-owned pre-outbox translation boundary and the VendorRegistered Integration Event v1 envelope, payload, independent BusinessAddress representation, serialization and compatibility rules; removed the resolved event-contract deferrals. |
 | 1.6 | 23 August 2026 | Regenerated using PR-002 from HJ-004 v2.7, HJ-105 v3.8 and the synchronized HJ-010/HJ-012 v1.8 Approved baseline. Defined the exact VendorRegistered v1 JSON member structure and deterministic contract-owned identifier, timestamp, time-only and enum representations; removed the resolved wire-format ambiguity. |
+| 1.7 | 25 August 2026 | Regenerated using PR-002 from HJ-004 v2.8, HJ-104 v3.6, HJ-105 v3.9 and the synchronized HJ-010/HJ-012 v1.9 Approved baseline. Defined the approved CON-023–CON-026 HTTP/JSON contract, controlled error mapping, validation allocation and Contact Email and Primary Contact Telephone profiles; removed superseded proposed and unresolved API wording. |
+
+| 1.8 | 26 August 2026 | Regenerated using PR-002 from HJ-104 v3.6, HJ-105 v4.0 and the synchronized HJ-010/HJ-012 v2.0 Approved baseline. Consolidated every Application validation failure into one `RequestValidationFailure` and one `registrationValidationFailed` API outcome; removed the superseded separate declaration and conditional-rule failure outcomes and codes. |
 
 ## Related Documents
 
@@ -30,13 +33,13 @@
 | PR-002 | Infer Service Contract from Approved Domain Artefacts | Governing prompt | Governs the inference method and document structure |
 | HJ-002 | Architectural Principles | Approved | Capability ownership, contracts, events and architectural simplicity |
 | HJ-003 | Ubiquitous Language Guide | Approved | Authoritative Vendor terminology and query language |
-| HJ-004 | Vendor Domain Models | Approved | Vendor aggregate, lifecycle, invariants, events and retrieval model |
+| HJ-004 v2.8 | Vendor Domain Models | Approved | Vendor aggregate, lifecycle, invariants, events, retrieval model and defensive Contact Email and Telephone Value Object rules |
 | HJ-005 | Coding Standards | Approved | API boundary, validation, error and HTTP conventions |
-| HJ-010 v1.8 | Current Application Architectural Concerns | Approved | Records the amended concrete CON-020 contract while retaining relay and broker-delivery mechanics under CON-018 and CON-021 |
-| HJ-011 v1.8 | Epic 1 Vendor Registration Implementation Scope | Approved | Places the exact VendorRegistered Integration Event v1 representation within Epic 1 delivery scope |
-| HJ-012 v1.8 | Established Application Architecture Patterns | Approved | Defines the approved CON-019 translation boundary and amended CON-020 published contract |
-| HJ-104 | Vendor Registration Fields Matrix | Approved | Authoritative registration information and business rules |
-| HJ-105 v3.8 | Vendor Registration Sequence Diagram | Approved | Authoritative interaction order, outcomes, failure behaviour and deterministic event-publication representation |
+| HJ-010 v2.0 | Current Application Architectural Concerns | Approved | Records the approved CON-023–CON-026 API and validation cohort and the amended unified validation-failure treatment for CON-025, CON-026 and CON-040, while retaining relay and broker-delivery mechanics under CON-018 and CON-021 |
+| HJ-011 v2.0 | Epic 1 Vendor Registration Implementation Scope | Approved | Places the thin Minimal API, technical contract, unified controlled validation-failure outcome and validation boundary within Epic 1 delivery scope |
+| HJ-012 v2.0 | Established Application Architecture Patterns | Approved | Defines the approved HTTP adaptation, technical API contract, unified validation-failure mapping and validation allocation |
+| HJ-104 v3.6 | Vendor Registration Fields Matrix | Approved | Authoritative registration information, business validation, canonicalisation and Contact Email and Telephone profiles |
+| HJ-105 v4.0 | Vendor Registration Sequence Diagram | Approved | Authoritative interaction order, API adaptation, validation ordering, outcomes and failure behaviour |
 | ADR-002 | Business Capabilities and Bounded Contexts | Accepted | Capability and persistence ownership |
 | ADR-003 v1.2 | Event-Driven Collaboration | Accepted | Pre-outbox Application mapping and prohibition of relay-time reconstruction |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Accepted | Registration Session, service and Vendor-existence boundaries |
@@ -61,9 +64,9 @@ The contract defines:
 - Domain and Integration Events;
 - idempotency and reliable-publication behaviour;
 - controlled business failures; and
-- a proposed minimal HTTP representation.
+- the approved Epic 1 HTTP representation.
 
-Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, proposes a technical HTTP representation. Technical conventions do not amend the authoritative business artefacts.
+Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, defines the approved Epic 1 HTTP representation derived from CON-023–CON-026. The API representation adapts and does not redefine the transport-independent Application contract.
 
 # 2. Source Artefacts
 
@@ -71,10 +74,10 @@ Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, pr
 |---|---|---|
 | HJ-002 | Constrains interpretation of capability boundaries and published contracts | Vendor owns Vendor behaviour and persistence; contracts are explicit; events represent completed facts; prefer simplicity |
 | HJ-003 v2.3 | Supplies authoritative language | Vendor State, Vendor Registration, Registered Information, Vendor Managed Information, Vendor Administrator, Retrieve Registered Vendor and Registered Vendor Details |
-| HJ-004 v2.7 | Defines the business model exposed by this contract | Aggregate properties, creation invariants, lifecycle, commands, events, the exact VendorRegistered v1 published contract, persisted retrieval source, result content and query side-effect invariant |
+| HJ-004 v2.8 | Defines the business model exposed by this contract | Aggregate properties, creation invariants, Contact Email and Telephone Value Objects, lifecycle, commands, events, the exact VendorRegistered v1 published contract, persisted retrieval source, result content and query side-effect invariant |
 | HJ-005 | Separates business contract from implementation conventions | Separate API models, controlled errors, layered validation, status-code guidance and safe response rules |
-| HJ-104 v3.5 | Is the authoritative registration information contract | Required, optional, conditional, derived and transient fields; validation; canonicalisation; composite Vendor uniqueness identity; semantic registration equivalence; ownership; lifecycle |
-| HJ-105 v3.8 | Defines observable interaction behaviour | Complete request boundary, Address collaboration, idempotency, pre-outbox event mapping, deterministic event serialization, immutable serialized-event staging, reliable publication and registered Vendor retrieval |
+| HJ-104 v3.6 | Is the authoritative registration information contract | Required, optional, conditional, derived and transient fields; validation ownership; exact contact profiles; canonicalisation; composite Vendor uniqueness identity; semantic registration equivalence; ownership; lifecycle |
+| HJ-105 v4.0 | Defines observable interaction behaviour | Thin HTTP adaptation, complete request boundary, unified validation-failure outcome and mapping, validation ordering, Address collaboration, idempotency, pre-outbox event mapping, reliable publication and registered Vendor retrieval |
 | ADR-002 | Prevents ownership leakage | Vendor capability owns Vendor registration and persistence; other capabilities retain their own behaviour and data |
 | ADR-003 v1.2 | Governs asynchronous collaboration | Completed business facts cross boundaries through explicit Integration Events mapped before outbox persistence and never reconstructed by the relay |
 | ADR-004 | Defines when a Vendor exists | No Vendor exists before successful registration; Registration Session remains outside the Vendor service boundary |
@@ -83,9 +86,9 @@ Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, pr
 | ADR-007 | Preserves compliance separation | Registration creates Pending Activation; Compliance and activation decisions remain outside registration |
 | ADR-008 v1.4 | Defines mandatory reliability behaviour | Explicit Register Vendor idempotency safeguard; atomic persistence; pre-outbox VendorRegistered mapping; serialization and immutable outbox storage; retry without reconstruction or repeated business effects |
 
-No contradictory business rule was found among the supplied source artefacts. HJ-104 v3.5 specializes the approved registration-information and idempotency rules. HJ-004 v2.7 and HJ-105 v3.8 define the approved concrete VendorRegistered v1 contract and observable publication sequence consistently with ADR-003 v1.2 and ADR-008 v1.4. The approved business artefacts govern business behaviour; HJ-005 informs only the proposed HTTP representation.
+No contradictory business rule was found among the supplied source artefacts. HJ-104 v3.6 specializes the approved registration-information and validation rules. HJ-004 v2.8 and HJ-105 v4.0 preserve the approved concrete VendorRegistered v1 contract, defensive contact invariants and HTTP adaptation sequence while consolidating Application validation failures into one outcome. HJ-005 supplies compatible engineering constraints; CON-023–CON-026 provide the approved Epic 1 technical specialization.
 
-HJ-010 v1.8 and HJ-012 v1.8 are the controlled architectural governance baseline for this contract. CON-006–CON-011 establish the Address collaboration boundary, consumed result and failure semantics used below. CON-013–CON-017 and CON-028 establish idempotency, concurrency, replay persistence, transaction, reliable staging and database-enforcement mechanics. CON-019 establishes the pre-outbox translation boundary and amended CON-020 establishes the exact published VendorRegistered v1 representation. Relay processing and broker delivery remain governed separately by unresolved CON-018 and CON-021.
+HJ-010 v2.0 and HJ-012 v2.0 are the controlled architectural governance baseline for this contract. CON-006–CON-011 establish the Address collaboration boundary, consumed result and failure semantics. CON-013–CON-017 and CON-028 establish idempotency, concurrency, replay persistence, transaction, reliable staging and database enforcement. CON-019/CON-020 establish the published-event boundary. CON-023–CON-026 and amended CON-040 establish the thin HTTP adaptation, exact API representation, unified controlled validation failure and validation allocation used below. Relay processing and broker delivery remain governed separately by unresolved CON-018 and CON-021.
 
 # 3. Business Operation Summary
 
@@ -131,8 +134,8 @@ No Vendor or server-side Registration Session needs to exist before invocation.
 | Service Includes Hot Food | Whether food or drink is supplied heated above ambient temperature | Vendor | Required | HJ-104 §§2, 5.1 | Boolean | Persisted | Registered Information | Part of Trading Characteristics |
 | Alcohol Service | Whether the Vendor supplies alcohol | Vendor | Required | HJ-104 §§2, 5.1 | Boolean | Persisted | Registered Information | Part of Trading Characteristics |
 | Contact Name | Primary business contact name | Vendor | Required | HJ-104 §§2, 5.2 | 1–100 characters | Persisted | Registered Information | Stored in Primary Contact |
-| Contact Email | Business correspondence address | Vendor | Required | HJ-104 §§2, 5.2 | Valid email format | Persisted | Registered Information | Stored in Primary Contact |
-| Contact Telephone | Primary contact number | Vendor | Required | HJ-104 §§2, 5.2 | UK telephone validation; exact accepted formats unspecified | Persisted | Registered Information | Stored in Primary Contact |
+| Contact Email | Business correspondence address | Vendor | Required | HJ-104 §§2, 5.2–5.3 | Trim surrounding whitespace; exactly one `@`; local part 1–64 characters; total length at most 254; approved ASCII dot-atom local part without leading, trailing or consecutive dot; domain with at least two valid 1–63-character labels; prohibit display names, comments, quoted local parts, domain literals and Unicode addresses | Persisted in canonical form | Registered Information | Preserve local-part case and lowercase the domain; structural validation only |
+| Contact Telephone | Primary contact number | Vendor | Required | HJ-104 §§2, 5.2–5.3 | Trim surrounding whitespace; raw input permits digits, spaces, hyphens, parentheses and one leading `+`; remove presentation characters; reject bare `44`; normalized value matches the approved pragmatic UK telephone expression; exclude unsupported specialist, short-code and legacy ranges | Persisted in canonical `+44` form | Registered Information | Structural validation only; allocation, activity, reachability and ownership verification are outside Epic 1 |
 | Address Resolution Reference | Reference to the approved Address selection | Address Domain | Required | HJ-104 §§2, 5.4, 6; HJ-105 §5 | Must resolve to an approved authoritative Address result | Transient request input | Neither | Sole request-side link to Address-owned values |
 | Website | Vendor website | Vendor | Optional | HJ-104 §§2, 5.2 | Valid HTTPS URL | Persisted when supplied | Vendor Managed Information | May be changed through future Vendor Management |
 | Business Description | Vendor-provided business description | Vendor | Optional | HJ-104 §§2, 5.2 | Maximum 2,000 characters | Persisted when supplied | Vendor Managed Information | May be changed through future Vendor Management |
@@ -149,8 +152,8 @@ The request must not authoritatively supply Canonical Address Identifier, Busine
 | RegisteredAt | Recorded by the Vendor Domain on successful creation | Persisted and available in registered Vendor details and event contracts where specified |
 | Canonical Address Identifier | Supplied exclusively by the Address Domain from the approved Address Resolution | Persisted with the snapshot as Registered Information |
 | Composite Vendor Uniqueness Identity | Derived by the Vendor Application from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and authoritative Canonical Address Identifier | Used to identify an existing Epic 1 Vendor registration; its storage and database enforcement are governed separately by CON-015 and CON-028 |
-| Semantic Registration Fingerprint | Derived deterministically from all materially relevant registration information after approved canonicalisation | Used to distinguish equivalent replay from `IdempotencyConflict`; excludes transient declarations, the opaque Address Resolution reference, server-generated values and technical metadata; exact encoding and storage remain deferred |
-| Business Address Snapshot | Supplied exclusively by the Address Domain from the approved Address Resolution | Persisted immutably as Registered Information; concrete schema is unspecified |
+| Semantic Registration Fingerprint | Derived deterministically from all materially relevant registration information after approved canonicalisation | Versioned deterministic UTF-8 canonical representation hashed using SHA-256; excludes transient declarations, the opaque Address Resolution reference, server-generated values and technical metadata |
+| Business Address Snapshot | Supplied exclusively by the Address Domain from the approved Address Resolution | Persisted immutably using the complete seven-field schema defined below |
 | Food Registration Authority | Derived and supplied by the Address Domain from the approved Business Address or mobile-unit base address | Persisted as Registered Information |
 | Primary Trading Authority | Derived and supplied by the Address Domain | Persisted only when Trading Location is `Stall`; absent otherwise |
 | Initial Vendor State | Established by successful Vendor creation | `PendingActivation` |
@@ -159,7 +162,13 @@ The request must not authoritatively supply Canonical Address Identifier, Busine
 
 ## 4.5 Business Validation
 
-The service shall enforce the HJ-104 rules server-side regardless of client-side convenience validation.
+The Vendor Application authoritatively validates the complete raw `RegisterVendor` intent regardless of client-side or API convenience validation. It validates all HJ-104 field, Registration Declaration, conditional and cross-field rules before Address resolution, uniqueness identity or fingerprint determination, Aggregate creation or persistence. Any Application validation failure returns one immutable `RequestValidationFailure` containing every independently detectable validation error. Registration Declaration and conditional-rule errors are entries in that result rather than separate top-level outcomes.
+
+Successful validation supplies canonical values to every downstream stage. These include uppercase Company Registration Number, unmodified registered name display values alongside trimmed case-insensitive comparison forms, Contact Email with surrounding whitespace removed and domain lowercased while preserving local-part case, and Primary Contact Telephone stored in canonical `+44` form. No downstream stage may return to uncanonicalized client input. The Vendor Domain remains the final defensive owner of Aggregate and Value Object invariants.
+
+The Contact Email profile permits ASCII letters, digits and ``. ! # $ % & ' * + - / = ? ^ _ ` { | } ~`` in the local part. A dot is prohibited first, last or consecutively. The domain contains at least two dot-separated labels; each label contains 1–63 ASCII letters, digits or hyphens and does not begin or end with a hyphen. Display names, comments, quoted local parts, domain literals and internationalized Unicode addresses are prohibited. Validation establishes plausible structure only; allocation, deliverability and ownership verification are outside Epic 1.
+
+For Primary Contact Telephone, presentation spaces, hyphens and parentheses are removed while a single permitted leading `+` is retained. Bare `44` is rejected. The normalized value shall match `^(?:(?:\+44|0)7\d{9}|(?:\+44|0)(?:1|2|3|5|8|9)\d{8,9})$`. A domestic value is converted by removing its leading `0` and prepending `+44`; an accepted `+44` value is retained. Specialist, short-code and legacy ranges outside this profile are rejected. Validation does not establish allocation, activity, reachability or ownership.
 
 Creation invariants are:
 
@@ -223,7 +232,7 @@ A first successful invocation:
 
 Pending Activation and Integration Event dispatch continue asynchronously and do not alter the synchronous successful outcome.
 
-RegisteredAt, Trading Preference and other persisted Vendor properties are committed state, but HJ-004 does not require them in the minimum `RegisterVendor` response. This contract proposes RegisteredAt and Trading Preference as additional response fields in Section 6; callers can obtain the complete committed Vendor state through `RetrieveRegisteredVendor`.
+RegisteredAt, Trading Preference and other persisted Vendor properties are committed state but are deliberately excluded from the approved minimum `RegisterVendor` HTTP response. Callers obtain complete committed state through `RetrieveRegisteredVendor`.
 
 ## 4.8 Vendor Lifecycle Transition
 
@@ -254,9 +263,9 @@ For the same composite identity and semantically equivalent previously successfu
 - publish no additional Integration Event; and
 - initiate no additional Pending Activation Process.
 
-Concurrent equivalent requests must converge on one processing owner and one successful outcome. Registration Session state is never consulted. The concurrency technique, replay persistence and retention, transaction mechanics, database enforcement, and exact fingerprint encoding and storage representation are governed separately by CON-014, CON-015, CON-016 and CON-028.
+Concurrent equivalent requests must converge on one processing owner and one successful outcome. Registration Session state is never consulted. The approved PostgreSQL concurrency authority, permanent replay persistence, atomic transaction, deterministic fingerprint and explicit database enforcement are governed by CON-014, CON-015, CON-016 and CON-028.
 
-If the same composite identity is associated with materially different registration information from the previously successful registration, the operation shall return `IdempotencyConflict`. It shall not create or modify a Vendor, record a completed business fact or Domain Event, create publication work, publish an Integration Event or initiate Pending Activation. Vendor updates require a separate future administration operation. The response payload and transport status are technical conventions.
+If the same composite identity is associated with materially different registration information from the previously successful registration, the operation shall return `IdempotencyConflict`. It shall not create or modify a Vendor, record a completed business fact or Domain Event, create publication work, publish an Integration Event or initiate Pending Activation. Vendor updates require a separate future administration operation. The approved HTTP mapping is `409 Conflict` with code `idempotencyConflict`.
 
 ## 4.10 Domain and Integration Events
 
@@ -326,9 +335,7 @@ Vendor persistence and durable recording of the serialized Integration Event mus
 
 | Failure | Trigger | Business Meaning | Retryable | Expected Caller Behaviour |
 |---|---|---|---|---|
-| Request validation failure | Missing, malformed or out-of-range request information | Registration cannot be attempted with the supplied information | Yes, after correction | Correct the identified fields and resubmit |
-| Registration Declaration failure | Any mandatory declaration is absent or not explicitly accepted | Applicant has not supplied the mandatory business confirmations | Yes, after explicit acceptance | Obtain confirmation and resubmit |
-| Conditional rule failure | Company Registration Number or Primary Trading Authority presence conflicts with its controlling type/location | Complete registration invariants are not satisfied | Yes, after correction or authoritative Address re-resolution | Correct client information or select/resolve an appropriate Address |
+| RequestValidationFailure | One or more request-field, Registration Declaration, conditional or cross-field rules fail | Registration cannot be attempted with the supplied information; the result contains every independently detectable validation error | Yes, after correction | Correct all identified errors, including any required declaration acceptance or Address-context correction, and resubmit |
 | InvalidReference | Address Resolution reference is unknown or fabricated | No authoritative Address selection can be established | Yes, after Address search and selection | Select a complete valid Address result and submit its issued reference |
 | InvalidAddressResult | A known reference cannot provide a complete immutable result for the request's declared Trading Location | Required Address-owned information cannot form valid Vendor Registered Information | Yes, after correction or reselection | Correct Trading Location or select another complete Address result |
 | AddressServiceTemporarilyUnavailable | Address resolution times out or encounters unavailable/transient infrastructure | Registration has not been attempted because authoritative Address information is temporarily unavailable | Yes, as a new caller-controlled attempt using the same permanent reference | Retry later; the service performs no in-process automatic retry |
@@ -394,34 +401,47 @@ The following are intentionally outside this service contract:
 - implementation code, persistence mappings, controllers, handlers and OpenAPI definitions; and
 - concrete transport, storage, outbox, broker and serialization technologies.
 
-# 6. Proposed HTTP Representation
+# 6. Approved HTTP Representation
 
-Everything in this section is a proposed technical convention unless explicitly traced to a business artefact. Route shapes, JSON property names, enum serialization, identifiers, timestamps, headers and error codes require technical review.
+This section defines the approved Epic 1 HTTP adaptation under CON-023–CON-026. The API uses thin ASP.NET Core Minimal API endpoint adapters. They own HTTP binding, structural request validation, API-to-Application mapping, Application-result-to-HTTP mapping, cancellation-token forwarding, response headers and centralized unexpected-exception handling. They contain no Domain rules, Address resolution, persistence query, transaction, event, outbox or broker behaviour.
 
-## 6.1 Endpoint
+## 6.1 Endpoints and JSON Conventions
 
-| Business Operation | Proposed Method | Proposed Route | Success |
+| Business Operation | Method | Route | Success |
 |---|---|---|---|
-| Register Vendor | `POST` | `/vendors` | `201 Created` with committed registration outcome |
+| Register Vendor | `POST` | `/vendors` | `201 Created` with the original committed registration outcome and `Location` header |
 | Retrieve Registered Vendor | `GET` | `/vendors/{vendorId}` | `200 OK` with Registered Vendor Details |
 
-No search or collection retrieval endpoint is proposed.
+No collection, search, filtering, paging, update or API-versioned endpoint is included in Epic 1.
 
-## 6.2 Request Example
+The wire contract uses:
 
-`addressResolutionReference` represents only the approved permanent reference; Address-owned values and the application-derived composite Vendor identity are absent from the caller-authored request.
+- `application/json` where a body exists;
+- lower-camel-case JSON member names and enum strings using approved ubiquitous terms;
+- canonical UUID `D` strings, lowercase in responses;
+- UTC invariant round-trip `O` timestamps;
+- invariant `HH:mm:ss` time-only strings without an offset;
+- explicit JSON `null` for every absent optional response member;
+- omission or JSON `null` as equivalent legitimate absence for optional request members; and
+- compatible ignoring of unknown request members.
+
+Required request-member presence is distinguished from a supplied default value, including for required booleans.
+
+## 6.2 Register Vendor Request
+
+`addressResolutionReference` is the only request-side link to Address-owned information. The request excludes Canonical Address Identifier, Business Address Snapshot, regulatory authorities, Vendor state, server-generated identifiers, composite identity, semantic fingerprint, persistence/outbox information and Registration Session state.
 
 ```json
 {
   "tradingName": "Hot Joe's Kitchen",
   "legalOperatorName": "Hot Joe's Foods Limited",
-  "legalOperatorType": "LimitedCompany",
+  "legalOperatorType": "limitedCompany",
   "companyRegistrationNumber": "AB123456",
   "tradingCharacteristics": {
-    "tradingLocation": "Kitchen",
+    "tradingLocation": "kitchen",
     "openingHours": {
-      "startTime": "17:00",
-      "endTime": "02:00"
+      "startTime": "17:00:00",
+      "endTime": "02:00:00"
     },
     "serviceIncludesHotFood": true,
     "alcoholService": false
@@ -429,7 +449,7 @@ No search or collection retrieval endpoint is proposed.
   "primaryContact": {
     "contactName": "Jordan Smith",
     "contactEmail": "jordan@example.test",
-    "contactTelephone": "+44 20 7946 0123"
+    "contactTelephone": "+442079460123"
   },
   "addressResolutionReference": "addr-resolution-example",
   "website": "https://example.test",
@@ -442,40 +462,38 @@ No search or collection retrieval endpoint is proposed.
 }
 ```
 
-The nesting and enum spellings shown are technical conventions. The business fields and rules are authoritative; their JSON representation is not.
+## 6.3 Success Responses
 
-## 6.3 Success Response
+### 6.3.1 Register Vendor
 
-### Register Vendor
+First successful processing and an equivalent replay both return the original `201 Created` response:
 
 ```json
 {
-  "vendorId": "vendor-example-id",
-  "registeredAt": "2026-08-08T10:30:00Z",
-  "vendorState": "PendingActivation",
-  "tradingPreference": "Offline"
+  "vendorId": "00000000-0000-0000-0000-000000000000",
+  "vendorState": "pendingActivation"
 }
 ```
 
-VendorId and the committed `PendingActivation` outcome are business-required. Including RegisteredAt and Trading Preference in the synchronous HTTP body is a proposed convention consistent with committed Vendor state.
+The response contains `Location: /vendors/{vendorId}`. `RegisteredAt`, Trading Preference and other committed details are deliberately excluded from this minimum response and are available through retrieval.
 
-### Retrieve Registered Vendor
+### 6.3.2 Retrieve Registered Vendor
 
 ```json
 {
-  "vendorId": "vendor-example-id",
-  "registeredAt": "2026-08-08T10:30:00Z",
-  "vendorState": "PendingActivation",
-  "tradingPreference": "Offline",
+  "vendorId": "00000000-0000-0000-0000-000000000000",
+  "registeredAt": "2026-08-25T10:30:00.0000000Z",
+  "vendorState": "pendingActivation",
+  "tradingPreference": "offline",
   "tradingName": "Hot Joe's Kitchen",
-  "legalOperatorType": "LimitedCompany",
+  "legalOperatorType": "limitedCompany",
   "legalOperatorName": "Hot Joe's Foods Limited",
   "companyRegistrationNumber": "AB123456",
   "tradingCharacteristics": {
-    "tradingLocation": "Kitchen",
+    "tradingLocation": "kitchen",
     "openingHours": {
-      "startTime": "17:00",
-      "endTime": "02:00"
+      "startTime": "17:00:00",
+      "endTime": "02:00:00"
     },
     "serviceIncludesHotFood": true,
     "alcoholService": false
@@ -483,7 +501,7 @@ VendorId and the committed `PendingActivation` outcome are business-required. In
   "primaryContact": {
     "contactName": "Jordan Smith",
     "contactEmail": "jordan@example.test",
-    "contactTelephone": "+44 20 7946 0123"
+    "contactTelephone": "+442079460123"
   },
   "canonicalAddressId": "address-example-id",
   "businessAddressSnapshot": {
@@ -502,74 +520,69 @@ VendorId and the committed `PendingActivation` outcome are business-required. In
 }
 ```
 
-The Business Address Snapshot field set is normative at the business-contract level. JSON null-versus-omission and other wire serialization choices remain unresolved under CON-024.
+The response excludes the Aggregate, Domain and Integration Events, outbox state and persistence metadata.
 
-## 6.4 Error Responses
+## 6.4 Controlled Error Envelope
 
-Proposed controlled error envelope:
+All expected failures use an API-owned client-safe envelope:
 
 ```json
 {
-  "code": "vendor_registration_validation_failed",
+  "code": "registrationValidationFailed",
   "message": "The Vendor could not be registered because supplied information is invalid.",
   "validationErrors": [
     {
       "field": "tradingName",
-      "code": "length_out_of_range",
+      "code": "lengthOutOfRange",
       "message": "Trading Name must contain between 1 and 160 characters."
     }
-  ],
-  "correlationId": "correlation-example-id"
+  ]
 }
 ```
 
-Vendor Not Found example:
+`validationErrors` is always present and is `null` when not applicable. Each validation entry contains the API JSON-path `field`, stable machine-readable `code` and client-safe `message`. The approved validation-entry code vocabulary is `required`, `invalidFormat`, `lengthOutOfRange`, `invalidValue`, `conditionallyRequired` and `prohibited`.
+
+Example without field validation:
 
 ```json
 {
-  "code": "vendor_not_found",
+  "code": "vendorNotFound",
   "message": "The requested Vendor was not found.",
-  "correlationId": "correlation-example-id"
+  "validationErrors": null
 }
 ```
 
-Idempotency conflict example:
+Messages are explanatory text rather than identifiers and may be improved compatibly without changing the stable code. Every Application validation failure uses this one envelope and top-level code; `registrationDeclarationFailed` and `conditionalRuleFailed` are not contract outcomes.
 
-```json
-{
-  "code": "idempotency_conflict",
-  "message": "A Vendor with the same registration identity already exists with materially different registration information.",
-  "correlationId": "correlation-example-id"
-}
-```
+## 6.5 HTTP Status and Error-Code Mapping
 
-Error-code vocabulary, validation-path syntax and correlation identifier format are proposed conventions. Responses must remain client-safe and omit internal diagnostics.
+| Outcome | HTTP Status | Error Code |
+|---|---:|---|
+| Structurally malformed or unbindable request | `400 Bad Request` | `requestMalformed` |
+| RequestValidationFailure, including request-field, Registration Declaration, conditional and cross-field errors | `400 Bad Request` | `registrationValidationFailed` |
+| Invalid Address reference | `400 Bad Request` | `invalidAddressReference` |
+| Invalid contextual Address result | `400 Bad Request` | `invalidAddressResult` |
+| Aggregate invariant failure | `400 Bad Request` | `aggregateInvariantFailed` |
+| Vendor not found | `404 Not Found` | `vendorNotFound` |
+| Idempotency conflict | `409 Conflict` | `idempotencyConflict` |
+| Address service temporarily unavailable | `503 Service Unavailable` | `addressServiceTemporarilyUnavailable` |
+| Persistence or atomic recording failure | `503 Service Unavailable` | `persistenceOrAtomicRecordingFailed` |
+| Unexpected unhandled failure | `500 Internal Server Error` | `unexpectedFailure` |
 
-## 6.5 HTTP Status Codes
+Epic 1 does not use `422 Unprocessable Content`. Unexpected exceptions are handled at one central API boundary, logged without duplication and returned without stack traces, database/provider details, internal class names or framework diagnostics.
 
-| Status | Proposed Use |
-|---|---|
-| `200 OK` | Registered Vendor retrieved successfully |
-| `201 Created` | Vendor committed successfully; proposed for both first processing and an equivalent successful replay so the original HTTP outcome is preserved |
-| `400 Bad Request` | Structurally malformed request or business validation/declaration failure |
-| `404 Not Found` | VendorId does not identify an existing Vendor |
-| `409 Conflict` | Proposed technical mapping for the business-required controlled idempotency-conflict outcome |
-| `422 Unprocessable Content` | Optional alternative convention for semantically invalid but structurally valid registration; not selected unless the project standard adopts it |
-| `500 Internal Server Error` | Unexpected failure, with no internal details exposed |
-| `503 Service Unavailable` | Proposed for temporary Address or persistence dependency unavailability where safe retry is appropriate |
-
-Authentication and authorisation are outside Epic 1; therefore this contract does not assign `401 Unauthorized` or `403 Forbidden` to either operation.
+Authentication and authorization are outside Epic 1; this contract therefore assigns no `401` or `403` outcome.
 
 ## 6.6 Headers
 
 | Header | Direction | Requirement | Purpose |
 |---|---|---|---|
-| `Content-Type: application/json` | Request and response | Proposed required convention where a body exists | Media type |
-| `Accept: application/json` | Request | Proposed convention | Requested response media type |
-| `Location` | Register response | Proposed | Identifies `/vendors/{vendorId}` after creation |
-| `X-Correlation-Id` | Request and response | Proposed | Correlates logs and controlled errors; exact name and generation rules unspecified |
+| `Content-Type: application/json` | Register request and every response with a body | Required | JSON media type |
+| `Accept: application/json` | Request | Standard negotiation when supplied | Requested response media type |
+| `Location: /vendors/{vendorId}` | Successful Register response | Required | Identifies the registered Vendor retrieval resource |
 
-No caller-supplied idempotency header is proposed. The Vendor Application derives the approved composite identity after authoritative Address resolution.
+No caller-supplied `Idempotency-Key` or equivalent header is accepted. No custom correlation header or error-body correlation member is normative in this contract; CON-035 retains that responsibility.
+
 
 # 7. Traceability Matrix
 
@@ -597,7 +610,8 @@ No caller-supplied idempotency header is proposed. The Vendor Application derive
 | Reliable publication implementation architecture | HJ-012 | CON-017 | Transactional Outbox is the approved implementation Approach for the existing atomic durable-publication guarantee; relay and broker details remain unresolved elsewhere |
 | Registered Vendor retrieval implementation architecture | HJ-012 | CON-027 | Query handler, Repository and response mapper fulfil the existing persisted-source, purpose-specific result and side-effect-free retrieval contract |
 | Address application boundary and consumed result | HJ-012; ADR-006; HJ-104; HJ-105 | CON-006–CON-011; ADR-006 §2; HJ-104 §§2, 5.4; HJ-105 §§6, 12.2 | Application port and typed adapter resolve the permanent contextual reference, apply the approved positional source-line mapping, and distinguish semantic from retryable technical failure |
-| Remaining architecture dependencies | HJ-010 | CON-018, CON-021 and CON-024 to CON-026 | Downstream derivation must preserve unresolved relay, broker-delivery, transport, error-mapping and validation matters and must not invent their Approaches |
+| HTTP adaptation and validation | HJ-010; HJ-012; HJ-011; HJ-104; HJ-105 | CON-023–CON-026 and CON-040; HJ-011 §2.3; HJ-104 §§5.2–5.3; HJ-105 §§4.1, 12.1 | Thin Minimal API adapters expose the two Application operations using the approved JSON, status and error-envelope rules; every Application validation failure uses one `RequestValidationFailure` mapped to `registrationValidationFailed` |
+| Remaining architecture dependencies | HJ-010 | CON-018, CON-021 and CON-035 | Relay, broker-delivery and correlation remain separately governed and are not invented by this contract |
 | Separate API models | HJ-005 | §§9.4, 16.1 | HTTP requests/results do not expose domain aggregate or persistence entities |
 | Controlled errors and HTTP guidance | HJ-005 | §§12.4, 16.3 | Technical mapping uses safe error bodies and result-appropriate status codes |
 
@@ -605,27 +619,25 @@ No caller-supplied idempotency header is proposed. The Vendor Application derive
 
 | Classification | Item | Consequence / Required Decision |
 |---|---|---|
-| Confirmed | HJ-002 v2.0, HJ-003 v2.3, HJ-004 v2.7, HJ-104 v3.5 and HJ-105 v3.8 are Approved | They are authoritative inputs to this regenerated contract |
+| Confirmed | HJ-002 v2.0, HJ-003 v2.3, HJ-004 v2.8, HJ-104 v3.6 and HJ-105 v4.0 are Approved | They are authoritative inputs to this regenerated contract |
 | Confirmed | Register Vendor creates one Vendor in PendingActivation and Offline | No draft Vendor or Registration lifecycle state is exposed |
-| Confirmed | Register Vendor’s minimum business response identifies VendorId and Vendor State PendingActivation | RegisteredAt and Trading Preference are proposed additional response fields rather than mandatory minimum response content |
+| Confirmed | Register Vendor’s successful HTTP response contains only VendorId and Vendor State PendingActivation | First processing and equivalent replay return the original `201 Created` outcome; complete state is available through retrieval |
 | Confirmed | Vendor uniqueness identity is trimmed, case-insensitive Trading Name plus trimmed, case-insensitive Legal Operator Name plus Canonical Address Identifier | Derive it after Address resolution; retain the original registered name display values |
 | Confirmed | Equivalent registration information for an existing composite identity is a replay | Return the original committed successful result without repeating any business effect |
 | Confirmed | Materially different registration information for an existing composite identity is `IdempotencyConflict` | Create or change no Vendor, event, publication work or Pending Activation Process; registration is not an update operation |
 | Confirmed | Retrieve Registered Vendor is read-only and uses VendorId only | No search, cross-domain call or event belongs in the operation |
-| Technical Convention | `POST /vendors` and `GET /vendors/{vendorId}` | CON-024: route review is required before implementation |
-| Technical Convention | Camel-case JSON and enum spellings for the proposed HTTP request and response representations | CON-024: HTTP serialization conventions require approval; this does not affect the approved VendorRegistered v1 Integration Event representation |
-| Technical Convention | Successful identical replay returns the same `201` response and body | CON-024 and CON-025: confirm the transport mapping while preserving the business outcome |
-| Technical Convention | `Location` and `X-Correlation-Id` headers | CON-024: confirm header names and mandatory behaviour |
+| Confirmed | `POST /vendors` and `GET /vendors/{vendorId}` are the two Epic 1 endpoints | CON-023/CON-024 approve thin Minimal API adaptation without search, collection, update or API versioning |
+| Confirmed | Lower-camel JSON, deterministic identifiers/times, explicit-null response optionals and compatible unknown request members | CON-024 defines the complete wire conventions used in §6 |
+| Confirmed | Successful equivalent replay returns the original `201` response and body | The transport preserves the permanent committed Application outcome |
+| Confirmed | Successful registration returns `Location: /vendors/{vendorId}` | No caller idempotency or custom correlation header is introduced |
 | Confirmed | Concurrent coordination, replay-outcome persistence and retention, transaction mechanics, database enforcement, and exact fingerprint encoding and storage representation | CON-014–CON-016 and CON-028 approve PostgreSQL concurrency authority, permanent outcome persistence, deterministic SHA-256 fingerprinting, one atomic transaction and explicit EF Core/PostgreSQL constraints |
 | Confirmed | Business Address Snapshot schema and positional translation used by Vendor Registration and retrieval | Address source Line 1 maps to optional RecipientOrOrganisationName; source Lines 2–4 map respectively to AddressLine1–3; Post Town, Postcode and optional County map directly; no concatenation, compression, shifting or reordering occurs |
 | Confirmed | Address Resolution reference semantics and failure taxonomy | Permanent, opaque, non-expiring, non-revocable, reusable and non-consuming; InvalidReference and InvalidAddressResult are semantic failures; temporary technical failure is caller-retryable with no in-process retry |
 | Confirmed | `VendorRegistered` Integration Event v1 schema, translation, serialization and compatibility | CON-019 and amended CON-020 define the Application mapper, exact nested member structure, deterministic UUID, UTC timestamp, time-only and lower-camel enum formats, contract-owned representations, independent BusinessAddress, explicit-null optionals, UTF-8 camel-case serialization, compatible optional additions and new-version requirements for breaking changes |
 | Missing Information | Outbox relay processing and broker delivery semantics | CON-018 and CON-021: resolve claim, retry, acknowledgement, duplicate delivery, ordering and poison-message treatment without reconstructing the stored event |
-| Missing Information | Exact UK telephone validation rule | CON-026: specify accepted forms through an approved business or validation source before executable contract validation is produced |
-| Missing Information | Identifier, timestamp and time-of-day formats for the proposed HTTP API | CON-024: adopt explicit HTTP serialization standards before OpenAPI generation; the VendorRegistered v1 Integration Event formats are approved and no longer missing |
-| Missing Information | Null-versus-omission behaviour for optional and inapplicable result fields | CON-024: decide for Company Registration Number, Primary Trading Authority, Website and Business Description |
-| Missing Information | Authoritative service error-code catalogue and field-path convention | CON-024 and CON-025: agree before client integration and test-catalogue finalisation |
-| Technical Convention | HTTP mappings for Address failures | CON-024 and CON-025 still govern wire status/error-envelope mapping; the business failure distinction and retry semantics are approved |
+| Confirmed | Contact Email and Primary Contact Telephone validation and canonicalisation | CON-026 and HJ-104 v3.6 define the exact supported profiles, canonical stored values and structural-only boundary |
+| Confirmed | Expected failure envelope, validation paths/codes and HTTP mappings | Amended CON-025, CON-026 and CON-040 define one `RequestValidationFailure` containing all independently detectable validation errors and one `registrationValidationFailed` API mapping in §6.4–§6.5; Epic 1 does not use `422` |
+| Missing Information | Correlation propagation and ownership | CON-035 remains responsible; no custom header or error member is made normative here |
 
 # 9. Review Checklist
 
@@ -647,8 +659,8 @@ No caller-supplied idempotency header is proposed. The Vendor Application derive
 - [x] Defines Retrieve Registered Vendor as a side-effect-free query over persisted Vendor state.
 - [x] Returns Registered Vendor Details rather than exposing the aggregate.
 - [x] Introduces no unsupported search, Identity dependency, lifecycle state or read-model infrastructure.
-- [x] Separates inferred business requirements from proposed HTTP conventions.
+- [x] Separates the transport-independent business contract from the approved Epic 1 HTTP adaptation.
 - [x] Records missing information and ambiguities instead of silently resolving them.
-- [x] Reconciles the HJ-010/HJ-012 v1.8 Approved baseline, including amended CON-020, without deciding unresolved relay or broker-delivery mechanics.
+- [x] Reconciles the HJ-010/HJ-012 v2.0 Approved baseline, including the amended unified validation-failure treatment for CON-025, CON-026 and CON-040, without deciding unresolved relay, broker-delivery or correlation mechanics.
 - [x] Keeps approved implementation patterns from becoming unnecessary service-contract requirements.
-- [x] Keeps unresolved architectural choices explicit and traceable to HJ-010 concerns.
+- [x] Keeps the remaining unresolved architectural choices explicit and traceable to HJ-010 concerns.

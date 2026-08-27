@@ -129,6 +129,7 @@ public sealed class PostgreSqlConcurrentVendorRegistrationConvergenceTests
             new FixedIdentifierGenerator(vendorId, eventId),
             TimeProvider.System);
         var service = new RegisterVendorService(
+            new AcceptingRegisterVendorCommandValidator(),
             new AddressResolutionInvoker(
                 new SuccessfulAddressResolver(addressValues)),
             new PostgreSqlRegistrationOutcomeDeterminer(context),
@@ -313,6 +314,16 @@ public sealed class PostgreSqlConcurrentVendorRegistrationConvergenceTests
             TradingLocation tradingLocation)
         {
             return AddressResolutionResult.Succeeded(_addressValues);
+        }
+    }
+
+    private sealed class AcceptingRegisterVendorCommandValidator
+        : IRegisterVendorCommandValidator
+    {
+        public RegisterVendorCommandValidationResult Validate(
+            RegisterVendorCommand command)
+        {
+            return RegisterVendorCommandValidationResult.Accepted(command);
         }
     }
 

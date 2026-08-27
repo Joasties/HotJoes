@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 3.8 |
+| **Version** | 4.0 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 August 2026 |
+| **Last Updated** | 26 August 2026 |
 
 ## Revision History
 
@@ -26,6 +26,9 @@
 | 3.6 | 19 August 2026 | Applied CR-058. Defined the CON-013 composite Vendor uniqueness identity and semantic replay outcomes, and moved identity evaluation after authoritative Address resolution supplies CanonicalAddressId. |
 | 3.7 | 22 August 2026 | Applied CR-064. Added the approved CON-019 pre-outbox mapping step and CON-020 VendorRegistered v1 envelope, payload, serialization and compatibility rules. |
 | 3.8 | 23 August 2026 | Applied CR-TBD-HJ105. Added the approved deterministic VendorRegistered v1 JSON representations to the publication behaviour and preserved the existing interaction sequence. |
+| 3.9 | 25 August 2026 | Added the approved CON-023–CON-026 HTTP adaptation, technical contract, controlled failure mapping and validation ownership and ordering to the registration and retrieval interactions. |
+
+| 4.0 | 26 August 2026 | Reconciled the approved unified RegisterVendor validation-failure outcome and API mapping for CON-025, CON-026 and CON-040. |
 
 ## Related Documents
 
@@ -81,6 +84,8 @@ This document covers:
 - mapping of persisted Vendor state to Registered Vendor Details; and
 - the controlled Vendor Not Found outcome.
 
+The sequence diagrams that show the client interacting directly with the Vendor Application are transport-independent behavioural views. At the HTTP boundary, the thin Vendor API adapter shown below binds and structurally validates the request, maps it to the existing Application operation and maps the typed result to the approved HTTP contract. It does not alter the Application interaction order.
+
 This document does not place Registration Session management inside the Vendor Registration service. It also excludes:
 
 - persisted or resumable registration drafts;
@@ -106,6 +111,9 @@ This document does not place Registration Session management inside the Vendor R
 | Address result completeness | The client cannot submit RegisterVendor until Address selection returns a complete valid result containing a CanonicalAddressId and the required authority information. |
 | Address failure | Semantic rejection fails fast. Technical timeout, unavailability or transient failure returns a controlled retryable application failure without in-process automatic retry; Epic 1 has no circuit breaker. |
 | Server authority | User-interface validation is advisory; server-side validation and aggregate invariants are authoritative. |
+| Validation allocation | The API owns HTTP and wire-structure validation. The Vendor Application authoritatively validates all HJ-104 registration rules and returns all independently detectable errors together before Address resolution or any business effect. The Vendor Domain remains the final defensive invariant boundary. |
+| Canonical values | Successful Application validation produces canonical values used by Address-context processing, semantic identity and fingerprint derivation, Aggregate creation and persistence. Downstream processing never reuses uncanonicalized client input. |
+| HTTP adaptation | `POST /vendors` and `GET /vendors/{vendorId}` are thin ASP.NET Core Minimal API adapters. They contain no Domain rule, Address resolution, persistence query, transaction, event, outbox or broker behaviour. |
 | Vendor existence | No Vendor exists before successful processing. A successful request creates the Vendor in `PendingActivation` and `Offline`. |
 | Declaration lifecycle | Registration Declarations influence the registration decision only and are never persisted or included in Domain or Integration Events. |
 | Event separation | The internal `VendorRegistered` Domain Event and published `VendorRegistered` Integration Event are distinct architectural concepts. |
@@ -122,6 +130,7 @@ This document does not place Registration Session management inside the Vendor R
 |---|---|
 | Prospective Vendor | Supplies registration information, confirms all Registration Declarations and submits Vendor Registration. |
 | Registration UI / BFF | Owns any temporary interaction state, performs convenience validation, coordinates Address search and selection, assembles the complete request and presents the result. |
+| Vendor API | Owns HTTP binding, structural validation, API-to-Application and Application-result-to-HTTP mapping, cancellation forwarding, headers and centralized unexpected-exception handling. |
 | Address Service | Provides Address search and approved Address Resolution references; authoritatively returns canonical identity, immutable snapshot and applicable regulatory authorities. |
 | Vendor Registration Application | Validates the complete request, obtains Address-owned values, derives the composite Vendor identity and semantic registration fingerprint, determines the registration or replay outcome, invokes the aggregate only for first processing, coordinates persistence and returns the authoritative result. |
 | Vendor Aggregate | Enforces Vendor creation invariants, creates the Vendor and records the internal completed business fact. |
@@ -133,6 +142,34 @@ This document does not place Registration Session management inside the Vendor R
 | Compliance Capability | Determines applicable Compliance Requirements through the approved Compliance boundary. |
 
 A Registration Session is deliberately absent from the server-side participant list. A client application or BFF may own transient interaction state, but the Vendor Registration Application neither knows nor depends on it.
+
+## 4.1 HTTP Adaptation Boundary
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client as Registration UI / BFF
+    participant API as Vendor Minimal API
+    participant Application as Vendor Application
+
+    alt Register Vendor
+        Client->>API: POST /vendors (application/json)
+        API->>API: Bind and structurally validate wire request
+        API->>Application: RegisterVendor(transport-independent command, cancellation)
+        Application-->>API: Typed RegisterVendorResult
+        API-->>Client: Approved status, body and Location header
+    else Retrieve Registered Vendor
+        Client->>API: GET /vendors/{vendorId}
+        API->>API: Validate UUID wire representation
+        API->>Application: RetrieveRegisteredVendor(VendorId, cancellation)
+        Application-->>API: Registered details or VendorNotFound
+        API-->>Client: 200 details or controlled 404 envelope
+    end
+```
+
+The API uses lower-camel-case JSON members and enum strings, lowercase canonical UUID `D` response values, UTC invariant round-trip `O` timestamps and invariant `HH:mm:ss` time-only values. Optional response members are present as explicit `null`; omitted and `null` optional request members both mean absence; unknown request members are ignored. First registration and equivalent replay return the original `201 Created` outcome with `VendorId`, `pendingActivation` and `Location: /vendors/{vendorId}`. Retrieval success returns `200 OK` with the complete Registered Vendor Details representation.
+
+Expected failures use one API-owned envelope containing `code`, `message` and always-present `validationErrors`, which is `null` when not applicable. Every Application validation failure returns one `RequestValidationFailure` containing all independently detectable request-field, Registration Declaration, conditional and cross-field errors. The API maps it to `400 Bad Request` with top-level code `registrationValidationFailed`; separate declaration and conditional-rule outcomes or API codes do not exist. Malformed request, invalid Address reference, invalid Address result and Aggregate invariant failures also map to `400`; Vendor Not Found to `404`; idempotency conflict to `409`; temporary Address unavailability and persistence or atomic-recording failure to `503`; and unexpected failure to `500`. Epic 1 does not use `422`.
 
 # 5. Complete RegisterVendor Request
 
@@ -334,17 +371,21 @@ sequenceDiagram
 
 The Vendor Registration service retains no Registration Session after failure. The client application or BFF alone decides whether to retain interaction state so the applicant can correct and resubmit information.
 
-Server-side validation shall enforce all HJ-104 rules, including:
+Before Address resolution, the Vendor Application shall validate the raw registration intent against all HJ-104 rules and return all independently detectable errors together, including:
 
 - all mandatory fields and formats;
 - controlled Legal Operator Type and Trading Location values;
 - conditional Company Registration Number presence and canonical uppercase storage;
+- the approved ASCII Contact Email profile, trimming surrounding whitespace, preserving local-part case and lowercasing the domain;
+- the approved pragmatic UK Primary Contact Telephone profile and canonical `+44` storage;
 - Opening Hours that permit legitimate overnight periods;
 - all three mandatory Registration Declarations;
 - approved Address Resolution reference;
 - Primary Trading Authority presence only for `Stall`;
 - optional Website HTTPS format; and
 - optional Business Description maximum length.
+
+Successful validation supplies canonical values to every subsequent stage. The Domain Value Objects enforce their corresponding invariants defensively. Any failure before commit creates no Vendor, Domain Event, Integration Event, persisted outcome or outbox work.
 
 # 9. Idempotent Replay and Concurrency
 
@@ -508,9 +549,11 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 
 # 12. Failure Behaviour
 
-## 12.1 Request or Declaration Validation Failure
+## 12.1 Application Validation Failure
 
-- Return structured validation errors.
+- Return one `RequestValidationFailure` containing every independently detectable request-field, Registration Declaration, conditional and cross-field validation error.
+- Do not return separate `RegistrationDeclarationFailure` or `ConditionalRuleFailure` outcomes.
+- Map the Application outcome to `400 Bad Request` with top-level API code `registrationValidationFailed`.
 - Persist no Vendor.
 - Record no completed business fact, Domain Event, publication work or Integration Event.
 - Retain no server-side interaction state.

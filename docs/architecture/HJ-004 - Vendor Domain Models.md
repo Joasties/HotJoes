@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 2.7 |
+| **Version** | 2.8 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 August 2026 |
+| **Last Updated** | 25 August 2026 |
 
 ## Revision History
 
@@ -27,6 +27,7 @@
 | 2.5 | 17 August 2026 | Applied CR-057. Aligned the Vendor-owned BusinessAddressSnapshot translation boundary with the positional mapping defined by ADR-006 v1.3. |
 | 2.6 | 22 August 2026 | Applied CR-063. Replaced the deferred VendorRegistered published-contract wording with the approved CON-019/CON-020 pre-outbox translation and versioned v1 contract. |
 | 2.7 | 23 August 2026 | Applied CR-TBD-HJ004. Defined the approved concrete VendorRegistered v1 JSON member structure and deterministic wire representations without coupling the published contract to Vendor Domain types. |
+| 2.8 | 25 August 2026 | Aligned the `EmailAddress` and `TelephoneNumber` Value Object invariants with the approved CON-026 validation and canonicalisation profiles. |
 
 ## Related Documents
 
@@ -522,9 +523,13 @@ contact name;
 email address;
 telephone number.
 ### EmailAddress
-Validated email-address value.
+Immutable canonical email-address value. It defensively enforces the approved Epic 1 ASCII email profile: exactly one `@`; a 1–64-character local part; a maximum total length of 254 characters; the approved ASCII dot-atom character set without a leading, trailing or consecutive dot; and a domain containing at least two 1–63-character ASCII letter, digit or hyphen labels without leading or trailing hyphens. Display-name forms, comments, quoted local parts, domain literals and internationalized Unicode addresses are not valid Epic 1 values.
+
+Surrounding whitespace is removed before construction. The local-part case is preserved and the domain is canonicalised to lowercase. The Value Object establishes structure only and does not represent allocation, deliverability or ownership verification.
 ### TelephoneNumber
-Validated telephone-number value.
+Immutable canonical UK telephone-number value. It defensively accepts only a value normalized from the approved Epic 1 raw-input profile and matching `^(?:(?:\+44|0)7\d{9}|(?:\+44|0)(?:1|2|3|5|8|9)\d{8,9})$`. Bare `44`, specialist, short-code and legacy ranges outside that profile are invalid.
+
+The stored Value Object always uses canonical `+44` form: a domestic leading `0` is removed and replaced with `+44`, while an accepted normalized `+44` value is retained. It establishes plausible UK structure only and does not represent allocation, activity, reachability or ownership verification.
 ### CanonicalAddressId
 Strongly typed, immutable identifier assigned by the Address Domain to the canonical Address.
 It represents the Vendor aggregate's durable relationship with the Address Domain without duplicating Address information owned by that bounded context.

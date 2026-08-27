@@ -40,7 +40,7 @@ The attached artefacts may include:
 
 HJ-013 is a downstream complementary catalogue. It is not required or used as an HJ-107 behavioural-derivation, regeneration or stable-ID input.
 
-Use Part A – Business Service Contract of the supplied current Approved HJ-106 baseline as the primary normative behavioural test basis. Record the exact HJ-106 version used in the generated catalogue.
+Use the supplied current Approved HJ-106 baseline as the primary normative test basis. Part A governs transport-independent business behaviour. Part B governs API behaviour where its technical contract is supported by Approved architectural concerns. Record the exact HJ-106 version used.
 
 Use upstream approved artefacts to:
 
@@ -57,11 +57,10 @@ Use each artefact only within its authority:
 
 | Artefact | Authority in this prompt |
 |---|---|
-| **HJ-106 Part A** | Primary normative basis for HJ-107 behavioural test derivation. |
-| **Authoritative business/domain sources cited by HJ-106** | Confirm terminology, business rules, invariants, ownership and traceability already represented in HJ-106; they shall not silently expand the service contract. |
-| **HJ-106 Part B** | Non-normative proposed technical representation; may produce Proposed tests only. |
+| **HJ-106 Part A** | Primary normative basis for transport-independent behavioural test derivation. |
+| **HJ-106 Part B** | Normative basis for API Contract tests when the applicable technical concerns are Approved in the current HJ-010/HJ-012 baseline; otherwise it may produce Proposed tests only. |
 | **HJ-010** | Identifies unresolved architectural concerns and dependencies that generation must preserve rather than resolve. |
-| **HJ-012** | Identifies approved implementation architecture; it may constrain interpretation but shall not introduce service behaviour absent from HJ-106 Part A. |
+| **HJ-012** | Identifies approved implementation architecture; it may constrain interpretation but does not introduce Vendor Registration behaviour or technical contract requirements absent from the current Approved HJ-106 contract. |
 | **HJ-006** | Authoritative Test Classification, Test Level and test-design standard. |
 | **HJ-005 and HJ-007** | Supporting implementation and enforcement standards; not sources of new Vendor Registration behaviour. |
 | **Existing HJ-107** | Sole regeneration baseline for preservation and reconciliation of the HJ-107-owned `VR-*` Test ID namespace, retained catalogue content and HJ-107 change history. |
@@ -165,25 +164,27 @@ Use:
 
 Supporting sources may clarify the origin of a requirement but must not introduce behaviour absent from the approved service contract.
 
-## Non-Normative Technical Proposal
+## Technical API Contract Authority
 
-HJ-106 Part B may be used only to derive a separate set of **proposed API contract tests**.
+Derive API Contract tests from HJ-106 Part B.
 
-Tests derived from Part B must be clearly labelled:
+When the applicable technical API concerns are Approved in the current HJ-010/HJ-012 baseline, treat the resulting API obligations as normative and assign their appropriate normal priority and dependency status.
+
+When those concerns are unresolved, label the affected tests:
 
 > Non-normative technical convention pending approval.
 
-Do not mix proposed HTTP behaviour with normative business tests.
+Do not infer approval from a Draft or proposed HJ-106 representation alone.
 
 ## Architectural Governance Inputs
 
 Use HJ-010 to identify Current Architectural Concerns whose unresolved decisions constrain test derivation or implementation. Carry the applicable `CON-xxx` references into dependency records and do not select their Approaches.
 
-Use HJ-012 to confirm approved implementation architecture. HJ-012 does not introduce Vendor Registration service behaviour absent from HJ-106 Part A.
+**HJ-012** does not introduce Vendor Registration behaviour or technical contract requirements absent from the current Approved HJ-106 contract.
 
 ## HJ-107 and HJ-013 Responsibility Boundary
 
-HJ-107 owns behavioural test obligations for `RegisterVendor` and `RetrieveRegisteredVendor` derived from HJ-106 Part A and its authoritative sources.
+HJ-107 owns transport-independent behavioural test obligations derived from HJ-106 Part A and API Contract test obligations derived from HJ-106 Part B where the applicable technical concerns are Approved.
 
 HJ-013 owns complementary architecture, dependency, persistence-mechanism, transaction-mechanism, reliable-publication-mechanism and runtime verification. HJ-107 shall not become an omnibus architecture and implementation test register.
 
@@ -524,8 +525,7 @@ Create explicit blocked or partially blocked catalogue entries for every current
 |---|---|
 | Address collaboration and failures | Include only concerns that are not Approved in the current HJ-010 baseline. Preserve already approved Address behaviour as Ready where its test boundary is complete. |
 | Idempotency, concurrency, replay persistence and transaction | Separate approved identity/equivalence behaviour from any still-unresolved concurrency, retention, persistence and transaction mechanisms. |
-| Publication relay, event translation, event schema and broker delivery | Carry the exact current `CON-*` dependencies without selecting their unresolved Approaches. |
-| Technical API contract, failure transport and validation allocation | Keep Part B tests proposed or blocked according to the current concern states. |
+| Technical API contract, failure transport and validation allocation | Derive API tests according to the current concern states. Approved concerns produce normative Ready obligations; unresolved concerns produce Proposed, Partially Blocked or Blocked obligations as applicable. |
 | Database mapping and constraints | Preserve behavioural guarantees while assigning concrete mapping and constraint verification to the applicable current concern and HJ-013 boundary. |
 
 The concern identifiers and states recorded in the generated catalogue shall come from current HJ-010, not from this illustrative area list.
@@ -675,13 +675,11 @@ For every test obligation provide a table row or structured entry containing:
 
 Priority and Dependency Status are separate fields. Do not encode blocked state as Priority.
 
-## 6. Proposed API Contract Tests
+## 6. API Contract Tests
 
-Derive tests from HJ-106 Part B only.
+Derive tests from HJ-106 Part B.
 
-Clearly mark the entire section:
-
-> Non-normative technical conventions pending approval.
+State whether the section is normative or proposed according to the current HJ-010/HJ-012 concern states. Apply the “Non-normative technical conventions pending approval” label only where the governing technical concerns remain unresolved.
 
 Separate:
 
@@ -692,7 +690,7 @@ Separate:
 - header tests;
 - replay-response tests.
 
-Do not treat them as approved business requirements.
+Do not treat API technical obligations as transport-independent business requirements. Where their governing concerns are Approved, treat them as normative API Contract requirements.
 
 ## 7. Blocked and Deferred Tests
 
@@ -784,9 +782,8 @@ Confirm that the Test Catalogue:
 - covers idempotent replay and concurrency;
 - covers atomic persistence and publication work;
 - keeps Domain and Integration Events distinct;
-- does not invent unresolved external contracts;
-- separates Part A business tests from Part B proposed API tests;
-- keeps all Part B-derived tests explicitly Proposed and non-normative;
+- separates Part A transport-independent business tests from Part B API Contract tests;
+- assigns Part B-derived tests normative or Proposed treatment according to the current Approved concern baseline;
 - identifies blocked dependencies explicitly;
 - contains complete requirement-to-test traceability;
 - contains no executable implementation code.
@@ -870,7 +867,7 @@ Classify test obligations as:
 - **Critical** – protects ownership, aggregate validity, idempotency, atomicity, event correctness or prohibition of duplicate business effects.
 - **Important** – protects required business behaviour, collaboration contracts, lifecycle outcomes or controlled failure behaviour.
 - **Standard** – validates supporting field rules, optional behaviour or non-critical boundaries.
-- **Proposed** – derived only from non-normative Part B technical conventions.
+- **Proposed** – derived from a technical convention whose governing authority remains unresolved; do not use for API behaviour already approved through HJ-010/HJ-012 and HJ-106 Part B.
 
 Do not assign every test the same priority.
 
@@ -947,7 +944,7 @@ Do **not**:
 - generate mocks or stubs;
 - generate test data builders;
 - generate CI pipeline configuration;
-- approve unresolved HTTP conventions;
+- treat unresolved HTTP conventions as approved;
 - resolve missing Address, Identity, Compliance or query contracts.
 
 The output should describe **what must be tested and why**, not how the tests are implemented.

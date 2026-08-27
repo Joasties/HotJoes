@@ -1,0 +1,6 @@
+@HotJoes.Api.Vendor_HostAddress = http://localhost:5286
+
+GET {{HotJoes.Api.Vendor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

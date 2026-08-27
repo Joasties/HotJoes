@@ -13,19 +13,11 @@ public abstract class RegisterVendorResult
         return new Success(vendorId);
     }
 
-    public static RegisterVendorResult RequestValidationFailed()
+    public static RegisterVendorResult RequestValidationFailed(
+        IEnumerable<RegistrationValidationError> errors)
     {
-        return new RequestValidationFailure();
-    }
-
-    public static RegisterVendorResult RegistrationDeclarationFailed()
-    {
-        return new RegistrationDeclarationFailure();
-    }
-
-    public static RegisterVendorResult ConditionalRuleFailed()
-    {
-        return new ConditionalRuleFailure();
+        ArgumentNullException.ThrowIfNull(errors);
+        return new RequestValidationFailure(errors);
     }
 
     public static RegisterVendorResult ReferenceIsInvalid()
@@ -73,23 +65,29 @@ public abstract class RegisterVendorResult
 
     public sealed class RequestValidationFailure : RegisterVendorResult
     {
-        internal RequestValidationFailure()
+        internal RequestValidationFailure(
+            IEnumerable<RegistrationValidationError> errors)
         {
-        }
-    }
+            RegistrationValidationError[] copiedErrors = errors.ToArray();
 
-    public sealed class RegistrationDeclarationFailure : RegisterVendorResult
-    {
-        internal RegistrationDeclarationFailure()
-        {
-        }
-    }
+            if (copiedErrors.Length == 0)
+            {
+                throw new ArgumentException(
+                    "At least one validation error is required.",
+                    nameof(errors));
+            }
 
-    public sealed class ConditionalRuleFailure : RegisterVendorResult
-    {
-        internal ConditionalRuleFailure()
-        {
+            if (copiedErrors.Any(error => error is null))
+            {
+                throw new ArgumentException(
+                    "Validation errors cannot contain null.",
+                    nameof(errors));
+            }
+
+            Errors = Array.AsReadOnly(copiedErrors);
         }
+
+        public IReadOnlyList<RegistrationValidationError> Errors { get; }
     }
 
     public sealed class InvalidReference : RegisterVendorResult

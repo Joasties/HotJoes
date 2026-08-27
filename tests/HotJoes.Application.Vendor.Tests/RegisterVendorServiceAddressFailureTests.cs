@@ -15,6 +15,7 @@ public sealed class RegisterVendorServiceAddressFailureTests
         var determiner = new ProhibitedDeterminer();
         var newVendorProcessor = new ProhibitedNewVendorRegistrationProcessor();
         var service = new RegisterVendorService(
+            new AcceptingRegisterVendorCommandValidator(),
             new AddressResolutionInvoker(resolver),
             determiner,
             newVendorProcessor);

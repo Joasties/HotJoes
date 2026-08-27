@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-013 |
 | **Document Title** | Architecture and Implementation Test Catalogue |
-| **Version** | 1.8 |
+| **Version** | 2.0 |
 | **Status** | Approved |
 | **Classification** | Test Catalogue |
 | **Owner** | Project Architecture / Engineering |
-| **Last Updated** | 23 August 2026 |
+| **Last Updated** | 26 August 2026 |
 
 ## Revision History
 
@@ -26,24 +26,27 @@
 | 1.6 | 21 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v1.6 and HJ-107 v1.4 Approved. Preserved all 37 existing `AI-*` IDs, made eight persistence/orchestration obligations Derivable, amended atomicity coverage and added AI-IDEMP-003–004 and AI-PG-001–002 for the approved CON-014–CON-016 and CON-028 cohort. |
 | 1.7 | 22 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v1.7 and HJ-107 v1.5 Approved. Preserved all 41 existing `AI-*` IDs, resolved CON-019/CON-020 dependencies, added AI-EVT-001–003 for pre-outbox mapping, immutable serialized-event staging and relay non-reconstruction, and retained relay/broker execution dependencies under CON-018/CON-021. |
 | 1.8 | 23 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v1.8 and HJ-107 v1.6 Approved. Preserved all 44 active `AI-*` IDs and materially strengthened AI-DE-003, AI-EVT-001 and AI-EVT-002 for the amended CON-020 contract-owned representations, exact mapping and deterministic serialization rules. |
+| 1.9 | 26 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v1.9 and HJ-107 v1.7 Approved. Preserved all 44 existing `AI-*` IDs, added AI-API-001–004 and AI-VAL-001 for the approved CON-023–CON-026 API and validation architecture, and delegated the corresponding observable behaviour to the current HJ-107 catalogue. |
+
+| 2.0 | 26 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v2.0 and HJ-107 v1.8 Approved. Preserved all 49 active `AI-*` IDs and reconciled AI-APP-004, AI-API-003 and AI-VAL-001 with the approved unified `RequestValidationFailure` and `registrationValidationFailed` mapping. |
 
 ## Related Documents
 
 | Document ID | Title | Version | Status | Relationship |
 |---|---|---:|---|---|
 | PR-005 | Generate Architecture and Implementation Test Catalogue | Current | Governing prompt | Defines scope-parameterised HJ-013 derivation, catalogue ownership and stable-ID reconciliation. |
-| HJ-004 | Vendor Domain Models | 2.7 | Approved | Authoritative Vendor Aggregate, Value Object, Entity, exact VendorRegistered v1 contract, Address snapshot and retrieval model. |
+| HJ-004 | Vendor Domain Models | 2.8 | Approved | Authoritative Vendor Aggregate, Value Object, Entity, exact VendorRegistered v1 contract, Address snapshot and retrieval model. |
 | HJ-005 | Coding Standards | 2.0 | Approved | Defines implementation boundaries, Domain modelling, persistence and enforcement expectations. |
 | HJ-006 | Testing Strategy and Standards | 2.0 | Approved | Authoritative Test Levels, Test Classifications and catalogue rules. |
 | HJ-007 | Enforcement Strategy | 2.0 | Approved | Defines build, static-analysis, dependency-validation and review mechanisms. |
-| HJ-010 | Current Application Architectural Concerns | 1.8 | Approved | Complete concern register including amended approved CON-020 and remaining unresolved dependencies. |
-| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 1.8 | Approved | Active delivery boundary including pre-outbox mapping and the exact VendorRegistered v1 contract. |
-| HJ-012 | Established Application Architecture Patterns | 1.8 | Approved | Authoritative approved architecture for CON-001–CON-017, CON-019, CON-020, CON-027, CON-028 and CON-040. |
+| HJ-010 | Current Application Architectural Concerns | 2.0 | Approved | Complete concern register including approved CON-023–CON-026 and remaining unresolved dependencies. |
+| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 2.0 | Approved | Active delivery boundary including the approved API adaptation and validation allocation. |
+| HJ-012 | Established Application Architecture Patterns | 2.0 | Approved | Authoritative approved architecture for CON-001–CON-017, CON-019, CON-020, CON-023–CON-028 and CON-040. |
 | HJ-SM-001 | System Model | 1.0 | Approved | Confirms visible component relationships; visibility does not create delivery scope. |
-| HJ-104 | Vendor Registration Fields Matrix | 3.5 | Approved | Defines registration information, positional Address translation, composite Vendor identity and semantic registration equivalence. |
-| HJ-105 | Vendor Registration Sequence Diagram | 3.8 | Approved | Defines RegisterVendor collaboration order, deterministic event representation, pre-outbox event mapping, replay and failure paths. |
-| HJ-106 | Vendor Registration Service Contract | 1.6 | Approved | Approved operations and exact VendorRegistered v1 published contract. |
-| HJ-107 | Vendor Registration Test Catalogue | 1.6 | Approved | Owns behavioural verification, including exact VendorRegistered v1 contract obligations. |
+| HJ-104 | Vendor Registration Fields Matrix | 3.6 | Approved | Defines registration information, exact contact validation and canonicalisation, positional Address translation, composite Vendor identity and semantic registration equivalence. |
+| HJ-105 | Vendor Registration Sequence Diagram | 4.0 | Approved | Defines API adaptation, validation allocation, RegisterVendor collaboration order, replay and failure paths. |
+| HJ-106 | Vendor Registration Service Contract | 1.8 | Approved | Approved transport-independent operations and normative Epic 1 HTTP/JSON contract. |
+| HJ-107 | Vendor Registration Test Catalogue | 1.8 | Approved | Current behavioural catalogue and stable `VR-*` coverage source. |
 | ADR-001 | Domain-Driven Design as the Primary Architectural Style | Current | Accepted | Governs the Domain Model and approved DDD patterns. |
 | ADR-003 | Event-Driven Collaboration | 1.2 | Accepted | Governs event-driven collaboration, pre-outbox translation and relay non-reconstruction. |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Current | Accepted | Governs Vendor identity and lifecycle commencement. |
@@ -54,10 +57,10 @@
 
 HJ-013 catalogues executable tests and controlled verification obligations required to validate conformance with approved HotJoes application architecture and implementation standards.
 
-This catalogue covers the twenty-two Approved concerns in HJ-012 v1.8:
+This catalogue covers the twenty-six Approved concerns in HJ-012 v2.0:
 
 ```text
-CON-001–CON-017, CON-019, CON-020, CON-027, CON-028 and CON-040
+CON-001–CON-017, CON-019, CON-020, CON-023–CON-028 and CON-040
 ```
 
 HJ-013 does not complete unresolved architecture. Where verification cannot be implemented without selecting an Approach for a Current Architectural Concern, the obligation remains **Dependent** and identifies that concern.
@@ -68,19 +71,19 @@ HJ-013 complements HJ-107. HJ-107 owns service and Domain behaviour derived from
 
 | Artefact | Authority Classification | Use in This Derivation |
 |---|---|---|
-| HJ-012 v1.8 Approved | Primary approved architecture | Supplies twenty-two Approved concerns, including amended CON-020. |
-| HJ-010 v1.8 Approved | Architectural governance | Supplies complete concern states and unresolved `CON-*` dependencies without authorising selection of candidate Approaches. |
-| HJ-011 v1.8 Approved | Active delivery scope | Restricts instantiation to Epic 1 Vendor Registration and includes its approved event-translation and exact published-contract boundaries. |
+| HJ-012 v2.0 Approved | Primary approved architecture | Supplies twenty-six Approved concerns, including CON-023–CON-026. |
+| HJ-010 v2.0 Approved | Architectural governance | Supplies complete concern states and unresolved `CON-*` dependencies without authorising selection of candidate Approaches. |
+| HJ-011 v2.0 Approved | Active delivery scope | Restricts instantiation to Epic 1 Vendor Registration and includes its approved API adaptation and validation boundaries. |
 | HJ-SM-001 v1.0 | System context | Confirms visible relationships; components outside HJ-011 remain outside this derivation. |
-| HJ-004 v2.7 | Domain authority | Defines the Vendor Aggregate, internal fact, exact published v1 contract, Vendor-owned Address snapshot and Domain concepts used by the in-scope operations. |
-| HJ-104 v3.5 and HJ-105 v3.8 | Information and interaction authority | Define registration information, Address translation, orchestration order, deterministic event representation and pre-outbox mapping without independently approving an implementation Approach. |
-| HJ-106 v1.6 | Service boundary | Defines the approved operations and exact VendorRegistered v1 translation, payload, serialization, compatibility and retry semantics. |
-| HJ-107 v1.6 | Behavioural catalogue | Owns behavioural obligations and supplies the current stable `VR-*` coverage references. |
+| HJ-004 v2.8 | Domain authority | Defines the Vendor Aggregate, internal fact, exact published v1 contract, Vendor-owned Address snapshot and Domain concepts used by the in-scope operations. |
+| HJ-104 v3.6 and HJ-105 v4.0 | Information and interaction authority | Define registration information, contact canonicalisation, validation allocation, API adaptation and orchestration order without independently approving an implementation Approach. |
+| HJ-106 v1.8 | Service boundary | Defines the approved transport-independent operations and normative Epic 1 HTTP/JSON contract. |
+| HJ-107 v1.8 | Behavioural catalogue | Owns behavioural obligations and supplies the current stable `VR-*` coverage references. |
 | HJ-005 / HJ-006 / HJ-007 | Engineering and test standards | Govern implementation boundaries, classification and enforcement treatment. |
 | ADR-001, ADR-003 v1.2, ADR-004, ADR-006 v1.3 and ADR-008 v1.4 | Accepted decisions | Supply decision authority for the applicable Approved patterns. |
-| Controlled HJ-013 v1.7 | Reconciliation baseline only | Sole baseline for preserving and reconciling `AI-*` IDs; not independent architectural authority. |
+| Controlled HJ-013 v1.9 | Reconciliation baseline only | Sole baseline for preserving and reconciling `AI-*` IDs; not independent architectural authority. |
 
-No normative source conflict was identified for the twenty-two Approved concerns. CON-019 defines pre-outbox Application mapping and amended CON-020 defines the exact VendorRegistered v1 member structure, formats and contract ownership. CON-018 relay processing and CON-021 broker delivery remain unresolved without weakening the approved contract and staging boundaries.
+No normative source conflict was identified for the twenty-six Approved concerns. CON-023–CON-026 and amended CON-040 define the thin HTTP adaptation, technical API contract, one unified Application validation outcome, centralized controlled failure mapping and layered validation allocation. CON-018 relay processing and CON-021 broker delivery remain unresolved without weakening the approved contract and staging boundaries.
 
 # 3. Scope and Derivation Rules
 
@@ -88,16 +91,16 @@ No normative source conflict was identified for the twenty-two Approved concerns
 
 | Boundary | Applied Baseline |
 |---|---|
-| Approved architecture | HJ-012 v1.8 Approved: CON-001–CON-017, CON-019, CON-020, CON-027, CON-028 and CON-040 |
-| Active delivery scope | HJ-011 v1.8 Approved: Epic 1 Vendor Registration |
+| Approved architecture | HJ-012 v2.0 Approved: CON-001–CON-017, CON-019, CON-020, CON-023–CON-028 and CON-040 |
+| Active delivery scope | HJ-011 v2.0 Approved: Epic 1 Vendor Registration |
 | Generation mode | Controlled Regeneration |
-| Previous HJ-013 baseline | HJ-013 v1.7 Approved |
-| Current behavioural catalogue | HJ-107 v1.6 Approved |
+| Previous HJ-013 baseline | HJ-013 v1.9 Approved |
+| Current behavioural catalogue | HJ-107 v1.8 Approved |
 | Applicable operations | RegisterVendor and RetrieveRegisteredVendor |
 | Applicable visible architecture | Vendor Domain, PostgreSQL persistence, reliable publication and the Address/Compliance boundaries only where exercised by HJ-011 |
 | Visible but excluded architecture | Later Vendor lifecycle commands, Identity behaviour, future queries/read models and other capabilities excluded by HJ-011 |
 
-Approved architecture is instantiated only within HJ-011 v1.8. The wider Domain Model and System Model do not independently expand this catalogue version.
+Approved architecture is instantiated only within HJ-011 v2.0. The wider Domain Model and System Model do not independently expand this catalogue version.
 
 ## 3.2 Derivation Rule
 
@@ -144,7 +147,7 @@ A dependency is not evidence that an Approved concern is deficient. A concern be
 | Concern ID | Approved Approach | Required Guarantee | Delivery Applicability | HJ-013 Treatment | HJ-107 Boundary | Known Dependencies |
 |---|---|---|---|---|---|---|
 | CON-001 | Aggregate | Vendor creation and lifecycle invariants are protected within one consistency boundary. | Vendor creation, persistence and retrieval | Mutation-boundary enforcement and whole-Aggregate rehydration | Creation invariants and outcomes | CON-037 for automated enforcement |
-| CON-002 | Value Object | Identity-free concepts remain explicit and avoid primitive obsession. | Epic 1 Vendor values and Address snapshot | Equality, immutability and persistence conversion | Accepted, rejected and canonical business values | CON-026 for validation authority only |
+| CON-002 | Value Object | Identity-free concepts remain explicit and avoid primitive obsession. | Epic 1 Vendor values and Address snapshot | Equality, immutability and persistence conversion | Accepted, rejected and canonical business values | None; CON-026 is approved behavioural validation authority |
 | CON-003 | Entity | Vendor identity persists through valid lifecycle-bearing behaviour. | Registration and retrieval | Encapsulation and persisted identity | Identity commencement and retrieval | CON-037 for automated enforcement |
 | CON-004 | Domain Event | Registration records an internal fact without infrastructure coupling. | VendorRegistered Domain Event | Domain isolation and representation separation | Event occurrence and non-occurrence | CON-037 for automated enforcement |
 | CON-005 | Repository | Persistence and retrieval do not introduce persistence concerns into Domain. | Vendor save and VendorId retrieval | Contract, dependency direction and adapter integration | Persisted and retrieved service outcomes | CON-037 for dependency enforcement |
@@ -159,11 +162,15 @@ A dependency is not evidence that an Approved concern is deficient. A concern be
 | CON-014 | PostgreSQL composite-identity uniqueness constraint + transaction-coordinated duplicate resolution | Concurrent equivalent or conflicting submissions converge without duplicate effects. | RegisterVendor concurrency boundary | Real-PostgreSQL uniqueness-race and convergence evidence | VR-IDEMP-003 and applicable replay/conflict outcomes | None |
 | CON-015 | Permanent persisted registration outcome + versioned deterministic semantic fingerprint | Qualifying replay returns the original persisted result without re-execution or expiry. | Registration outcome persistence and replay | Fingerprint, retention and original-result round-trip evidence | VR-IDEMP-001–002, VR-FAILURE-007 | None |
 | CON-016 | One explicit PostgreSQL transaction coordinated by Vendor Application and implemented by Infrastructure | Vendor, replay outcome and outbox obligation commit or roll back together. | RegisterVendor atomic persistence boundary | Transaction failure-injection and three-part atomicity evidence | VR-RELIABILITY-001–002, VR-FAILURE-006 | None |
-| CON-040 | Closed typed `RegisterVendorResult` owned by the Vendor Application | RegisterVendor distinguishes committed success from every expected controlled failure without exposing transport, Address-provider, persistence, publication, Registration Session or framework representations. | RegisterVendor Application outcome boundary | Closed-result construction, state-validity, failure-preservation and prohibited-representation evidence | HJ-106 success and controlled failure outcomes | CON-026 validation detail, CON-024–CON-025 HTTP mapping and CON-037 enforcement |
+| CON-040 | Closed typed `RegisterVendorResult` owned by the Vendor Application | RegisterVendor distinguishes committed success from every expected controlled failure without exposing transport, Address-provider, persistence, publication, Registration Session or framework representations; every Application validation failure is one `RequestValidationFailure`. | RegisterVendor Application outcome boundary | Closed-result construction, unified-validation representation, state-validity, failure-preservation and prohibited-representation evidence | HJ-106 success and controlled failure outcomes; VR-REQ-008; VR-FAILURE-001–003 | CON-037 for automated enforcement only; CON-024–CON-026 are approved |
 | CON-017 | Transactional Outbox | A committed Vendor cannot lose its publication obligation. | Registration persistence and messaging | Atomicity, immutable serialized-event staging, rollback, Domain isolation and relay recovery | Durable publication and non-duplication outcomes | CON-018 and CON-021 for relay/broker; CON-037 enforcement |
 | CON-019 | Vendor Application-owned explicit mapper | Internal and external event representations remain separate; translation occurs before outbox persistence and never at relay time. | RegisterVendor completed-fact translation | Mapper execution, Domain isolation and no-reconstruction evidence | VR-INTEGRATION-EVENT-001–003, VR-INTEGRATION-EVENT-010 | CON-018 for concrete relay execution; CON-037 for automated enforcement |
 | CON-020 | VendorRegistered Integration Event v1 contract serialized once as immutable UTF-8 camel-case JSON using contract-owned representations, explicit nulls and deterministic identifier, timestamp, time and enum formats | The exact nested member structure, contract-owned representations and deterministic formats are preserved unchanged through persistence and retry. | Event creation and durable publication staging | Exact mapping plus serialize-once/persist-unchanged integration evidence | VR-INTEGRATION-EVENT-001–010 | CON-018 and CON-021 only for relay/broker execution |
-| CON-027 | Query handler + Repository + response mapper | Retrieval uses persisted Vendor, returns a purpose-specific result and remains side-effect-free. | RetrieveRegisteredVendor | Handler/repository/mapper composition and persistence integration | Found, Not Found, response content and side effects | CON-024 for HTTP mapping |
+| CON-023 | Thin ASP.NET Core Minimal API endpoint adapters | HTTP exposes RegisterVendor and RetrieveRegisteredVendor without allowing transport semantics or collaborators to enter Application or Domain behaviour. | `POST /vendors` and `GET /vendors/{vendorId}` | Transport isolation enforcement plus delegated endpoint behaviour | VR-API-001–003, VR-API-011 | CON-037 for automated dependency enforcement only |
+| CON-024 | Explicit Epic 1 HTTP/JSON contract with generated OpenAPI | Routes, schemas, headers, serialization and response representations are exact and consistently described. | Vendor API and generated OpenAPI | OpenAPI-to-runtime congruence evidence plus delegated wire behaviour | VR-API-003–006, VR-API-011–012 | None |
+| CON-025 | API-owned error envelope and centralized typed outcome mapping | Expected and unexpected failures produce the approved safe HTTP representation without leaking implementation details; every `RequestValidationFailure` uses one `registrationValidationFailed` mapping. | Vendor API error boundary | Centralized-mapper ownership enforcement plus delegated unified mapping behaviour | VR-API-007–010 | CON-037 for automated centralization enforcement only |
+| CON-026 | API structural validation, authoritative Application validation/canonicalisation and defensive Domain invariants | Each layer validates only its approved responsibility; every independently detectable Application validation error is returned in one `RequestValidationFailure`; canonical values flow downstream and pre-commit failure creates no business effect. | RegisterVendor API, Application and Domain boundaries | Behavioural delegation without duplicate architecture tests | VR-REQ-006, VR-REQ-008–010, VR-FAILURE-001–003, VR-CONTACT-002–004, VR-API-003, VR-API-007, VR-API-010 | None |
+| CON-027 | Query handler + Repository + response mapper | Retrieval uses persisted Vendor, returns a purpose-specific result and remains side-effect-free. | RetrieveRegisteredVendor | Handler/repository/mapper composition and persistence integration | Found, Not Found, response content, side effects and HTTP mapping | None |
 | CON-028 | Explicit EF Core fluent mapping + PostgreSQL keys, constraints and indexes | Aggregate, registration-outcome and outbox persistence has explicit faithful mappings and database enforcement. | Vendor Infrastructure persistence | Mapping inspection plus real-PostgreSQL constraint/index/delete evidence | Ready persistence and retrieval outcomes in HJ-107 | CON-029 for migration lifecycle only |
 
 # 5. Architecture and Implementation Test Catalogue
@@ -226,7 +233,7 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 |---|---|---|---|---|---|---|---|---|---|
 | AI-QRY-001 | Retrieval uses the approved handler, repository and mapper roles | The query handler obtains persisted Vendor through the Repository and delegates production of a purpose-specific response without using an alternative state source or exposing the Aggregate. | CON-027; HJ-004 §2.6; HJ-106 §4.12; HJ-012; HJ-005 §§9.2–9.4, 10.4 | Executable Test | Application / Unit | P1 | Collaborator-focused tests show one repository lookup by `VendorId`, mapping from returned Vendor, and no alternative persistence/read-model collaborator. | Response content remains governed by HJ-004/HJ-106 and HJ-107. | Derivable |
 | AI-QRY-002 | Retrieval is side-effect-free | Retrieval does not save Vendor state, record an event, create publication work or invoke a publisher. | CON-027; HJ-106 §4.12.3; HJ-107 VR-RETRIEVE-006 and related obligations | HJ-107 Coverage | Applicable HJ-107 classifications | P1 | The cited HJ-107 retrieval side-effect obligations pass; HJ-013 adds no duplicate application test. | HJ-107 owns the behavioural outcome. | HJ-107 |
-| AI-QRY-003 | Retrieval returns controlled Not Found | Repository absence produces the approved application-level Not Found outcome without infrastructure leakage. | CON-027; HJ-106 §§4.12.2–4.12.3; HJ-107 VR-RETRIEVE-007 | HJ-107 Coverage | Applicable HJ-107 classifications | P1 | The cited HJ-107 Not Found obligation passes; HTTP mapping remains non-normative pending CON-024. | HJ-107 owns business Not Found; CON-024 governs HTTP representation. | HJ-107 |
+| AI-QRY-003 | Retrieval returns controlled Not Found | Repository absence produces the approved application-level Not Found outcome without infrastructure leakage. | CON-027; HJ-106 §§4.12.2–4.12.3, 6.5; HJ-107 VR-RETRIEVE-007, VR-API-008 | HJ-107 Coverage | Applicable HJ-107 classifications | P1 | The cited HJ-107 obligations prove the Application Not Found outcome and its approved HTTP representation. | HJ-107 owns both observable boundaries; HJ-013 adds no duplicate test. | HJ-107 |
 | AI-QRY-004 | Concrete retrieval adapter and mapper preserve their boundaries | A real persisted Vendor is rehydrated through the Repository and mapped into Registered Vendor Details without persistence representations entering the response. | CON-027; CON-005; CON-028; HJ-004 §2.6; HJ-106 §4.12; HJ-012; HJ-005 §§9.4, 10.4–10.5 | Executable Test | Persistence Integration / Integration | P1 | Real-PostgreSQL integration evidence focuses on repository-to-mapper boundary, purpose-specific response mapping, approved snapshot fields and absence of ORM/database types; HJ-107 owns response values and side effects. | None. | Derivable |
 
 ## 5.8 CON-006–CON-013 and CON-040 — Address Boundary and RegisterVendor Orchestration
@@ -243,7 +250,7 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 | AI-APP-001 | RegisterVendor orchestration coordinates approved collaborators | The Application Service coordinates request validation, one Address resolution, first-processing aggregate creation and persistence/publication staging in the approved order while Domain creation rules remain exercised through the Aggregate. Identity/replay persistence coordination is independently owned by AI-IDEMP-002. | CON-011; HJ-004; HJ-105; HJ-106 | Executable Test | Application / Unit | P0 | Collaborator-focused tests prove first-processing and failure-path calls and prohibited calls without duplicating HJ-107 business assertions or the independently testable persistence boundary. | None; AI-IDEMP-002 owns the separate derivable identity/replay coordination. | Derivable |
 | AI-APP-002 | RegisterVendor layer boundaries are enforced | Transport and adapters do not contain Vendor Domain rules, and Domain code does not perform Address, persistence, transport or publication orchestration. | CON-011; CON-006; HJ-012; HJ-005 | Automated Enforcement | Not applicable | P0 | Dependency and structural checks reject Domain-rule relocation and infrastructure orchestration in inner layers. | CON-037 governs the approved enforcement mechanism. | Dependent |
 | AI-APP-003 | RegisterVendor command represents complete client-authored intent | The immutable Vendor Application-owned `RegisterVendorCommand` retains every client-authored registration field, the opaque Address Resolution reference and transient declarations while excluding HTTP types, Registration Session state, a Vendor Aggregate, Address-owned authoritative values, server-generated state, persistence/publication representations, the derived composite identity and the semantic registration fingerprint. | CON-012; CON-013; HJ-012; HJ-011 §2.1; HJ-104; HJ-106 §§4.1–4.3 | Executable Test | Application / Unit | P0 | Focused construction and reflection evidence proves complete field retention, immutability and prohibited-type/value exclusion without duplicating HJ-107 request-validity behaviour. | Automated cross-project dependency enforcement remains subject to CON-037; the executable command contract is independently derivable. | Derivable |
-| AI-APP-004 | RegisterVendor result is a closed valid Application outcome | The immutable Vendor Application-owned `RegisterVendorResult` represents exactly one committed success or one expected controlled HJ-106 failure. Success contains the minimum committed `VendorId` and `PendingActivation` state; failure contains no success payload; `InvalidReference`, `InvalidAddressResult` and `AddressServiceTemporarilyUnavailable` remain distinct. The result exposes no HTTP, Address-provider, persistence, publication, Registration Session or framework representation. | CON-040; HJ-012; HJ-011 §2.1; HJ-106 §§4.7, 4.9, 4.11 | Executable Test | Application / Unit | P0 | Focused construction and reflection evidence proves a closed immutable outcome set, mutually exclusive success/failure state, minimum success data, exact Address failure preservation and prohibited-type exclusion. Tests do not prescribe validation detail or HTTP mapping. | Automated cross-project dependency enforcement remains subject to CON-037; validation detail and HTTP mapping remain governed by CON-026 and CON-024–CON-025. The executable result contract is independently derivable. | Derivable |
+| AI-APP-004 | RegisterVendor result is a closed valid Application outcome | The immutable Vendor Application-owned `RegisterVendorResult` represents exactly one committed success or one expected controlled HJ-106 failure. Success contains the minimum committed `VendorId` and `PendingActivation` state; failure contains no success payload. Every request-field, Registration Declaration, conditional and cross-field validation failure uses one immutable `RequestValidationFailure` containing all independently detectable errors; `RegistrationDeclarationFailure` and `ConditionalRuleFailure` are absent from the closed outcome set. `InvalidReference`, `InvalidAddressResult` and `AddressServiceTemporarilyUnavailable` remain distinct. The result exposes no HTTP, Address-provider, persistence, publication, Registration Session or framework representation. | CON-040; CON-025; CON-026; HJ-012; HJ-011 §2.1; HJ-106 §§4.5, 4.7, 4.9, 4.11; HJ-107 VR-REQ-008, VR-FAILURE-001–003 | Executable Test | Application / Unit | P0 | Focused construction and reflection evidence proves a closed immutable outcome set, mutually exclusive success/failure state, minimum success data, one aggregated validation result, absence of the two superseded result kinds, exact Address failure preservation and prohibited-type exclusion. Tests do not prescribe HTTP mapping. | Automated cross-project dependency enforcement remains subject to CON-037; HJ-107 owns the validation-error content behaviour. | Derivable |
 | AI-IDEMP-001 | Composite identity and semantic fingerprint are explicit Application values | Vendor uniqueness identity and semantic registration fingerprint are immutable, transport-independent Vendor Application values derived after Address resolution. Identity contains only the normalized Trading Name, normalized Legal Operator Name and `CanonicalAddressId`. Fingerprint excludes transient declarations, the opaque Address Resolution reference, server-generated values and technical metadata. Neither value is caller-authored or part of the Vendor Aggregate. | CON-013; HJ-012; HJ-011 §§2.1, 2.4; HJ-104 §§5.3, 5.6; HJ-106 §§4.4, 4.9; HJ-107 VR-REQ-007, VR-IDEMP-007–010 | Executable Test | Application / Unit | P0 | Focused construction and structural tests prove ownership, immutability, exact identity components, prohibited-content exclusion and deterministic value behaviour. HJ-107 remains authoritative for equivalent replay, conflict and registered display-value outcomes. | Automated cross-project enforcement remains subject to CON-037; exact fingerprint encoding and persistence representation remain outside this obligation. | Derivable |
 | AI-IDEMP-002 | RegisterVendor consumes derived identity and fingerprint through the persistence boundary | After successful Address resolution, the Application derives the composite identity and fingerprint, obtains the first-processing, equivalent-replay or conflict determination before aggregate creation, returns the original committed result for replay and never treats conflict as an update. | CON-013–CON-016; CON-028; HJ-012; HJ-011 §§2.1, 2.4; HJ-105 §§7, 9; HJ-106 §§4.6, 4.9; HJ-107 VR-IDEMP-001–009, VR-FAILURE-007/009 | Executable Test | Persistence Integration / Integration | P0 | Collaborator and real-persistence tests prove post-Address derivation, one outcome owner, original-result replay, conflict preservation and absence of aggregate creation for replay/conflict without duplicating HJ-107 business assertions. | None. | Derivable |
 | AI-IDEMP-003 | PostgreSQL uniqueness coordinates concurrent registration | The approved normalized composite identity is enforced by PostgreSQL so concurrent equivalent or conflicting submissions produce one committed owner and every losing transaction commits no business effect. | CON-014; CON-016; CON-028; HJ-012; ADR-008 §§2.2, 2.7; HJ-107 VR-IDEMP-003 | Executable Test | Persistence Integration / Integration | P0 | Real-PostgreSQL concurrency tests release competing transactions at the uniqueness boundary and prove one Vendor, one registration outcome and one outbox record; equivalent losers replay and conflicting losers return conflict after loading the winner. | No process-local/distributed lock, duplicate effect or split owner. | Derivable |
@@ -263,6 +270,16 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 | AI-EVT-001 | Application mapper translates the completed fact into the exact contract before persistence | An explicit Vendor Application mapper creates VendorRegistered v1 from the completed internal fact and approved registration-time information using the exact contract-owned envelope, nested payload, Trading Characteristics, Opening Hours and BusinessAddress representations before outbox persistence. | CON-019; amended CON-020; HJ-012; HJ-004 §7.2; HJ-105 §10; ADR-003; ADR-008 §2.5 | Executable Test | Application / Unit | P0 | Mapper tests prove exact source-to-contract member translation, nesting and exclusions; contract properties match the authoritative registration-time values; no Vendor Domain Aggregate, Value Object, enum or `BusinessAddressSnapshot` type crosses the boundary. | Exact contract values and wire behaviour are owned by HJ-107 VR-INTEGRATION-EVENT-001–009; no unresolved architecture dependency. | Derivable |
 | AI-EVT-002 | Infrastructure serializes deterministically once and persists the event unchanged | Vendor Infrastructure serializes the mapped VendorRegistered v1 once as UTF-8 camel-case JSON using the approved UUID `D`, UTC timestamp `O`, time-only `HH:mm:ss`, lower-camel enum, nested-object and explicit-null rules, then persists the exact immutable bytes with EventId and version inside the registration transaction. | CON-016; CON-017; CON-019; amended CON-020; CON-028; HJ-012; ADR-008 §§2.5–2.7 | Executable Test | Persistence Integration / Integration | P0 | Real-PostgreSQL integration evidence proves one deterministic serialization from representative contract variants and exact round-trip equality of stored EventId, EventVersion and bytes with the produced representation; no remapping, reserialization or format drift occurs at persistence. | None for creation and persistence; relay/broker execution is separate. | Derivable |
 | AI-EVT-003 | Relay publishes the stored event without reconstruction | Publication reads and publishes the stored VendorRegistered v1 identity, version and serialized bytes without querying or reconstructing from current Vendor state. | CON-017; CON-019; CON-020; HJ-012; ADR-003; ADR-008 §§2.5–2.6 | Executable Test | Integration Contract / Integration | P0 | Relay-boundary tests prove exact-byte publication after Vendor state changes and across retry/restart, with no Vendor repository lookup or mapping during relay. | CON-018 must define relay claim, retry and recovery mechanics; CON-021 governs broker acknowledgement/delivery. Already derivable: the prohibited reconstruction rule and exact stored-event expectation. | Dependent |
+
+## 5.11 CON-023–CON-026 — HTTP Adaptation and Validation Allocation
+
+| Test ID | Title | Requirement | Source | Verification Form | Classification / Level | Priority | Expected Evidence | Dependency | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| AI-API-001 | Transport representations and collaborators remain outside inner layers | Vendor Application and Domain assemblies reference no ASP.NET Core, HTTP, OpenAPI or API DTO type, and endpoint adapters contain no Address, repository, transaction, event, outbox or broker implementation dependency. | CON-023; HJ-012; HJ-011 §2.3; HJ-005 | Automated Enforcement | Not applicable | P1 | Dependency and structural checks reject transport types in inner layers and prohibited implementation collaborators in endpoint composition. | CON-037 governs the approved enforcement mechanism. | Dependent |
+| AI-API-002 | Generated OpenAPI describes the approved runtime contract | The generated OpenAPI description exposes only the two approved Epic 1 routes and accurately describes their request, response, media-type, header, nullability and controlled-error schemas. | CON-024; HJ-012; HJ-011 §2.3; HJ-106 Part B | Executable Test | API Contract / API Integration | P0 | Tests compare generated OpenAPI operations and schemas with the runtime API contract, including required members, explicit-null response optionals, success and controlled-error responses, and absence of excluded endpoints or headers. HJ-107 separately owns actual request/response behaviour. | None. | Derivable |
+| AI-API-003 | Controlled failure translation is owned by one API mapping boundary | Typed Application outcomes are translated through one API-owned mapping boundary; every `RequestValidationFailure` follows the single `400 registrationValidationFailed` mapping; and unexpected exceptions are handled centrally rather than independently inside endpoints. | CON-025; CON-026; CON-040; HJ-012; HJ-011 §2.3; HJ-005; HJ-106 §§6.4–6.5 | Automated Enforcement | Not applicable | P0 | Composition and dependency checks show endpoints delegate controlled outcomes to one mapper, the mapper contains only one validation-outcome branch, the superseded declaration and conditional branches are absent, and unexpected exceptions reach the central handler; endpoint-specific mapping tables or exception payload construction are rejected. | CON-037 governs the approved enforcement mechanism; observable status, code and error aggregation remain delegated to HJ-107. | Dependent |
+| AI-API-004 | HTTP endpoint and failure behaviour remains owned by HJ-107 | The approved routes, thin endpoint invocation, JSON representations, success responses, headers, status mappings and client-safe failure envelopes behave exactly as HJ-106 Part B specifies. | CON-023–CON-025; HJ-106 Part B; HJ-107 VR-API-001–012 | HJ-107 Coverage | Applicable HJ-107 classifications | P0 | All cited `VR-API-*` obligations pass; HJ-013 adds no duplicate executable API-behaviour test. | HJ-107 owns the observable API behaviour. | HJ-107 |
+| AI-VAL-001 | Layered validation, unified failure and canonicalisation behaviour remains owned by HJ-107 | API structural validation, authoritative Application validation, aggregation of every independently detectable field, Registration Declaration, conditional and cross-field error into one `RequestValidationFailure`, pre-downstream ordering, canonical-value flow and defensive Domain invariants follow the approved allocation. | CON-025; CON-026; CON-040; HJ-012; HJ-011 §§2.1–2.3; HJ-104; HJ-106; HJ-107 VR-REQ-006, VR-REQ-008–010, VR-FAILURE-001–003, VR-CONTACT-002–004, VR-API-003, VR-API-007, VR-API-010 | HJ-107 Coverage | Applicable HJ-107 classifications | P0 | The cited behavioural obligations pass through direct Application, Domain and API boundaries, proving one aggregated validation result, exact Contact Email and Primary Contact Telephone rules, one API validation code and zero pre-commit business effect. | HJ-107 owns these observable validation responsibilities; HJ-013 adds no duplicate executable test. | HJ-107 |
 
 # 6. Cross-Catalogue Responsibility
 
@@ -284,6 +301,10 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 | PostgreSQL mapping | Persisted and retrieved behavioural outcomes | Explicit EF Core mapping, relational constraint, index and restrictive-delete evidence |
 | RegisterVendor outcome representation | Successful and controlled failure outcomes defined by HJ-106 | Result closure, immutability, state validity, exact Address-failure preservation and prohibited-representation evidence |
 | VendorRegistered v1 published contract | Envelope, payload, independent BusinessAddress, exclusions, explicit nulls, compatibility and retry identity/content | Application mapper execution, Domain isolation, serialize-once persistence and relay non-reconstruction mechanisms |
+| HTTP adaptation | Route behaviour, Application invocation, cancellation, headers and prohibited endpoint side effects | Automated transport-isolation enforcement; exact observable endpoint behaviour is delegated |
+| Technical API contract | Exact runtime HTTP/JSON requests, responses, formats and headers | Generated OpenAPI congruence with the approved runtime contract |
+| Controlled failure mapping | Exact statuses, codes, error envelope and information-exclusion behaviour | Centralized mapping and exception-handler ownership enforcement |
+| Validation allocation | Structural, Application and Domain validation behaviour, one aggregated `RequestValidationFailure`, canonicalisation, ordering and absence of pre-commit effects | Closed-result structure under AI-APP-004; observable validation and API mapping delegated to HJ-107; no duplicate HJ-013 behavioural test |
 
 The same Required Guarantee may have tests at distinct boundaries, but identical stimuli and evidence shall not be duplicated across the catalogues.
 
@@ -292,7 +313,7 @@ The same Required Guarantee may have tests at distinct boundaries, but identical
 | Approved Concern | Required Guarantee | AI Test IDs | HJ-107 Coverage | Coverage Status | Dependencies |
 |---|---|---|---|---|---|
 | CON-001 | Vendor invariants are protected within one consistency boundary. | AI-AGG-001–003 | VR-INV-001–005 and applicable success/failure obligations | Covered | CON-037 for mutation-boundary enforcement only |
-| CON-002 | Identity-free concepts remain explicit and do not degrade into primitive obsession. | AI-VO-001–003 | Applicable field, validation and canonicalisation obligations | Covered | CON-026 remains behavioural validation authority only |
+| CON-002 | Identity-free concepts remain explicit and do not degrade into primitive obsession. | AI-VO-001–003 | Applicable field, validation and canonicalisation obligations | Covered | None; CON-026 is approved behavioural validation authority |
 | CON-003 | Vendor identity persists through valid in-scope behaviour. | AI-ENT-001–003 | VR-STATE and VR-RETRIEVE obligations | Covered | CON-037 for encapsulation enforcement only |
 | CON-004 | Registration records an internal fact without infrastructure coupling. | AI-DE-001–003 | VR-DOMAIN-EVENT-001–004 | Covered / dependent enforcement | CON-037 only |
 | CON-005 | Vendor persistence and retrieval do not introduce persistence concerns into the Domain Model. | AI-REP-001–003 | Applicable persistence and retrieval outcomes | Covered / dependent enforcement | CON-037 only |
@@ -307,16 +328,20 @@ The same Required Guarantee may have tests at distinct boundaries, but identical
 | CON-014 | Concurrent equivalent or conflicting submissions cannot create duplicate effects. | AI-IDEMP-003; AI-PG-002 | VR-IDEMP-003 and applicable replay/conflict obligations | Covered | None |
 | CON-015 | Qualifying replay returns the permanent original committed outcome. | AI-IDEMP-002; AI-IDEMP-004; AI-PG-001 | VR-IDEMP-001–002; VR-FAILURE-007 | Covered | None |
 | CON-016 | Vendor, replay outcome and outbox obligation have one atomic PostgreSQL boundary. | AI-OUT-001–002; AI-IDEMP-002 | VR-RELIABILITY-001–002; VR-FAILURE-006 | Covered | None |
-| CON-040 | RegisterVendor returns a closed transport-independent typed Application outcome distinguishing committed success from every expected controlled failure. | AI-APP-004 | Existing HJ-106-derived success, Address, validation, invariant, reliability and idempotency outcome obligations | Covered / dependent enforcement | CON-037; CON-026 and CON-024–CON-025 govern validation and HTTP detail |
+| CON-040 | RegisterVendor returns a closed transport-independent typed Application outcome distinguishing committed success from every expected controlled failure, with one aggregated validation result. | AI-APP-004 | VR-REQ-008, VR-FAILURE-001–003 and existing success, Address, invariant, reliability and idempotency outcome obligations | Covered / dependent enforcement | CON-037 only; CON-024–CON-026 are approved |
 | CON-017 | A committed Vendor cannot lose its publication obligation. | AI-OUT-001–005; AI-EVT-002–003 | VR-RELIABILITY, VR-IDEMP and applicable failure obligations | Covered / dependent relay execution | CON-018; CON-021; CON-037 |
 | CON-019 | Internal and external event representations are mapped before outbox persistence and never reconstructed by the relay. | AI-DE-003; AI-EVT-001–003 | VR-INTEGRATION-EVENT-001–003, VR-INTEGRATION-EVENT-010 | Covered / dependent relay execution | CON-018 for relay execution; CON-037 for automated enforcement |
 | CON-020 | VendorRegistered v1 has an immutable versioned contract that is serialized once, persisted and published unchanged. | AI-EVT-001–003; AI-OUT-001; AI-OUT-005 | VR-INTEGRATION-EVENT-001–010 | Covered / dependent relay execution | CON-018 and CON-021 only |
-| CON-027 | Retrieval uses persisted Vendor as authoritative source and remains side-effect-free. | AI-QRY-001–004 | VR-RETRIEVE-001–008 | Covered | CON-024 for HTTP mapping only |
-| CON-028 | Aggregate, replay-outcome and outbox data are explicitly mapped and relationally enforced. | AI-PG-001–002; AI-AGG-003; AI-VO-003; AI-ENT-003; AI-REP-003; AI-QRY-004; AI-EVT-002 | Ready persistence, retrieval and event-staging obligations in HJ-107 v1.6 | Covered | CON-029 for migration lifecycle only |
+| CON-023 | HTTP exposes the two operations without importing transport semantics or collaborators into inner layers. | AI-API-001; AI-API-004 | VR-API-001–003, VR-API-011 | Covered / dependent enforcement | CON-037 for automated transport-isolation enforcement only |
+| CON-024 | The approved HTTP/JSON contract and generated OpenAPI remain exact and consistent. | AI-API-002; AI-API-004 | VR-API-003–006, VR-API-011–012 | Covered | None |
+| CON-025 | Expected and unexpected failures use one safe controlled API boundary and exact approved mappings, including one validation mapping. | AI-API-003–004 | VR-API-007–010 | Covered / dependent enforcement | CON-037 for automated centralization enforcement only |
+| CON-026 | Validation ownership, aggregation, canonicalisation, ordering and no-effect guarantees remain explicit across layers. | AI-VAL-001; AI-VO-002; AI-APP-001; AI-APP-004 | VR-REQ-006, VR-REQ-008–010, VR-FAILURE-001–003, VR-CONTACT-002–004, VR-API-003, VR-API-007, VR-API-010 | Covered | None |
+| CON-027 | Retrieval uses persisted Vendor as authoritative source and remains side-effect-free. | AI-QRY-001–004 | VR-RETRIEVE-001–008, VR-API-002, VR-API-006, VR-API-008 | Covered | None |
+| CON-028 | Aggregate, replay-outcome and outbox data are explicitly mapped and relationally enforced. | AI-PG-001–002; AI-AGG-003; AI-VO-003; AI-ENT-003; AI-REP-003; AI-QRY-004; AI-EVT-002 | Ready persistence, retrieval and event-staging obligations in HJ-107 v1.8 | Covered | CON-029 for migration lifecycle only |
 
 # 8. Derivation Findings and Dependencies
 
-No evidence requires any of the twenty-two Approved concerns to become Challenged.
+No evidence requires any of the twenty-six Approved concerns to become Challenged.
 
 | Current Concern | Effect on HJ-013 |
 |---|---|
@@ -331,22 +356,24 @@ No evidence requires any of the twenty-two Approved concerns to become Challenge
 | CON-019 | Resolved; AI-EVT-001 owns Application mapping, AI-EVT-002 owns immutable persistence and AI-EVT-003 retains the approved no-reconstruction rule at the unresolved relay boundary. |
 | CON-020 | Resolved; HJ-107 owns exact v1 contract behaviour while AI-EVT-001–003 own complementary mapping, persistence and relay-mechanism evidence. |
 | CON-021 | Blocks broker-specific delivery and recovery assertions. |
-| CON-024 | Keeps HTTP Not Found and other technical API representations outside normative HJ-013 verification. |
-| CON-026 | Blocks exhaustive EmailAddress/TelephoneNumber validation-profile and allocation evidence; tests must not invent accepted or rejected formats. |
+| CON-023 | Resolved; AI-API-001 owns transport-isolation enforcement and AI-API-004 delegates observable endpoint behaviour to HJ-107. |
+| CON-024 | Resolved; AI-API-002 owns generated OpenAPI congruence and AI-API-004 delegates runtime HTTP/JSON behaviour to HJ-107. |
+| CON-025 | Resolved; AI-API-003 owns centralized mapping-boundary enforcement and AI-API-004 delegates observable status/error behaviour to HJ-107. |
+| CON-026 | Resolved; AI-VAL-001 delegates exact layered validation and canonicalisation behaviour to HJ-107 without duplicating it. |
 | CON-028 | Resolved; real-PostgreSQL mapping, rehydration, repository, constraint, index and restrictive-delete evidence is derivable. CON-029 remains responsible only for migration lifecycle. |
 | CON-037 | Blocks selection and implementation of automated dependency, structure and architecture-fitness enforcement. |
 
-The remaining dependencies constrain implementation or execution of tests; they do not invalidate the twenty-two Approved Approaches.
+The remaining dependencies constrain implementation or execution of tests; they do not invalidate the twenty-six Approved Approaches.
 
-This PR-005 regeneration found no behavioural-catalogue omission, normative source conflict or evidence requiring an Approved concern to become Challenged. It materially strengthens three existing representation, mapping and staging obligations and preserves every other controlled HJ-013 v1.7 responsibility.
+This PR-005 regeneration found no behavioural-catalogue omission, normative source conflict or evidence requiring an Approved concern to become Challenged. It preserves all 49 active obligations and materially amends three to reflect the unified validation-failure decision.
 
 # 9. Generation Readiness
 
 | Readiness | Obligations | Treatment |
 |---|---|---|
-| **Derivable** | AI-AGG-003; AI-VO-001–003; AI-ENT-003; AI-REP-002–003; AI-OUT-001–002; AI-QRY-001; AI-QRY-004; AI-ADDR-002–006; AI-APP-001; AI-APP-003–004; AI-IDEMP-001–004; AI-PG-001–002; AI-EVT-001–002 | Generate focused Domain, Application, Persistence Integration and Integration Contract test candidates and perform the repository contract review within each obligation's stated boundary. |
-| **HJ-107 Coverage** | AI-AGG-001; AI-ENT-001; AI-DE-002; AI-OUT-004; AI-QRY-002; AI-QRY-003 | Generate no duplicate HJ-013 executable test; use the referenced HJ-107 coverage. |
-| **Dependent** | AI-AGG-002; AI-ENT-002; AI-DE-001; AI-DE-003; AI-REP-001; AI-OUT-003; AI-OUT-005; AI-ADDR-001; AI-ADDR-007; AI-APP-002; AI-EVT-003 | Retain the obligations, but do not allow test or implementation generation to select unresolved relay, broker or enforcement Approaches. |
+| **Derivable** | AI-AGG-003; AI-VO-001–003; AI-ENT-003; AI-REP-002–003; AI-OUT-001–002; AI-QRY-001; AI-QRY-004; AI-ADDR-002–006; AI-APP-001; AI-APP-003–004; AI-IDEMP-001–004; AI-PG-001–002; AI-EVT-001–002; AI-API-002 | Generate focused Domain, Application, Persistence Integration, Integration Contract and API Contract test candidates and perform the repository contract review within each obligation's stated boundary. |
+| **HJ-107 Coverage** | AI-AGG-001; AI-ENT-001; AI-DE-002; AI-OUT-004; AI-QRY-002; AI-QRY-003; AI-API-004; AI-VAL-001 | Generate no duplicate HJ-013 executable test; use the referenced HJ-107 coverage. |
+| **Dependent** | AI-AGG-002; AI-ENT-002; AI-DE-001; AI-DE-003; AI-REP-001; AI-OUT-003; AI-OUT-005; AI-ADDR-001; AI-ADDR-007; AI-APP-002; AI-EVT-003; AI-API-001; AI-API-003 | Retain the obligations, but do not allow test or implementation generation to select unresolved relay, broker or enforcement Approaches. |
 
 HJ-107 test-candidate readiness remains governed by HJ-107. This catalogue does not modify or reconcile any `VR-*` ID.
 
@@ -356,69 +383,60 @@ Readiness for a test candidate does not authorise unrestricted implementation ge
 
 ## 10.1 AI Test ID Reconciliation
 
+HJ-013 v1.9 is the sole `AI-*` stable-ID baseline.
+
 | AI Test ID | Previous Treatment | Regenerated Treatment | Reason |
 |---|---|---|---|
-| AI-DE-003 | Distinct Domain and Integration Event types; published Integration Event, outbox, serialization and broker types absent from Vendor Domain. | Adds explicit contract ownership of identifier, timestamp, enum, Trading Characteristics, Opening Hours and BusinessAddress representations and prohibits reuse of all applicable Vendor Domain types. | Amended CON-020 closes the representation-ownership detail; CON-037 remains the only enforcement dependency. |
-| AI-EVT-001 | Application mapper produced VendorRegistered v1 with exact source-to-contract translation, exclusions and independent BusinessAddress. | Adds exact nested contract-owned representations and explicit prohibition of Aggregate, Value Object, enum and snapshot-type leakage. | HJ-106 v1.6 and HJ-107 v1.6 make the mapper target exact. |
-| AI-EVT-002 | Infrastructure serialized once as UTF-8 camel-case JSON and persisted EventId, version and bytes unchanged with explicit nulls. | Adds deterministic UUID `D`, UTC timestamp `O`, time-only `HH:mm:ss`, lower-camel enum and nested-object evidence while preserving exact-byte staging. | Amended CON-020 closes every previously ambiguous serialization choice. |
-| Remaining 41 existing AI-* IDs | Controlled HJ-013 v1.7 treatment. | Preserved without material obligation change. | The approved delta affects only representation separation, mapper output and deterministic staging evidence. |
+| AI-APP-004 | Closed result represented success and expected failures but did not require one validation result or prohibit the two separate validation result kinds. | Requires one immutable `RequestValidationFailure`, absence of `RegistrationDeclarationFailure` and `ConditionalRuleFailure`, and preserves all other result kinds and exclusions. | Amended CON-040 and HJ-106 v1.8 change the closed result representation. |
+| AI-API-003 | One centralized mapper without a prescribed unified validation branch. | Requires exactly one validation-outcome branch and absence of the superseded declaration/conditional branches, while retaining central exception handling. | Amended CON-025, CON-026 and CON-040 define one validation mapping. |
+| AI-VAL-001 | Delegated layered validation, aggregate error collection and canonicalisation behaviour. | Delegates the explicit single-result aggregation and unified API mapping to current HJ-107 obligations. | HJ-107 v1.8 preserves the trigger obligations and makes their shared outcome explicit. |
+| Remaining 46 active AI-* IDs | Controlled HJ-013 v1.9 treatment. | Preserved without material obligation change. | Their approved architecture and delivery applicability are unchanged. |
 
 Reconciliation totals:
 
-- 44 existing AI-* IDs retained;
-- 41 existing AI-* IDs preserved without material obligation change;
-- 3 existing AI-* IDs materially amended;
-- 0 new AI-* IDs;
-- 0 retired, merged, split, superseded or reused IDs; and
+- 49 active `AI-*` IDs retained;
+- 46 preserved without material obligation change;
+- 3 materially amended;
+- 0 added;
+- 0 retired, merged, split, superseded, reused or reassigned; and
 - 0 unresolved stable-ID mappings.
 
 ## 10.2 Behavioural Reference Reconciliation
 
 | AI Test ID | Previous Behavioural Reference | Current Behavioural Reference | Treatment |
 |---|---|---|---|
-| AI-DE-003; AI-EVT-001 | VR-DOMAIN-EVENT-001–004; VR-INTEGRATION-EVENT-001–003 | Same stable IDs, with VR-INTEGRATION-EVENT-001–002 materially strengthened in HJ-107 v1.6 | HJ-013 retains representation isolation and mapper execution; HJ-107 retains event occurrence, exact payload and exclusions. |
-| AI-EVT-002 | VR-INTEGRATION-EVENT-006–010; VR-RELIABILITY-001–004 | Same stable IDs, with VR-INTEGRATION-EVENT-006–008 materially strengthened in HJ-107 v1.6 | HJ-013 retains deterministic serialize-once/persist-unchanged evidence; HJ-107 retains exact wire behaviour and observable retry outcomes. |
-| AI-EVT-003; AI-OUT-005 | VR-INTEGRATION-EVENT-010; VR-RELIABILITY-003–004; VR-FAILURE-008 | Unchanged current stable IDs | Relay mechanism evidence remains dependent; behavioural immutable-retry and failure outcomes remain in HJ-107. |
-| All other HJ-107-referencing AI-* IDs | HJ-107 v1.5 stable IDs | Corresponding current stable IDs in HJ-107 v1.6 | References retained; no behavioural responsibility moved into HJ-013. |
+| AI-APP-004 | General HJ-106 success and controlled failures | VR-REQ-008; VR-FAILURE-001–003 plus unchanged success and other failure obligations | Adds explicit unified-result trigger coverage without duplicating behaviour. |
+| AI-API-003 | Observable mapping delegated generally to VR-API-007–010 | VR-API-007 and VR-API-010 unified validation mappings | Architecture enforcement remains distinct from observable API behaviour. |
+| AI-VAL-001 | VR-REQ-006, VR-REQ-008–010, VR-CONTACT-002–004, VR-API-003, VR-API-007, VR-API-010 | Same references plus VR-FAILURE-001–003 | Preserves distinct trigger coverage while delegating their common result. |
+| All other HJ-107-referencing AI-* IDs | Stable IDs in HJ-107 v1.7 | Corresponding current stable IDs in HJ-107 v1.8 | References retained; no behavioural responsibility moved into HJ-013. |
 
 Behavioural reconciliation totals:
 
-- current behavioural baseline: HJ-107 v1.6 Approved;
-- 3 existing AI-* obligations reconciled to materially strengthened current behavioural coverage;
-- 0 missing referenced VR-* IDs; and
-- 0 VR-* IDs created, changed, retired or reconciled by PR-005.
+- current behavioural baseline: HJ-107 v1.8 Approved;
+- 3 `AI-*` obligations materially reconciled to current behavioural coverage;
+- 0 missing referenced `VR-*` IDs; and
+- 0 `VR-*` IDs created, changed, retired or reconciled by PR-005.
 
 # 11. Review Checklist
 
-- [x] Uses the supplied execution context rather than hard-coded Epic scope in PR-005.
-- [x] Derives active obligations only from Approved entries in HJ-012 v1.8 Approved.
-- [x] Instantiates those obligations only within HJ-011 v1.8 Approved.
-- [x] Does not treat HJ-SM-001 visibility as delivery scope.
-- [x] Preserves applicable earlier HJ-013 obligations.
-- [x] Uses HJ-013 v1.7 as the sole AI-* stable-ID baseline.
-- [x] Creates, changes and reconciles only AI-* IDs.
-- [x] Does not create, modify, retire or reconcile any VR-* ID.
-- [x] References only behavioural IDs present in HJ-107 v1.6 Approved.
+- [x] Uses the supplied execution context and HJ-011 v2.0 delivery boundary.
+- [x] Derives active obligations only from Approved entries in HJ-012 v2.0.
+- [x] Uses HJ-013 v1.9 as the sole `AI-*` stable-ID baseline.
+- [x] Retains all 49 active `AI-*` IDs and reconciles the three material amendments.
+- [x] Does not create, modify, retire or reconcile any `VR-*` ID.
+- [x] References only behavioural IDs present in HJ-107 v1.8 Approved.
 - [x] Duplicates no HJ-107 behavioural obligation as an HJ-013 executable test.
-- [x] Assigns one independently diagnosable responsibility to each obligation.
-- [x] Contains no circular responsibility delegation.
-- [x] Separates derivable event mapping/staging evidence from unresolved enforcement, relay and broker evidence.
-- [x] Uses exactly one approved HJ-006 Classification / Level for each Executable Test.
-- [x] Uses no invented Architecture Test or Address Adapter Contract classification.
-- [x] Uses only Derivable, Dependent and HJ-107 derivation statuses.
-- [x] Identifies the governing concern or missing authority for every dependency.
+- [x] Keeps closed-result structure, mapping-boundary enforcement and observable validation behaviour independently diagnosable.
+- [x] Uses only approved Verification Forms, HJ-006 classifications and Derivation Status values.
 - [x] Selects no Approach for an unresolved concern.
-- [x] Introduces only the persistence and event-contract treatments explicitly approved by CON-014–CON-020 and CON-028; invents no operation, schema, format or lifecycle transition.
-- [x] Distinguishes catalogue derivation defects from implementation defects and architectural challenges.
-- [x] Does not amend HJ-010, HJ-012 or HJ-107.
-- [x] Reconciles every preserved, materially changed and added AI-* ID, with no retired, merged, split or superseded ID.
-- [x] Identifies exactly which obligations are ready for constrained test-candidate generation.
+- [x] Introduces no operation, schema, format, technology or lifecycle transition.
+- [x] Records no source conflict or architectural challenge.
 - [x] Contains no executable test or implementation code.
 
 # 12. Next Steps
 
-1. Review and apply HJ-013 v1.8 derived from HJ-012 v1.8 and HJ-107 v1.6 Approved.
-2. Resume PR-006 Slice 8C.3 using the materially strengthened AI-EVT-001–002 event mapping and deterministic staging obligations.
-3. Implement in small test-driven stages: orchestration boundary, replay persistence, concurrency, atomic transaction, mapping/constraints, Application event mapping and immutable staging.
+1. Review and apply HJ-013 v2.0 derived from HJ-012 v2.0 and HJ-107 v1.8 Approved.
+2. Resume PR-006 for Slice 10C under the approved CON-023–CON-026 and CON-040 validation/API cohort.
+3. Generate the next focused test proposal from the reconciled validation obligations; do not recreate separate declaration or conditional result types.
 4. Retain relay and broker obligations as Dependent on CON-018 and CON-021.
-5. Retain AI-ADDR-001, AI-ADDR-007 and AI-APP-002 as Dependent until CON-037 approves the enforcement mechanism.
+5. Retain automated enforcement obligations as Dependent where CON-037 remains the governing unresolved enforcement authority.

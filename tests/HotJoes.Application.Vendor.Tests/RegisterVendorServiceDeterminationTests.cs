@@ -74,6 +74,7 @@ public sealed class RegisterVendorServiceDeterminationTests
         INewVendorRegistrationProcessor newVendorProcessor)
     {
         return new RegisterVendorService(
+            new AcceptingRegisterVendorCommandValidator(),
             new AddressResolutionInvoker(new SuccessfulAddressResolver(addressValues)),
             determiner,
             newVendorProcessor);

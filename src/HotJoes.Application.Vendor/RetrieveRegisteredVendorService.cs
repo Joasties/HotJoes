@@ -4,6 +4,7 @@ using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 namespace HotJoes.Application.Vendor;
 
 public sealed class RetrieveRegisteredVendorService
+    : IRetrieveRegisteredVendorService
 {
     private readonly IVendorRepository _vendorRepository;
     private readonly RegisteredVendorDetailsMapper _detailsMapper;

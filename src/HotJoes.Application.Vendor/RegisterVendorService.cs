@@ -1,20 +1,24 @@
 namespace HotJoes.Application.Vendor;
 
-public sealed class RegisterVendorService
+public sealed class RegisterVendorService : IRegisterVendorService
 {
+    private readonly IRegisterVendorCommandValidator _validator;
     private readonly AddressResolutionInvoker _addressResolutionInvoker;
     private readonly IRegistrationOutcomeDeterminer _registrationOutcomeDeterminer;
     private readonly INewVendorRegistrationProcessor _newVendorRegistrationProcessor;
 
     public RegisterVendorService(
+        IRegisterVendorCommandValidator validator,
         AddressResolutionInvoker addressResolutionInvoker,
         IRegistrationOutcomeDeterminer registrationOutcomeDeterminer,
         INewVendorRegistrationProcessor newVendorRegistrationProcessor)
     {
+        ArgumentNullException.ThrowIfNull(validator);
         ArgumentNullException.ThrowIfNull(addressResolutionInvoker);
         ArgumentNullException.ThrowIfNull(registrationOutcomeDeterminer);
         ArgumentNullException.ThrowIfNull(newVendorRegistrationProcessor);
 
+        _validator = validator;
         _addressResolutionInvoker = addressResolutionInvoker;
         _registrationOutcomeDeterminer = registrationOutcomeDeterminer;
         _newVendorRegistrationProcessor = newVendorRegistrationProcessor;
@@ -26,6 +30,26 @@ public sealed class RegisterVendorService
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        RegisterVendorCommandValidationResult validationResult =
+            _validator.Validate(command);
+
+        return validationResult switch
+        {
+            RegisterVendorCommandValidationResult.Failure failure =>
+                RegisterVendorResult.RequestValidationFailed(failure.Errors),
+            RegisterVendorCommandValidationResult.Success success =>
+                await RegisterValidatedAsync(
+                    success.Command,
+                    cancellationToken),
+            _ => throw new InvalidOperationException(
+                "The registration validation result is not supported.")
+        };
+    }
+
+    private async Task<RegisterVendorResult> RegisterValidatedAsync(
+        RegisterVendorCommand command,
+        CancellationToken cancellationToken)
+    {
         AddressResolutionResult addressResult = _addressResolutionInvoker.Resolve(
             command.AddressResolutionReference,
             command.TradingLocation);

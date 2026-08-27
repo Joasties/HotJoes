@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-104 |
 | **Document Title** | Vendor Registration Fields Matrix |
-| **Version** | 3.5 |
+| **Version** | 3.6 |
 | **Status** | Approved |
 | **Classification** | Requirements |
 | **Owner** | Project Architecture |
-| **Last Updated** | 19 August 2026 |
+| **Last Updated** | 25 August 2026 |
 
 ## Revision History
 
@@ -23,6 +23,7 @@
 | 3.3 | 17 August 2026 | Applied CR-050. Defined the accepted Address Resolution reference and normalized Business Address Snapshot information contract for CON-008 and CON-009. |
 | 3.4 | 17 August 2026 | Applied CR-057. Aligned the Vendor Registration information contract with the positional Address-to-BusinessAddressSnapshot mapping defined by ADR-006 v1.3. |
 | 3.5 | 19 August 2026 | Applied CR-058. Defined the approved CON-013 composite Vendor uniqueness identity, semantic registration equivalence and equivalent-replay and conflict outcomes. |
+| 3.6 | 25 August 2026 | Defined the approved CON-026 Contact Email and Primary Contact Telephone validation and canonicalisation profiles and clarified authoritative Application validation allocation. |
 
 ## 1. Purpose
 
@@ -62,8 +63,8 @@ This document intentionally excludes:
 | 7 | Service Includes Hot Food | Boolean | Yes | — | Registered Information | Indicates whether the Vendor supplies food or drink heated above ambient room temperature.<br>Used together with Opening Hours to determine applicable Compliance Requirements. See §5.1. |
 | 8 | Alcohol Service | Boolean | Yes | — | Registered Information | Indicates whether the Vendor supplies alcohol.<br>Used to determine applicable Compliance Requirements. See §5.1. |
 | 9 | Contact Name | Text | Yes | 1–100 characters | Registered Information | Primary business contact. See §5.2. |
-| 10 | Contact Email | Email | Yes | Valid email format | Registered Information | Business correspondence. See §5.2. |
-| 11 | Contact Telephone | Telephone | Yes | UK telephone validation | Registered Information | Primary contact number. See §5.2. |
+| 10 | Contact Email | Email | Yes | Required ASCII email profile defined in §5.2; surrounding whitespace trimmed; domain stored lowercase while local-part case is preserved. | Registered Information | Structural validation only; allocation, deliverability and ownership verification are outside Epic 1. See §§5.2–5.3. |
+| 11 | Contact Telephone | Telephone | Yes | Required pragmatic UK telephone profile defined in §5.2; presentation characters removed and value stored in canonical `+44` form. | Registered Information | Structural validation only; allocation, activity, reachability and ownership verification are outside Epic 1. See §§5.2–5.3. |
 | 12 | Business Address | Address selection | Yes | A permanent opaque Address Resolution reference issued for a complete valid Address result bound to the declared Trading Location shall identify the selected address. The same Trading Location shall be supplied at registration. Client-supplied snapshot or authority values are not accepted. | Registered Information | The client cannot submit RegisterVendor before successful Address selection. The Address Domain supplies the Canonical Address Identifier, Business Address Snapshot and regulatory-authority information. See §5.4, §5.5, ADR-006, HJ-004 and HJ-105. |
 | 13 | Canonical Address Identifier | Derived | Yes | Supplied by the Address Domain from the approved Address Resolution. Not client-editable. | Registered Information | Supplied exclusively by the Address Domain; not entered, edited or overridden by the Vendor. Persisted with the Business Address Snapshot and contributes to the Vendor uniqueness identity. See §§5.4–5.6, ADR-006 and HJ-004. |
 | 14 | Food Registration Authority | Derived | Yes | Derived from the approved Business Address or mobile unit base address. | Registered Information | Provided by the Address Service. Not manually editable by the Vendor. See §5.4, §5.5. |
@@ -179,8 +180,8 @@ Validation rules represent business constraints. Implementation-specific validat
 | Trading Location | Must be a value from the controlled list (Restaurant, Stall, Kitchen) |
 | Opening Hours | Represented by Start Time and End Time. Validation shall not require Start Time to be earlier than End Time, allowing legitimate overnight trading periods (for example 23:00–05:00). |
 | Contact Name | 1–100 characters |
-| Contact Email | Valid email format |
-| Contact Telephone | UK telephone validation |
+| Contact Email | Surrounding whitespace is removed. The value shall contain exactly one `@`; the local part shall contain 1–64 characters; and the complete address shall contain at most 254 characters. The ASCII local part permits letters, digits and the characters `. ! # $ % & ' * + - / = ? ^ _ \` { \| } ~`; a dot shall not appear first, last or consecutively. The domain shall contain at least two dot-separated labels. Each label shall contain 1–63 ASCII letters, digits or hyphens and shall not begin or end with a hyphen. Display-name forms, comments, quoted local parts, domain literals and internationalized Unicode addresses are prohibited. This validates plausible structure only. |
+| Contact Telephone | Surrounding whitespace is removed. Raw input may contain decimal digits, spaces, hyphens and parentheses, plus one `+` only as the first non-whitespace character. Spaces, hyphens and parentheses are removed before validation; a leading `+` is retained. Bare `44` notation is prohibited. The normalized value shall match `^(?:(?:\+44\|0)7\d{9}\|(?:\+44\|0)(?:1\|2\|3\|5\|8\|9)\d{8,9})$`. Specialist, short-code and legacy ranges outside this profile are prohibited in Epic 1. This validates plausible UK structure only. |
 | Business Address | Must be selected from the Address Service |
 | Website | Valid HTTPS URL (when supplied) |
 | Business Description | Maximum 2,000 characters (when supplied) |
@@ -193,6 +194,18 @@ Validation rules represent business constraints. Implementation-specific validat
 
 2. **Vendor uniqueness name comparison**
    Trading Name and Legal Operator Name are each compared after trimming leading and trailing whitespace and without regard to case when deriving the Epic 1 Vendor uniqueness identity. These comparison forms do not replace or alter the registered display values.
+
+3. **Contact Email**
+   Surrounding whitespace is removed. The local-part case is preserved and the domain is converted to lowercase before storage.
+
+4. **Primary Contact Telephone**
+   Accepted presentation characters are removed. A domestic normalized value is converted to canonical international form by removing its leading `0` and prepending `+44`; an accepted normalized `+44` value is retained. The canonical `+44` value is stored as Registered Information.
+
+### 5.3.1 Validation Ownership and Ordering
+
+The Vendor Application is the authoritative owner of the registration-field, declaration, conditional and cross-field validation rules in this information contract. It validates the complete raw registration intent before Address resolution, uniqueness identity or semantic fingerprint determination, Aggregate creation or persistence. All independently detectable errors are returned together.
+
+Successful Application validation produces canonical values used by every downstream stage. The API may perform structural validation for early feedback but does not replace Application validation. The Vendor Domain remains the final defensive owner of Aggregate and Value Object invariants. Every pre-commit validation failure creates no Vendor, Domain Event, Integration Event, persisted outcome or outbox work.
 
 ### 5.4 Derived Information
 

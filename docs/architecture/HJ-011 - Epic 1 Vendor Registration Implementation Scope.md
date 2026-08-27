@@ -6,11 +6,11 @@
 | --- | --- |
 | **Document ID** | HJ-011 |
 | **Document Title** | Epic 1 Vendor Registration Implementation Scope |
-| **Version** | 1.8 |
+| **Version** | 2.0 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 August 2026 |
+| **Last Updated** | 26 August 2026 |
 
 ## Revision History
 
@@ -25,6 +25,9 @@
 | 1.6 | 21 August 2026 | Added the approved CON-014–CON-016 and CON-028 PostgreSQL-backed concurrency, permanent replay-outcome, atomic transaction and explicit EF Core mapping boundaries to Epic 1. |
 | 1.7 | 22 August 2026 | Applied CR-065. Added the approved CON-019 pre-outbox VendorRegistered mapper and CON-020 versioned Integration Event v1 contract to Epic 1 delivery scope. |
 | 1.8 | 23 August 2026 | Applied CR-TBD-HJ011. Added the approved concrete VendorRegistered v1 JSON member structure and deterministic wire-format requirements to Epic 1 delivery scope. |
+| 1.9 | 25 August 2026 | Added the approved CON-023–CON-026 thin Minimal API boundary, technical HTTP/JSON contract, centralized controlled-failure mapping and authoritative Application validation allocation to Epic 1. |
+
+| 2.0 | 26 August 2026 | Reconciled the approved unified Application validation-failure outcome across the Epic 1 RegisterVendor delivery scope. |
 
 ## Related Documents
 
@@ -80,7 +83,9 @@ No Vendor behaviour beyond that required to complete and retrieve the registrati
 
 The `RegisterVendorCommand` contains all client-authored registration fields, the opaque Address Resolution reference and transient Registration Declarations. It is independent of the HTTP request representation and any client/BFF Registration Session. It does not contain a Vendor Aggregate, authoritative Address-owned values, server-generated Vendor state, persistence or publication representations, or the derived uniqueness identity, semantic fingerprint and remaining idempotency mechanics governed by CON-013–CON-016.
 
-The `RegisterVendorResult` distinguishes committed success from the expected controlled HJ-106 failure outcomes. Committed success carries only the minimum committed Vendor identity and lifecycle state. Expected failures use stable Vendor Application-owned outcome kinds. The result contains no HTTP representation or status mapping, Address-provider representation, persistence or publication representation, Registration Session state, or framework type. Validation detail and HTTP mapping mechanics remain governed by their separate concerns.
+The `RegisterVendorResult` distinguishes committed success from the expected controlled HJ-106 failure outcomes. Committed success carries only the minimum committed Vendor identity and lifecycle state. Expected failures use stable Vendor Application-owned outcome kinds. Every request-field, Registration Declaration, conditional and cross-field validation failure is represented by one immutable `RequestValidationFailure` containing all independently detectable validation errors; `RegistrationDeclarationFailure` and `ConditionalRuleFailure` are not separate outcomes. The result contains no HTTP representation or status mapping, Address-provider representation, persistence or publication representation, Registration Session state, or framework type. Validation detail and HTTP mapping mechanics remain governed by their separate concerns.
+
+The Vendor Application authoritatively validates all HJ-104 field, declaration, conditional and independently detectable cross-field rules before Address resolution, identity or fingerprint determination, Aggregate creation or persistence. It returns all independently detectable validation errors together. Successful validation supplies canonical values to every downstream stage, including canonical Contact Email and Primary Contact Telephone values. The Vendor Domain remains the final defensive owner of Aggregate and Value Object invariants.
 
 After authoritative Address resolution, RegisterVendor establishes the Vendor uniqueness identity from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and CanonicalAddressId. A repeated submission with that identity and semantically equivalent materially relevant registration information returns the original committed successful result without repeating any business effect. The same identity with materially different registration information returns `IdempotencyConflict` and does not update the Vendor. Vendor updates require a separate future administration operation outside Epic 1.
 
@@ -111,12 +116,18 @@ The Registration Session:
 Epic 1 implements:
 
 - Vendor Service.
-- `RegisterVendor` API.
-- `RetrieveRegisteredVendor` query/API.
+- a thin ASP.NET Core Minimal API `POST /vendors` endpoint invoking `RegisterVendor`;
+- a thin ASP.NET Core Minimal API `GET /vendors/{vendorId}` endpoint invoking `RetrieveRegisteredVendor`;
 - API Gateway routing required to expose the Epic 1 Vendor endpoints.
-- API contract validation.
-- Transport-level error handling and response mapping.
-- API versioning required by the approved Vendor Registration contract.
+- API-owned request and response DTOs using the approved nested contract and lower-camel-case JSON conventions;
+- structural API validation for JSON usability, required-member presence, token and type compatibility, enum, UUID and time wire formats, nested-object structure and supported media type;
+- mapping between API DTOs and the transport-independent Vendor Application boundaries;
+- centralized mapping from typed Application outcomes to the approved HTTP statuses and API-owned client-safe error envelope;
+- generated OpenAPI description of the approved contract;
+- cancellation-token forwarding and boundary-specific response headers, including `Location` after successful registration; and
+- central unexpected-exception handling that exposes no internal diagnostics.
+
+The endpoints contain no Domain rule, Address resolution, persistence query, transaction, event, outbox or broker behaviour. First registration and equivalent replay both return `201 Created`; retrieval success returns `200 OK`. Epic 1 uses no `422` response, caller-supplied idempotency header, custom correlation convention, custom media type or API versioning. Collection, search, filtering, paging and update endpoints are outside Epic 1.
 
 ## 2.4 Data and Persistence
 
@@ -376,5 +387,7 @@ Epic 1 Vendor Registration is complete when:
 10. The published integration event is successfully received and deserialized by the Compliance Event Consumer Stub.
 11. The complete Epic 1 execution can be observed and diagnosed sufficiently to identify registration, persistence and publication failures.
 12. Epic 1 components requiring centrally managed configuration can retrieve and validate their required configuration from the Centralized Configuration Service.
+13. `POST /vendors` and `GET /vendors/{vendorId}` expose the approved Application operations through thin endpoint adapters using the approved JSON, success and controlled-failure contracts.
+14. Direct Vendor Application invocation remains authoritative for registration validation without requiring an HTTP caller, and every pre-commit failure leaves no Vendor, event, outcome or outbox work.
 
 Real Compliance processing of the published `VendorRegistered` integration event is outside the Epic 1 completion boundary.

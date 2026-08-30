@@ -3,11 +3,11 @@
 | **Document ID** | ADR-007 |
 |-----------------|---------|
 | **Document Title** | Vendor Compliance as a Separate Bounded Context |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 July 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ---
 
@@ -16,6 +16,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Record. |
+| 1.1 | 28 August 2026 | Defined the Epic 1 Compliance consumer stub as a thin RabbitMQ adapter with durable EventId receipt and byte-hash deduplication under CON-022. |
 
 ---
 
@@ -65,6 +66,10 @@ The Vendor domain consumes those outcomes to determine whether a Vendor may tran
 Vendor activation therefore depends upon successful compliance rather than successful registration.
 
 The Vendor aggregate remains responsible only for its own business lifecycle and does not implement regulatory decision making.
+
+## 2.1 Epic 1 Compliance Consumer Stub
+
+The Epic 1 stub consumes only VendorRegistered v1. It durably records EventId, EventType, EventVersion, receipt time and a hash of the serialized bytes before acknowledgement. An equivalent duplicate is acknowledged without another receipt; the same EventId with different bytes is dead-lettered as a contract-integrity failure. The stub performs no Vendor lookup and introduces no Compliance Domain behaviour or Pending Activation processing.
 
 ---
 

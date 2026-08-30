@@ -3,11 +3,11 @@
 | **Document ID** | ADR-003 |
 |-----------------|---------|
 | **Document Title** | Event-Driven Collaboration |
-| **Version** | 1.2 |
+| **Version** | 1.3 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ---
 
@@ -18,6 +18,7 @@
 | 1.0 | 23 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 23 July 2026 | Clarified synchronous user interactions, business events as facts, and appropriate use of asynchronous collaboration. |
 | 1.2 | 22 August 2026 | Applied CR-061. Established pre-outbox Application mapping for VendorRegistered and prohibited relay-time reconstruction from current Vendor state under CON-019 and CON-020. |
+| 1.3 | 28 August 2026 | Added the approved RabbitMQ at-least-once collaboration and durable idempotent-consumer semantics for CON-021 and CON-022. |
 
 ---
 
@@ -73,6 +74,12 @@ Where a user interaction requires an immediate authoritative response, the initi
 Cross-domain collaboration that follows this response may proceed asynchronously through published events.
 
 The user experience shall always reflect the latest confirmed business state rather than assuming downstream processing has already completed.
+
+## Epic 1 Reliable Publication Profile
+
+Epic 1 uses a dedicated Vendor relay worker that polls PostgreSQL in bounded batches and claims eligible outbox records using leased `FOR UPDATE SKIP LOCKED` semantics. It publishes the stored immutable event bytes through durable RabbitMQ topology with publisher confirms, then marks the record published. Expired claims recover automatically. Failed attempts use validated bounded exponential backoff; exhausted work becomes durable `Stalled` work requiring explicit administrative requeue. Records are not deleted.
+
+Delivery is at least once. EventId is the stable message identity; exactly-once and ordering guarantees are not claimed. Consumers acknowledge only after durable idempotent receipt, use bounded retry, and route exhausted or non-retryable messages to a durable dead-letter queue without changing EventId, EventVersion or payload.
 
 ---
 

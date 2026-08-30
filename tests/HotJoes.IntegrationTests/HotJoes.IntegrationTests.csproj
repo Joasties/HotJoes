@@ -10,7 +10,9 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.14.0" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="4.14.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
@@ -22,8 +24,11 @@
   <ItemGroup>
     <ProjectReference Include="../../src/HotJoes.Application.Address/HotJoes.Application.Address.csproj" />
     <ProjectReference Include="../../src/HotJoes.Application.Vendor/HotJoes.Application.Vendor.csproj" />
-    <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Address/HotJoes.Infrastructure.Vendor.Address.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.ComplianceConsumer/HotJoes.Infrastructure.ComplianceConsumer.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.Health/HotJoes.Infrastructure.Health.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.Persistence/HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Address/HotJoes.Infrastructure.Vendor.Address.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.VendorRelay/HotJoes.Infrastructure.VendorRelay.csproj" />
   </ItemGroup>
 
 </Project>

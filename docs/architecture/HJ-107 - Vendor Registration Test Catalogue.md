@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-107 |
 | **Document Title** | Vendor Registration Test Catalogue |
-| **Version** | 1.8 |
+| **Version** | 1.9 |
 | **Status** | Approved |
 | **Classification** | Test Catalogue |
 | **Owner** | Project Architecture |
-| **Last Updated** | 26 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ## Revision History
 
@@ -24,8 +24,8 @@
 | 1.5 | 22 August 2026 | Regenerated from HJ-106 v1.5 Approved using PR-004. Preserved all active stable IDs, made the approved CON-019/CON-020 event obligations Ready, added five independently testable VendorRegistered v1 contract obligations and retired the resolved VR-BLOCKED-002 dependency record. |
 | 1.6 | 23 August 2026 | Regenerated from HJ-106 v1.6 Approved using PR-004. Preserved all 124 actual active stable IDs, materially strengthened five VendorRegistered v1 obligations with the approved exact JSON member structure and deterministic wire rules, and corrected the inherited v1.5 reconciliation total that overstated the active catalogue by five. |
 | 1.7 | 26 August 2026 | Regenerated from HJ-106 v1.7 Approved using PR-004. Made the approved CON-023–CON-026 API obligations normative and Ready, defined exact Contact Email and Primary Contact Telephone coverage, added three validation-orchestration obligations and retired three resolved blocked-dependency records while preserving 129 active stable IDs. |
-
 | 1.8 | 26 August 2026 | Regenerated from HJ-106 v1.8 Approved using PR-004. Preserved all 129 active stable `VR-*` IDs; consolidated validation outcome expectations under one `RequestValidationFailure` and one `registrationValidationFailed` API mapping while retaining distinct field, declaration and conditional trigger coverage. |
+| 1.9 | 28 August 2026 | Regenerated from HJ-106 v1.9 Approved using PR-004. Preserved all 129 active stable `VR-*` IDs, made the three previously partial publication obligations Ready, added five independently testable delivery, receipt, trace and failure obligations, and retired the resolved VR-BLOCKED-008 dependency record. |
 
 ## Related Documents
 
@@ -38,24 +38,24 @@
 | HJ-005 | Coding Standards | 2.0 | Approved | Technical API, validation and controlled-error guidance |
 | HJ-006 | Testing Strategy and Standards | 2.0 | Approved | Test levels, classifications and quality rules |
 | HJ-007 | Enforcement Strategy | 2.0 | Approved | Supporting enforcement boundary; not a source of Vendor Registration behaviour |
-| HJ-010 | Current Application Architectural Concerns | 2.0 | Approved | Current concern dependencies including approved CON-023–CON-026 |
-| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 2.0 | Approved | Active delivery scope including the approved API and validation boundary |
-| HJ-012 | Established Application Architecture Patterns | 2.0 | Approved | Approved implementation architecture; not a source of requirements absent from HJ-106 |
+| HJ-010 | Current Application Architectural Concerns | 2.1 | Approved | Current approved concern and dependency baseline |
+| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 2.1 | Approved | Active delivery scope including reliable publication and Compliance receipt |
+| HJ-012 | Established Application Architecture Patterns | 2.1 | Approved | Approved implementation architecture; not a source of requirements absent from HJ-106 |
 | HJ-104 | Vendor Registration Fields Matrix | 3.6 | Approved | Registration fields, exact contact validation, canonicalisation, classifications and lifecycle |
-| HJ-105 | Vendor Registration Sequence Diagram | 4.0 | Approved | Processing order, API adaptation, validation allocation, outcomes and failures |
-| HJ-106 | Vendor Registration Service Contract | 1.8 | Approved | Primary normative transport-independent and API Contract test basis |
+| HJ-105 | Vendor Registration Sequence Diagram | 4.1 | Approved | Processing order, publication and receipt sequence, outcomes and failures |
+| HJ-106 | Vendor Registration Service Contract | 1.9 | Approved | Primary normative transport-independent and API Contract test basis |
 | HJ-013 | Architecture and Implementation Test Catalogue | Current | Downstream catalogue | Owns complementary architecture and implementation verification; not an HJ-107 generation or behavioural source |
 | ADR-002 | Business Capabilities and Bounded Contexts | Current | Accepted | Capability and persistence ownership |
-| ADR-003 | Event-Driven Collaboration | 1.2 | Accepted | Asynchronous collaboration and pre-outbox translation boundary |
+| ADR-003 | Event-Driven Collaboration | 1.3 | Accepted | Asynchronous collaboration, at-least-once delivery and durable idempotent receipt |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Current | Accepted | Registration and Vendor-existence boundaries |
 | ADR-005 | Registered Information vs Vendor Managed Information | Current | Accepted | Information classification and editability |
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | 1.3 | Accepted | Address authority, immutable snapshot and positional translation |
-| ADR-007 | Vendor Compliance as a Separate Bounded Context | Current | Accepted | Compliance and activation separation |
-| ADR-008 | Idempotent Operations and Reliable Event Publication | 1.4 | Accepted | Idempotency, atomic recording, immutable serialized-event staging and publication recovery |
+| ADR-007 | Vendor Compliance as a Separate Bounded Context | 1.1 | Accepted | Compliance separation and durable Epic 1 receipt stub |
+| ADR-008 | Idempotent Operations and Reliable Event Publication | 1.5 | Accepted | Idempotency, atomic staging, relay, delivery, recovery and trace context |
 
 # 1. Purpose
 
-This document is the authoritative catalogue of transport-independent behavioural obligations derived from HJ-106 v1.8 Part A and normative API Contract obligations derived from its approved Part B for the Epic 1 `RegisterVendor` and `RetrieveRegisteredVendor` operations.
+This document is the authoritative catalogue of transport-independent behavioural obligations derived from HJ-106 v1.9 Part A and normative API Contract obligations derived from its approved Part B for the Epic 1 `RegisterVendor` and `RetrieveRegisteredVendor` operations.
 
 It defines what must be verified, why, at which boundary and with which prohibited outcomes. It contains no executable test code and does not prescribe frameworks, fixtures, mocks, brokers, databases or CI implementation.
 
@@ -76,9 +76,9 @@ It defines what must be verified, why, at which boundary and with which prohibit
 | HJ-006 | Normative testing standard | Defines the approved Test Levels and Domain, Application, Persistence Integration, Integration Contract, API Contract and Contract Review classifications. |
 | HJ-010 | Architectural governance | Identifies unresolved Current Architectural Concerns and dependencies. It does not add Vendor Registration behaviour. |
 | HJ-012 | Approved architecture governance | Identifies approved implementation architecture that fulfils existing service guarantees. It does not add behaviour or technical requirements absent from the current Approved HJ-106 contract. |
-| Existing HJ-107 v1.7 | Regeneration baseline | Sole baseline for stable `VR-*` Test IDs and retained catalogue content; it is not a normative source of behaviour. |
+| Existing HJ-107 v1.8 | Regeneration baseline | Sole baseline for stable `VR-*` Test IDs and retained catalogue content; it is not a normative source of behaviour. |
 
-No conflict was found among the normative and supporting sources. HJ-106 v1.8 defines both the approved transport-independent contract and the approved CON-023–CON-026 API Contract. HJ-010/HJ-012 v2.0, HJ-104 v3.6 and HJ-105 v4.0 provide the current governance, validation and interaction baselines. Change Requests and the previous HJ-107 were not used as normative inputs; existing HJ-107 v1.7 was used only as the stable-ID and retained-content baseline.
+No conflict was found among the normative and supporting sources. HJ-106 v1.9 defines both the approved transport-independent contract and the approved CON-023–CON-026 API Contract. HJ-010/HJ-012 v2.1, HJ-104 v3.6 and HJ-105 v4.1 provide the current governance, validation and interaction baselines. Change Requests and the previous HJ-107 were not used as normative inputs; existing HJ-107 v1.8 was used only as the stable-ID and retained-content baseline.
 
 # 3. Catalogue Conventions
 
@@ -115,12 +115,12 @@ HJ-107 owns the behavioural boundary established by HJ-106. HJ-013 owns compleme
 | Domain Event | 4 | Domain / Unit | HJ-106 §4.10 | Covered | Internal payload deliberately unconstrained |
 | Integration Event | 10 | Integration Contract / Integration | HJ-106 §4.10 | Covered | None |
 | Idempotency and Concurrency | 10 | Application / Unit | HJ-106 §4.9 | Covered | None |
-| Persistence and Publication | 5 | Persistence Integration / Integration | HJ-106 §§4.7, 4.10 | Covered/partly blocked | CON-018 and CON-021 affect dispatch and delivery execution |
+| Persistence and Publication | 7 | Persistence Integration / Integration | HJ-106 §§4.7, 4.10 | Covered | None at the behavioural boundary; HJ-013 owns mechanism verification |
 | Registered Vendor Retrieval | 8 | Application / Unit | HJ-106 §4.12 | Covered | None |
-| Business Failures | 9 | Application / Unit | HJ-106 §4.11 | Covered/partly blocked | CON-018 and CON-021 affect dispatch failure execution |
+| Business Failures | 12 | Application / Unit and Integration Contract / Integration | HJ-106 §4.11 | Covered | None at the behavioural boundary |
 | Scope Exclusions | 5 | Contract Review / Non-executable | HJ-106 §§1, 5 | Covered | Identity contract deliberately excluded |
 | API Contract | 12 | API Contract / API Integration | HJ-106 §6 | Covered | None; CON-023–CON-026 Approved |
-| Blocked and Deferred | 2 | Contract Review / Non-executable | HJ-106 §§4, 5, 8; HJ-010 | Explicitly recorded | Identity remains outside scope; CON-018/CON-021 remain unresolved |
+| Blocked and Deferred | 1 | Contract Review / Non-executable | HJ-106 §§4, 5, 8; HJ-010 | Explicitly recorded | Identity remains outside scope |
 
 # 5. Test Catalogue
 
@@ -285,9 +285,11 @@ All rows in Sections 5.1–5.17 are normative obligations unless their Dependenc
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | VR-RELIABILITY-001 | Atomic Vendor and publication work | Vendor state and its durable publication obligation commit as one business outcome. | HJ-106; ADR-008 | §§4.7, 4.10 | Persistence Integration / Integration | Critical | Valid first processing. | Complete registration at the approved persistence boundary. | Vendor and exactly one durable publication record are committed together. | No Vendor without publication work or publication work without its Vendor. | Automate | Ready | CON-016 and CON-028 approve concrete transaction/database proof; HJ-013 owns complementary mechanism-level atomicity and failure injection. |
 | VR-RELIABILITY-002 | No partial outcome on atomic-recording failure | Failure to commit the business outcome means registration did not succeed. | HJ-106 | §4.11 | Persistence Integration / Integration | Critical | An approved pre-commit failure can be induced. | Attempt registration. | Controlled retryable failure and no committed registration outcome. | No success response, Vendor, event record or partial publication work. | Automate | Ready | CON-016 and CON-028 approve the rollback boundary; HJ-013 owns complementary transaction-mechanism failure injection. |
-| VR-RELIABILITY-003 | Dispatch failure preserves recoverable obligation | Failed dispatch leaves the Vendor committed and the immutable serialized publication obligation available for independent retry. | HJ-106 | §§4.10–4.11 | Integration Contract / Integration | Critical | Commit succeeded and dispatch subsequently fails. | Observe failure and later retry through the approved publication boundary. | Vendor remains unchanged and the same serialized obligation remains recoverable until successful publication. | No rerun of RegisterVendor, event reconstruction or caller instruction to register again. | Automate after dependency | Partially Blocked | Event identity/content are approved; CON-018 and CON-021 block concrete relay and broker execution. HJ-013 owns relay restart/recovery mechanics. |
-| VR-RELIABILITY-004 | Publication retry creates no new business effect | Repeated publication attempts reuse the stored serialized event and create no new durable publication records or business facts. | HJ-106; ADR-008 | §4.10 | Integration Contract / Integration | Critical | One committed publication obligation exists. | Exercise retry through the approved publication boundary. | The original EventId, version and serialized event are retried and the observable business result remains singular. | No duplicate registration, Domain Event, completed fact, durable publication record, remapping or reserialization. | Automate after dependency | Partially Blocked | Contract immutability is Ready under CON-020; CON-018 and CON-021 block concrete relay/broker execution. HJ-013 owns those mechanics. |
+| VR-RELIABILITY-003 | Dispatch failure preserves recoverable obligation | Failed dispatch leaves the Vendor committed and the immutable serialized publication obligation available for independent retry. | HJ-106 | §§4.10–4.11 | Integration Contract / Integration | Critical | Commit succeeded and dispatch subsequently fails. | Observe failure and later retry through the approved publication boundary. | Vendor remains unchanged and the same serialized obligation remains recoverable until broker-confirmed publication. | No rerun of RegisterVendor, event reconstruction, premature published marking or caller instruction to register again. | Automate | Ready | CON-018 and CON-021 are approved; HJ-013 owns concrete claim, restart and broker-confirm mechanism verification. |
+| VR-RELIABILITY-004 | Publication retry creates no new business effect | Repeated publication attempts reuse the stored serialized event and create no new durable publication records or business facts. | HJ-106; ADR-008 | §4.10 | Integration Contract / Integration | Critical | One committed publication obligation exists. | Exercise retry through the approved publication boundary. | The original EventId, version and serialized event are retried and the observable business result remains singular. | No duplicate registration, Domain Event, completed fact, durable publication record, remapping or reserialization. | Automate | Ready | At-least-once delivery permits duplicate message attempts, not duplicate business facts. |
 | VR-RELIABILITY-005 | Success only after commit | Synchronous registration success is confirmed only after atomic commit. | HJ-106 | §§4.7, 4.11 | Application / Unit | Critical | Commit delayed/fails. | Observe response timing/outcome. | Success follows successful commit; failure otherwise. | No partial success or optimistic success. | Automate | Ready | Observable application behaviour. |
+| VR-RELIABILITY-006 | Equivalent duplicate has one durable Compliance receipt | At-least-once delivery may repeat the same EventId and bytes, but the Compliance stub records the fact once and acknowledges the equivalent duplicate. | HJ-106; ADR-003; ADR-007 | §§4.10–4.11 | Integration Contract / Integration | Critical | One VendorRegistered v1 delivery has a durable receipt. | Deliver the identical EventId, version and serialized bytes again. | Existing receipt is retained and the duplicate is acknowledged without another receipt or downstream effect. | No second receipt, Vendor lookup, Compliance Domain decision or duplicate Pending Activation processing. | Automate | Ready | HJ-013 owns concrete consumer storage and RabbitMQ acknowledgement mechanics. |
+| VR-RELIABILITY-007 | Trace context does not alter event identity or JSON | W3C trace context is delivery metadata rather than Integration Event content. | HJ-106; ADR-008 | §4.10 | Integration Contract / Integration | Important | The same stored event is published with present and absent trace metadata. | Compare delivered event bytes and contract identity. | EventId, EventVersion and serialized JSON remain byte-identical; trace metadata may accompany delivery headers. | No `traceparent` or `tracestate` JSON member, payload mutation or event invalidation when trace metadata is absent. | Parameterised contract automation | Ready | HJ-013 owns concrete outbox-column and RabbitMQ-header mapping. |
 
 ## 5.15 Registered Vendor Retrieval
 
@@ -313,8 +315,11 @@ All rows in Sections 5.1–5.17 are normative obligations unless their Dependenc
 | VR-FAILURE-005 | Aggregate invariant failure | Domain rejection is returned as controlled business failure. | HJ-106 | §4.11 | Application / Unit | Critical | Valid-looking input violates invariant. | Submit. | Correctable business outcome where applicable. | No technical exception exposed; no side effect. | Parameterised automation | Ready | Safe translation required. |
 | VR-FAILURE-006 | Persistence/atomic failure | Failed atomic commit is retryable through the idempotency safeguard. | HJ-106 | §4.11 | Persistence Integration / Integration | Critical | An approved pre-commit failure can be induced. | Register. | Failure, safe retry guidance and no registered outcome. | No partial Vendor or durable publication record. | Automate | Ready | CON-016 and CON-028 approve concrete failure injection; behavioural coverage complements HJ-013 mechanism verification. |
 | VR-FAILURE-007 | Equivalent duplicate convergence | Equivalent duplicate is original committed success, not failure. | HJ-106 | §4.11 | Application / Unit | Critical | Prior successful registration for the composite identity. | Submit semantically equivalent registration information. | Original committed result returned. | No duplicate business effect or error requiring new registration. | Automate | Ready | CON-015 approves the durable stored replay outcome. |
-| VR-FAILURE-008 | Dispatch failure after commit | Dispatch failure delays notification but registration remains successful. | HJ-106 | §4.11 | Integration Contract / Integration | Critical | Commit complete. | Fail external dispatch through the approved publication boundary. | Vendor remains registered and the original immutable serialized publication obligation remains recoverable. | No caller instruction to register again, registration rerun, event reconstruction or rollback. | Automate after dependency | Partially Blocked | CON-018 and CON-021 block concrete relay/broker execution; HJ-013 owns recovery mechanics. |
+| VR-FAILURE-008 | Dispatch failure after commit | Relay claim, broker publication or publisher-confirmation failure delays notification but registration remains successful. | HJ-106 | §4.11 | Integration Contract / Integration | Critical | Commit complete. | Fail each dispatch stage through the approved publication boundary. | Vendor remains registered and the original immutable serialized publication obligation remains recoverable for bounded retry. | No caller instruction to register again, registration rerun, event reconstruction, rollback or premature published state. | Parameterised automation | Ready | HJ-013 owns concrete failure injection and relay recovery mechanics. |
 | VR-FAILURE-009 | Idempotency conflict | Materially different information under the same composite Vendor identity returns `IdempotencyConflict`. | HJ-106 | §4.11 | Application / Unit | Critical | Prior success. | Submit materially different registration information while retaining normalized names and Canonical Address Identifier. | `IdempotencyConflict`; an update requires a separate future administration operation. | No state change, update, event, publication work or Pending Activation. | Parameterised automation | Ready | Approved `409 idempotencyConflict` mapping is covered by VR-API-009. |
+| VR-FAILURE-010 | Exhausted publication becomes stalled | Exhausting bounded relay attempts preserves the committed registration and moves publication work to durable `Stalled` state. | HJ-106 | §4.11 | Integration Contract / Integration | Critical | One committed publication obligation repeatedly fails dispatch. | Exhaust the approved bounded attempts. | The original obligation remains durable and requires explicit administrative requeue. | No deletion, automatic unbounded retry, event reconstruction, registration rollback or caller re-registration. | Automate | Ready | HJ-013 owns backoff timing, claim and administrative-requeue mechanism verification. |
+| VR-FAILURE-011 | Receipt failure prevents acknowledgement | The Compliance stub acknowledges only after durable idempotent receipt. | HJ-106 | §4.11 | Integration Contract / Integration | Critical | A valid VendorRegistered delivery arrives and receipt persistence fails. | Attempt consumer processing. | Delivery remains unacknowledged and is eligible for broker redelivery or bounded consumer retry. | No false acknowledgement, partial receipt or instruction to rerun RegisterVendor. | Automate | Ready | HJ-013 owns concrete RabbitMQ and receipt-store failure injection. |
+| VR-FAILURE-012 | Poison or EventId byte conflict is dead-lettered unchanged | Non-retryable, exhausted or same-EventId/different-bytes delivery is isolated as a contract-integrity failure. | HJ-106 | §4.11 | Integration Contract / Integration | Critical | Supply each poison condition, including an existing EventId with different bytes. | Process through the consumer boundary. | Message is durably dead-lettered with original EventId, EventVersion and payload preserved. | No overwrite of the original receipt, acknowledgement as equivalent, payload repair, new EventId or Compliance business effect. | Parameterised automation | Ready | HJ-013 owns concrete queue topology and retry-count enforcement. |
 
 All controlled errors must be client-safe and omit stack traces, database details, internal class names and framework diagnostics.
 
@@ -330,7 +335,7 @@ All controlled errors must be client-safe and omit stack traces, database detail
 
 # 6. API Contract Tests
 
-HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010/HJ-012 v2.0. Every obligation in this section is an approved API Contract requirement with Dependency Status `Ready`; it remains distinct from the transport-independent business obligations in Section 5.
+HJ-106 v1.9 Part B is normative because CON-023–CON-026 are Approved in HJ-010/HJ-012 v2.1. Every obligation in this section is an approved API Contract requirement with Dependency Status `Ready`; it remains distinct from the transport-independent business obligations in Section 5.
 
 | Test ID | Title | Requirement | Source | Section | Classification / Level | Priority | Preconditions | Input / Stimulus | Expected Result | Prohibited Outcome | Automation | Dependency Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -344,7 +349,7 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 | VR-API-008 | Vendor Not Found mapping | `VendorNotFound` maps to `404 Not Found` and code `vendorNotFound`. | HJ-106 Part B; CON-025 | §§6.4–6.5 | API Contract / API Integration | Important | Query returns VendorNotFound. | GET unknown canonical VendorId. | Approved envelope with `validationErrors: null`. | No `200`, Vendor creation, internal leakage or side effect. | Automate | Ready | Transport mapping of VR-RETRIEVE-007. |
 | VR-API-009 | Idempotency conflict mapping | `IdempotencyConflict` maps to `409 Conflict` and code `idempotencyConflict`. | HJ-106 Part B; CON-025 | §6.5 | API Contract / API Integration | Critical | Existing identity has materially different information. | POST conflicting request. | Approved envelope with `validationErrors: null`. | No success, update, Vendor/event/outbox effect or alternative conflict code. | Automate | Ready | Transport mapping of VR-FAILURE-009. |
 | VR-API-010 | Complete status and failure-code mapping | Every approved outcome maps to its exact HTTP status and stable top-level code, with every Application validation variant sharing one mapping. | HJ-106 Part B; CON-025; CON-040 | §6.5 | API Contract / API Integration | Critical | All mapped Application outcomes and one unexpected exception are available. | Parameterise malformed; unified request-field, declaration, conditional and mixed `RequestValidationFailure`; invalid-reference; invalid-address-result; aggregate-invariant; not-found; conflict; Address-unavailable; persistence/atomic; and unexpected cases. | Exact approved `400`, `404`, `409`, `503` or `500` status and code are returned consistently; every `RequestValidationFailure` maps to `400 registrationValidationFailed`. | No separate declaration/conditional top-level code, `422`, status ambiguity, exception escape or duplicate exception logging. | Parameterised automation | Ready | Authentication/authorization outcomes are outside Epic 1. |
-| VR-API-011 | Media type and header boundary | Body-bearing requests/responses use `application/json`; standard Accept negotiation and successful registration Location apply; no custom identity/correlation header is normative. | HJ-106 Part B; CON-024 | §§6.1, 6.6 | API Contract / API Integration | Important | Endpoint available. | Exercise supported/unsupported Content-Type, Accept variants, success and ordinary error responses; attempt caller idempotency/custom correlation headers. | Supported media handling and Location are exact; caller-supplied non-contract headers do not control identity or error representation. | No custom media type, `Idempotency-Key` semantics, custom correlation response member/header or API version header. | Parameterised automation | Ready | CON-035 separately owns future correlation. |
+| VR-API-011 | Media type and header boundary | Body-bearing requests/responses use `application/json`; standard Accept negotiation and successful registration Location apply; no custom identity/correlation header is normative. | HJ-106 Part B; CON-024 | §§6.1, 6.6 | API Contract / API Integration | Important | Endpoint available. | Exercise supported/unsupported Content-Type, Accept variants, success and ordinary error responses; attempt caller idempotency/custom correlation headers. | Supported media handling and Location are exact; caller-supplied non-contract headers do not control identity or error representation. | No custom media type, `Idempotency-Key` semantics, custom correlation response member/header or API version header. | Parameterised automation | Ready | CON-035 W3C propagation is internal delivery metadata and does not amend this API contract. |
 | VR-API-012 | Deterministic JSON and optional-member semantics | JSON uses lower-camel members/enums, lowercase UUID `D`, UTC `O`, `HH:mm:ss`, explicit-null response optionals, omission/null-equivalent request optionals and compatible unknown request members. | HJ-106 Part B; CON-024 | §§6.1–6.3 | API Contract / API Integration | Important | Representative values and all optional combinations. | Serialize responses and bind request variants including unknown members. | Every deterministic representation is exact; optional request absence is accepted equivalently; unknown members are ignored. | No omitted optional response member, shifted default, case drift, offset-bearing time-only value or rejection solely for an unknown member. | Parameterised automation | Ready | Covers CRN, Primary Trading Authority, Website, Description and Business Address optionals. |
 
 # 7. Blocked and Deferred Tests
@@ -352,7 +357,6 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 | Test Area | Affected Test IDs | Missing Contract or Decision | Current Concern ID(s) | Authoritative Owner / Source Required | What Can Already Be Tested | What Remains Blocked | Required Resolution | Implementation / Readiness Impact |
 |---|---|---|---|---|---|---|---|---|
 | VR-BLOCKED-003 Identity scope exclusion | VR-SCOPE-002 | Authentication, authorization and caller-to-Vendor association are outside Epic 1 | None; explicitly excluded by HJ-106 | Future Identity/service-boundary contract | Verify that Epic 1 introduces no Identity behaviour | Future access-control behaviour cannot be derived in this catalogue | Approve separately when Identity enters scope | Does not block RegisterVendor or RetrieveRegisteredVendor coverage. |
-| VR-BLOCKED-008 Publication relay and broker behaviour | VR-RELIABILITY-003–004; VR-FAILURE-008 | Relay claim/retry/restart policy and broker delivery semantics | CON-018; CON-021 | Vendor publication relay and broker-delivery architecture | Registration success, immutable serialized event, retry identity/content preservation, durable obligation and non-duplication | Concrete relay recovery, acknowledgement, broker duplicate delivery and poison-message execution | Resolve relay and broker-delivery concerns | HJ-107 remains behavioural; HJ-013 owns concrete relay/broker mechanism verification. |
 
 
 # 8. Requirement-to-Test Traceability Matrix
@@ -374,15 +378,16 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 | Vendor existence and initial state | §4.8 | ADR-004; ADR-007 | VR-STATE-001–004 | Covered | No activation. |
 | Composite identity, semantic equivalence, replay, concurrency and conflict | §4.9 | HJ-104 §§5.3, 5.6; HJ-105 §9; ADR-008 | VR-IDEMP-001–010, VR-REQ-007 | Covered | CON-013–CON-016 and CON-028 define both behaviour and the executable persistence boundary. |
 | Internal Domain Event | §4.10 | HJ-004; ADR-008 | VR-DOMAIN-EVENT-001–004 | Covered | No invented minimum payload. |
-| Published Integration Event | §4.10 | HJ-004; HJ-105; ADR-003; ADR-008 | VR-INTEGRATION-EVENT-001–010 | Covered | CON-019 and amended CON-020 approve translation, exact nested member structure, deterministic identifier/timestamp/time/enum formats, contract ownership, independent BusinessAddress, explicit nulls, compatibility and immutable retry semantics. |
-| Atomic persistence and publication recovery | §§4.7, 4.10–4.11 | ADR-008; HJ-105 §10 | VR-RELIABILITY-001–005, VR-INTEGRATION-EVENT-010 | Covered/partly blocked | Atomic recording and immutable event staging are Ready; CON-018 and CON-021 still block relay/broker execution. |
+| Published Integration Event | §4.10 | HJ-004; HJ-105; ADR-003; ADR-008 | VR-INTEGRATION-EVENT-001–010, VR-RELIABILITY-007 | Covered | Includes exact contract, immutable retry semantics and exclusion of trace context from event JSON. |
+| Atomic persistence and publication recovery | §§4.7, 4.10–4.11 | ADR-008; HJ-105 §10 | VR-RELIABILITY-001–007, VR-INTEGRATION-EVENT-010 | Covered | Includes durable obligation, immutable retry, broker-confirmed completion, at-least-once duplicate receipt and trace-metadata separation. |
+| Publication and consumer failure outcomes | §4.11 | ADR-003; ADR-007; ADR-008 | VR-FAILURE-008, VR-FAILURE-010–012 | Covered | Includes dispatch failure, stalled work, receipt failure/redelivery and poison or byte-conflict dead-lettering. |
 | Unified RequestValidationFailure and request-field triggers | §§4.5, 4.11 | HJ-104; CON-026; CON-040 | VR-REQ-008, VR-FAILURE-001 | Covered | One result contains all independently detectable validation errors. |
 | Registration Declaration validation triggers | §§4.5, 4.11 | HJ-104; CON-026; CON-040 | VR-REQ-008, VR-FAILURE-002 | Covered | Declaration errors are entries in the unified result. |
 | Conditional-rule validation triggers | §§4.5, 4.11 | HJ-104; HJ-004; CON-026; CON-040 | VR-REQ-008, VR-FAILURE-003 | Covered | CRN and authority errors are entries in the unified result. |
 | Address failure | §4.11 | ADR-006; HJ-105 | VR-FAILURE-004, VR-ADDRESS-008, VR-ADDRESS-014–015 | Covered | Semantic and retryable technical outcomes, caller-controlled retry and no in-process retry/circuit breaker are approved. |
 | Aggregate failure | §4.11 | HJ-004 | VR-FAILURE-005 | Covered | Safe controlled outcome. |
 | Persistence failure | §4.11 | ADR-008 | VR-FAILURE-006, VR-RELIABILITY-002 | Covered | Retry guarantee and failure-injection boundary are approved under CON-016 and CON-028. |
-| Equivalent duplicate and dispatch failure | §4.11 | ADR-008 | VR-FAILURE-007–008 | Covered/partly blocked | CON-018 and CON-021 block concrete dispatch execution. |
+| Equivalent duplicate and dispatch failure | §4.11 | ADR-003; ADR-007; ADR-008 | VR-FAILURE-007–008, VR-RELIABILITY-003–006 | Covered | Equivalent business replay and at-least-once message duplication remain distinct and create no duplicate business effect. |
 | Idempotency conflict and no-update rule | §§4.11, 6.5 | HJ-104 §5.6; HJ-105 §12.7; ADR-008; CON-025 | VR-FAILURE-009, VR-IDEMP-004–005, VR-IDEMP-009, VR-API-009 | Covered | Application behaviour, persistence proof and `409 idempotencyConflict` mapping are Ready. |
 | Client-safe controlled errors | §§4.11, 6.4–6.5 | HJ-005; CON-025; CON-026; CON-040 | VR-REQ-008, VR-FAILURE-001–009, VR-API-007–010 | Covered | One validation outcome and API code cover field, declaration, conditional and mixed errors; exact envelope, paths, entry codes, other statuses, prohibited `422` and internal-diagnostic exclusions remain covered. |
 | Retrieval intent and VendorId lookup | §4.12.1 | HJ-003; HJ-004; HJ-105 | VR-RETRIEVE-001 | Covered | Trusted actor premise; Identity excluded. |
@@ -396,19 +401,19 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 - Every normative HJ-106 Part A operation, precondition, field category, creation invariant, outcome, event rule, failure, retrieval rule and scope exclusion maps to at least one Test ID in Section 8.
 - Requirements covered at multiple levels are intentionally split by observable boundary: for example, conditional creation rules at Domain level, persistence at Persistence Integration level and approved transport mapping at API Contract level.
 - Domain/Integration Event separation, no Registration Session dependence, and the absence of prohibited business effects are repeated where distinct stimuli could regress independently.
-- The Vendor-owned Business Address Snapshot, separate Integration Event-owned BusinessAddress, positional Address translation, permanent contextual reference, Address failure semantics, composite Vendor identity, semantic equivalence, PostgreSQL concurrency, permanent replay outcome, atomic transaction, contact validation/canonicalisation, API contract, pre-outbox event mapping, VendorRegistered v1 contract and immutable serialized-event staging are approved and explicitly covered. Only publication relay and broker mechanics remain linked to unresolved Current Concerns.
+- The Vendor-owned Business Address Snapshot, separate Integration Event-owned BusinessAddress, positional Address translation, permanent contextual reference, Address failure semantics, composite Vendor identity, semantic equivalence, PostgreSQL concurrency, permanent replay outcome, atomic transaction, contact validation/canonicalisation, API contract, pre-outbox event mapping, VendorRegistered v1 contract, immutable serialized-event staging and observable reliable-delivery outcomes are approved and explicitly covered.
 - Identity authentication, authorisation and caller association are scope exclusions, not blockers for the approved Epic 1 operations.
 - The absence of a prescribed internal Domain Event payload and the absence of dedicated read-model infrastructure are deliberate non-requirements verified by Contract Review rather than executable schema tests.
 - Approved Part B obligations are wholly separated in Section 6 and carry normal priority with Ready status; they are normative API Contract requirements, not transport-independent business rules.
 - Potential overlap exists between failure rows and their triggering field/invariant rows; this is intentional because the former verifies orchestration and prohibited side effects while the latter verifies the lowest responsible rule boundary.
-- HJ-107 owns behavioural outcomes. Complementary dependency enforcement, concrete mapping, Transactional Outbox, transaction failure-injection, relay recovery and broker-mechanism obligations remain in HJ-013.
-- No source ambiguity changes approved behaviour or the approved API Contract. Remaining relay/broker dependencies and the deliberate Identity exclusion are listed in Sections 7 and 10.
+- HJ-107 owns behavioural and Integration Contract outcomes. Complementary dependency enforcement, concrete mapping, Transactional Outbox, transaction failure-injection, lease/backoff implementation, relay recovery, RabbitMQ topology and runtime health obligations remain in HJ-013.
+- No source ambiguity changes approved behaviour or the approved API Contract. The deliberate Identity exclusion is listed in Sections 7 and 10; no in-scope behavioural obligation remains blocked.
 
 # 10. Assumptions and Open Questions
 
 | Classification | Item | Treatment |
 |---|---|---|
-| Confirmed | HJ-106 v1.8 is the primary normative basis. | Part A supplies transport-independent behaviour and approved Part B supplies API Contract requirements. |
+| Confirmed | HJ-106 v1.9 is the primary normative basis. | Part A supplies transport-independent behaviour and approved Part B supplies API Contract requirements. |
 | Confirmed | HJ-006 v2.0 approves the detailed classifications used here. | Every executable classification maps to one approved Test Level. |
 | Confirmed | `RegisterVendor` and `RetrieveRegisteredVendor` are the only Epic 1 operations in scope. | No additional query or command tests are invented. |
 | Test Design Convention | Parameterized obligations represent equivalent values/boundaries without hiding distinct outcomes. | Implementations may split them while retaining stable traceability. |
@@ -418,7 +423,8 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 | Resolved Dependency | Integration Event translation and the exact VendorRegistered v1 published contract are approved. | CON-019 and amended CON-020; VR-INTEGRATION-EVENT-001–010 are Ready, including deterministic wire-format assertions. |
 | Scope Exclusion | Identity behaviour is outside Epic 1. | See VR-SCOPE-002 and VR-BLOCKED-003; it does not block the approved operations. |
 | Resolved Dependency | Vendor identity, semantic registration equivalence, concurrency, permanent replay outcome and transaction mechanics are approved. | CON-013–CON-016 and CON-028; VR-IDEMP-001–010 are Ready. |
-| Blocked Dependency | Publication relay and broker semantics are unresolved. | CON-018 and CON-021; see VR-BLOCKED-008. |
+| Resolved Dependency | Publication relay, broker delivery and Compliance receipt semantics are approved. | CON-018, CON-021 and CON-022; VR-RELIABILITY-003–007 and VR-FAILURE-008, VR-FAILURE-010–012 are Ready at their HJ-107 boundary. |
+| Resolved Dependency | W3C trace context is delivery metadata outside the Integration Event JSON. | CON-035; VR-RELIABILITY-007 is Ready while concrete metadata/header mapping remains complementary HJ-013 work. |
 | Resolved Dependency | PostgreSQL mappings and constraints are approved. | CON-028; applicable Persistence Integration obligations are Ready and HJ-013 owns complementary mechanism evidence. |
 | Resolved Dependency | Contact Email and Primary Contact Telephone profiles are approved. | CON-026; VR-CONTACT-002–004 and VR-REQ-010 are Ready. |
 | Resolved Dependency | API adaptation, serialization, errors, statuses and headers are approved. | CON-023–CON-026 and amended CON-040; VR-API-001–012 are normative and Ready, including the unified validation mapping. |
@@ -429,10 +435,10 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 # 11. Review Checklist
 
 - [x] Covers every normative statement in HJ-106 Parts A and B through the traceability matrix.
-- [x] Uses HJ-106 v1.8 Part A as the transport-independent basis and approved Part B as the API Contract basis.
+- [x] Uses HJ-106 v1.9 Part A as the transport-independent basis and approved Part B as the API Contract basis.
 - [x] Uses the approved HJ-006 Test Classification and Test Level mapping.
 - [x] Preserves stable Test IDs and records their regeneration reconciliation.
-- [x] Uses HJ-107 v1.7 as the sole `VR-*` stable-ID baseline.
+- [x] Uses HJ-107 v1.8 as the sole `VR-*` stable-ID baseline.
 - [x] Preserves and reconciles only HJ-107-owned `VR-*` identifiers and contains no `AI-*` identifiers.
 - [x] Does not use HJ-013 as a behavioural, regeneration or stable-ID input.
 - [x] Contains no version-specific HJ-013 dependency and uses stable Document ID `HJ-013` only for complementary responsibility.
@@ -453,7 +459,7 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 - [x] Covers equivalent replay, materially different conflict and concurrent submission.
 - [x] Covers atomic Vendor persistence and durable publication work.
 - [x] Keeps Domain and Integration Events distinct.
-- [x] Applies approved Address, persistence, event-contract and CON-023–CON-026 API/validation semantics without inventing unresolved Compliance, Identity, publication-relay or broker contracts.
+- [x] Applies approved Address, persistence, event-contract, reliable-publication, Compliance-receipt and CON-023–CON-026 API/validation semantics without inventing Identity behaviour or concrete HJ-013 mechanisms.
 - [x] Separates HJ-106 Part A transport-independent tests from Part B API Contract tests.
 - [x] Treats approved Part B-derived tests as normative API Contract obligations with normal priority and Ready status.
 - [x] Identifies blocked dependencies explicitly.
@@ -462,22 +468,23 @@ HJ-106 v1.8 Part B is normative because CON-023–CON-026 are Approved in HJ-010
 
 # 12. Regeneration Reconciliation
 
-HJ-107 v1.7 is the sole stable-ID baseline. Direct enumeration establishes 129 active unique `VR-*` IDs. This regeneration retains every active ID and changes only the six obligations materially affected by HJ-106 v1.8.
+HJ-107 v1.8 is the sole stable-ID baseline. Direct enumeration establishes 129 active unique `VR-*` IDs. This regeneration retains every active ID, materially changes three existing obligations, adds five independently testable obligations and retires one resolved blocked-dependency record.
 
 | Test ID(s) | Previous Treatment | Regenerated Treatment | Reason |
 |---|---|---|---|
-| VR-REQ-008 | One aggregated validation result without an explicit closed result kind. | Requires one immutable `RequestValidationFailure` containing every independently detectable field, declaration, conditional and cross-field error. | HJ-106 v1.8 and amended CON-026/CON-040 make the unified result normative. |
-| VR-FAILURE-001–003 | Distinct request, declaration and conditional failure outcomes. | Retained as distinct trigger-focused obligations, each expecting the same `RequestValidationFailure`; separate outcome kinds are prohibited. | The trigger rules remain independently testable while the top-level outcome has been unified. |
-| VR-API-007 | Generic controlled envelope coverage. | Requires every validation combination to map to one `400 registrationValidationFailed` envelope containing all errors; prohibits the two superseded codes. | HJ-106 v1.8 §6.4–§6.5. |
-| VR-API-010 | Parameterised mapping included separate declaration and conditional top-level codes. | Uses one parameterised `RequestValidationFailure` mapping for field, declaration, conditional and mixed validation cases. | Amended CON-025 and CON-040 remove the separate mappings. |
-| All other active HJ-107 v1.7 `VR-*` IDs | Approved v1.7 obligations. | Preserved without material change. | Their source obligations are unchanged by HJ-106 v1.8. |
+| VR-RELIABILITY-003–004 | Observable immutable retry obligations were Partially Blocked by unresolved CON-018/CON-021. | Ready obligations covering recoverability until broker-confirmed publication and retry without a new business effect. | HJ-106 v1.9 approves the applicable relay and delivery semantics. |
+| VR-FAILURE-008 | Generic dispatch failure was Partially Blocked. | Ready parameterised obligation covering relay, publication and confirmation failure without rollback or premature completion. | HJ-106 v1.9 §4.11 defines the controlled post-commit outcome. |
+| VR-RELIABILITY-006–007 | Did not exist. | Added equivalent-duplicate durable receipt and trace-context/event-immutability obligations. | These are new, independently observable HJ-106 v1.9 contract guarantees. |
+| VR-FAILURE-010–012 | Did not exist. | Added stalled publication, receipt-failure redelivery and poison/byte-conflict dead-letter obligations. | HJ-106 v1.9 adds three distinct business-failure outcomes. |
+| VR-BLOCKED-008 | Recorded CON-018/CON-021 relay and broker semantics as unresolved. | Retired; applicable HJ-107 obligations are Ready and complementary mechanism verification remains assigned to HJ-013. | CON-018 and CON-021 are Approved in the current baseline. |
+| All other active HJ-107 v1.8 `VR-*` IDs | Approved v1.8 obligations. | Preserved without material change. | Their source obligations are unchanged by HJ-106 v1.9. |
 
 Regeneration totals:
 
-- 129 active HJ-107 v1.7 `VR-*` IDs retained;
-- 123 retained `VR-*` IDs preserved without material change;
-- 6 retained `VR-*` IDs materially amended;
-- 0 newly added `VR-*` IDs;
-- 0 retired, merged, split, reused or silently reassigned IDs;
-- 129 active `VR-*` catalogue entries after regeneration; and
+- 129 active HJ-107 v1.8 `VR-*` IDs retained;
+- 126 retained `VR-*` IDs preserved without material change;
+- 3 retained `VR-*` IDs materially amended;
+- 5 newly added `VR-*` IDs;
+- 1 resolved blocked-dependency ID retired, with no ID reused or silently reassigned;
+- 134 active `VR-*` catalogue entries after regeneration; and
 - 0 unresolved source or cross-catalogue responsibility references introduced by this regeneration.

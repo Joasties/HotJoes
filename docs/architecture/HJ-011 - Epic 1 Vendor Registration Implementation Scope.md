@@ -6,11 +6,11 @@
 | --- | --- |
 | **Document ID** | HJ-011 |
 | **Document Title** | Epic 1 Vendor Registration Implementation Scope |
-| **Version** | 2.0 |
+| **Version** | 2.1 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 26 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ## Revision History
 
@@ -26,8 +26,8 @@
 | 1.7 | 22 August 2026 | Applied CR-065. Added the approved CON-019 pre-outbox VendorRegistered mapper and CON-020 versioned Integration Event v1 contract to Epic 1 delivery scope. |
 | 1.8 | 23 August 2026 | Applied CR-TBD-HJ011. Added the approved concrete VendorRegistered v1 JSON member structure and deterministic wire-format requirements to Epic 1 delivery scope. |
 | 1.9 | 25 August 2026 | Added the approved CON-023–CON-026 thin Minimal API boundary, technical HTTP/JSON contract, centralized controlled-failure mapping and authoritative Application validation allocation to Epic 1. |
-
 | 2.0 | 26 August 2026 | Reconciled the approved unified Application validation-failure outcome across the Epic 1 RegisterVendor delivery scope. |
+| 2.1 | 28 August 2026 | Added the approved reliable-publication worker, RabbitMQ, Compliance receipt, migration, observability, health, architecture enforcement and CI scope for CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039. |
 
 ## Related Documents
 
@@ -231,6 +231,16 @@ Epic 1 implements sufficient observability to diagnose and verify:
 - health of deployable Epic 1 services.
 
 ---
+
+## 2.9 Reliable Publication and Enforcement
+
+## Epic 1 Reliable Publication Profile
+
+Epic 1 uses a dedicated Vendor relay worker that polls PostgreSQL in bounded batches and claims eligible outbox records using leased `FOR UPDATE SKIP LOCKED` semantics. It publishes the stored immutable event bytes through durable RabbitMQ topology with publisher confirms, then marks the record published. Expired claims recover automatically. Failed attempts use validated bounded exponential backoff; exhausted work becomes durable `Stalled` work requiring explicit administrative requeue. Records are not deleted.
+
+Delivery is at least once. EventId is the stable message identity; exactly-once and ordering guarantees are not claimed. Consumers acknowledge only after durable idempotent receipt, use bounded retry, and route exhausted or non-retryable messages to a durable dead-letter queue without changing EventId, EventVersion or payload.
+
+The Compliance stub durably records EventId and a serialized-byte hash before acknowledgement and performs no Compliance business behaviour. Reviewed EF Core migrations are applied before readiness, not by ordinary service startup. W3C trace context is carried as outbox and RabbitMQ metadata, with structured redacted logs and focused metrics. Liveness has no external dependency; readiness is responsibility-specific: the API requires PostgreSQL but not RabbitMQ, while relay and consumer readiness require their PostgreSQL/RabbitMQ dependencies. A dedicated HotJoes.ArchitectureTests project and mandatory GitHub Actions gates enforce the approved project, type, migration, PostgreSQL, RabbitMQ and API rules.
 
 # 3. Out of Scope
 

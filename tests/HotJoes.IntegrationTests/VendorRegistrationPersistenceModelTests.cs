@@ -236,15 +236,66 @@ public sealed class VendorRegistrationPersistenceModelTests
         AssertColumns(
             entity,
             table,
+            "attempt_count",
+            "claim_expires_at_utc",
+            "claimed_by",
             "event_id",
             "event_version",
+            "is_stalled",
+            "last_attempt_at_utc",
+            "last_failure_category",
+            "next_attempt_at_utc",
             "published_at_utc",
             "serialized_event",
+            "trace_parent",
+            "trace_state",
             "vendor_id");
+        AssertColumn(entity, table, "attempt_count", "integer", nullable: false);
+        AssertColumn(entity, table, "claimed_by", "uuid", nullable: true);
+        AssertColumn(
+            entity,
+            table,
+            "claim_expires_at_utc",
+            "timestamp with time zone",
+            nullable: true);
+        AssertColumn(
+            entity,
+            table,
+            "next_attempt_at_utc",
+            "timestamp with time zone",
+            nullable: true);
+        AssertColumn(
+            entity,
+            table,
+            "last_attempt_at_utc",
+            "timestamp with time zone",
+            nullable: true);
+        AssertColumn(
+            entity,
+            table,
+            "last_failure_category",
+            "character varying(64)",
+            nullable: true,
+            maximumLength: 64);
+        AssertColumn(entity, table, "is_stalled", "boolean", nullable: false);
         AssertColumn(entity, table, "event_id", "uuid", nullable: false);
         AssertColumn(entity, table, "vendor_id", "uuid", nullable: false);
         AssertColumn(entity, table, "event_version", "integer", nullable: false);
         AssertColumn(entity, table, "serialized_event", "bytea", nullable: false);
+        AssertColumn(
+            entity,
+            table,
+            "trace_parent",
+            "character varying(55)",
+            nullable: true,
+            maximumLength: 55);
+        AssertColumn(
+            entity,
+            table,
+            "trace_state",
+            "character varying(512)",
+            nullable: true,
+            maximumLength: 512);
         AssertColumn(
             entity,
             table,
@@ -274,10 +325,31 @@ public sealed class VendorRegistrationPersistenceModelTests
             unpublishedIndex.Properties.Select(
                 property => property.GetColumnName(table)));
 
+        IIndex eligibleIndex = Assert.Single(
+            entity.GetIndexes(),
+            index => index.GetDatabaseName() ==
+                "ix_vendor_registration_outbox_eligible");
+        Assert.False(eligibleIndex.IsUnique);
+        Assert.Equal(
+            "published_at_utc IS NULL AND is_stalled = FALSE",
+            eligibleIndex.GetFilter());
+        Assert.Equal(
+            new[]
+            {
+                "next_attempt_at_utc",
+                "claim_expires_at_utc",
+                "event_id"
+            },
+            eligibleIndex.Properties.Select(
+                property => property.GetColumnName(table)));
+
         AssertCheckConstraints(
             entity,
+            "ck_vendor_registration_outbox_attempt_count",
+            "ck_vendor_registration_outbox_claim",
             "ck_vendor_registration_outbox_event_version",
-            "ck_vendor_registration_outbox_serialized_event");
+            "ck_vendor_registration_outbox_serialized_event",
+            "ck_vendor_registration_outbox_stalled");
     }
 
     [Fact]

@@ -1,21 +1,15 @@
-name: Build
+name: Epic 1 Quality Gates
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
-
+  quality:
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -27,11 +21,119 @@ jobs:
       - name: Restore
         run: dotnet restore HotJoes.sln
 
-      - name: Build
-        run: dotnet build HotJoes.sln --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test HotJoes.sln --configuration Release --no-build
-
-      - name: Verify Formatting
+      - name: Verify formatting
         run: dotnet format HotJoes.sln --verify-no-changes --no-restore
+
+      - name: Build without warnings
+        run: dotnet build HotJoes.sln --configuration Release --no-restore --warnaserror
+
+  unit-tests:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore HotJoes.sln
+
+      - name: Domain tests
+        run: dotnet test tests/HotJoes.Domain.Vendor.Tests/HotJoes.Domain.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=domain.trx" --results-directory TestResults
+
+      - name: Application tests
+        run: dotnet test tests/HotJoes.Application.Vendor.Tests/HotJoes.Application.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=application.trx" --results-directory TestResults
+
+      - name: Publish unit-test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: TestResults/*.trx
+          if-no-files-found: error
+          retention-days: 7
+
+  architecture-tests:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore HotJoes.sln
+
+      - name: Architecture tests
+        run: dotnet test tests/HotJoes.Architecture.Tests/HotJoes.Architecture.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=architecture.trx" --results-directory TestResults
+
+      - name: Publish architecture-test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-test-results
+          path: TestResults/*.trx
+          if-no-files-found: error
+          retention-days: 7
+
+  api-tests:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore HotJoes.sln
+
+      - name: API tests
+        run: dotnet test tests/HotJoes.Api.Vendor.Tests/HotJoes.Api.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=api.trx" --results-directory TestResults
+
+      - name: Publish API-test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: TestResults/*.trx
+          if-no-files-found: error
+          retention-days: 7
+
+  integration-tests:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore HotJoes.sln
+
+      - name: Migration, PostgreSQL and RabbitMQ integration tests
+        run: dotnet test tests/HotJoes.IntegrationTests/HotJoes.IntegrationTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=integration.trx" --results-directory TestResults
+
+      - name: Publish integration-test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: TestResults/*.trx
+          if-no-files-found: error
+          retention-days: 7

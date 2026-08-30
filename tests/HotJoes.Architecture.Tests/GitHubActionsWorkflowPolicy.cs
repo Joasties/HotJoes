@@ -205,7 +205,7 @@ public static partial class GitHubActionsWorkflowPolicy
             RegexOptions.CultureInvariant).Count;
         int uploadCount = Regex.Matches(
             workflow,
-            "uses: actions/upload-artifact@v4",
+            "uses: actions/upload-artifact@v6",
             RegexOptions.CultureInvariant).Count;
 
         if (testCommandCount != 5 ||

@@ -35,7 +35,7 @@ public sealed class GitHubActionsQualityGateTests
               - run: dotnet test tests/HotJoes.Domain.Vendor.Tests/HotJoes.Domain.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=domain.trx" --results-directory TestResults
               - run: dotnet test tests/HotJoes.Application.Vendor.Tests/HotJoes.Application.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=application.trx" --results-directory TestResults
               - if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                   name: unit-test-results
                   path: TestResults/*.trx
@@ -52,7 +52,7 @@ public sealed class GitHubActionsQualityGateTests
               - run: dotnet restore HotJoes.sln
               - run: dotnet test tests/HotJoes.Architecture.Tests/HotJoes.Architecture.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=architecture.trx" --results-directory TestResults
               - if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                   name: architecture-test-results
                   path: TestResults/*.trx
@@ -69,7 +69,7 @@ public sealed class GitHubActionsQualityGateTests
               - run: dotnet restore HotJoes.sln
               - run: dotnet test tests/HotJoes.Api.Vendor.Tests/HotJoes.Api.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=api.trx" --results-directory TestResults
               - if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                   name: api-test-results
                   path: TestResults/*.trx
@@ -86,7 +86,7 @@ public sealed class GitHubActionsQualityGateTests
               - run: dotnet restore HotJoes.sln
               - run: dotnet test tests/HotJoes.IntegrationTests/HotJoes.IntegrationTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=integration.trx" --results-directory TestResults
               - if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                   name: integration-test-results
                   path: TestResults/*.trx
@@ -194,7 +194,7 @@ public sealed class GitHubActionsQualityGateTests
     public void AI_CI_002_MissingSafeTestResultPublication_IsDetected()
     {
         string workflow = CompliantWorkflow.Replace(
-            "uses: actions/upload-artifact@v4",
+            "uses: actions/upload-artifact@v6",
             "uses: actions/cache@v4",
             StringComparison.Ordinal);
 

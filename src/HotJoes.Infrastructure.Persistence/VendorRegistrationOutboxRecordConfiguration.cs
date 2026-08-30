@@ -102,11 +102,11 @@ internal sealed class VendorRegistrationOutboxRecordConfiguration
             .HasDatabaseName("ix_vendor_registration_outbox_unpublished");
 
         builder.HasIndex(record => new
-            {
-                record.NextAttemptAtUtc,
-                record.ClaimExpiresAtUtc,
-                record.EventId
-            })
+        {
+            record.NextAttemptAtUtc,
+            record.ClaimExpiresAtUtc,
+            record.EventId
+        })
             .HasFilter(
                 "published_at_utc IS NULL AND is_stalled = FALSE")
             .HasDatabaseName("ix_vendor_registration_outbox_eligible");

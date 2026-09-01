@@ -52,8 +52,9 @@ public sealed class VendorApiAzureAppConfigurationReplicaTopology
         Replicas = replicas.AsReadOnly();
     }
 
-    public IReadOnlyList<IConfigurationSnapshotReplica<
-        VendorApiConfigurationSnapshot>> Replicas { get; }
+    public IReadOnlyList<IConfigurationSnapshotReplica<VendorApiConfigurationSnapshot>>
+    Replicas
+    { get; }
 
     private static void ValidateDefinitions(
         AzureAppConfigurationReplicaDefinition[] definitions)

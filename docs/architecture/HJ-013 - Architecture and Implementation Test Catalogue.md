@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-013 |
 | **Document Title** | Architecture and Implementation Test Catalogue |
-| **Version** | 2.1 |
+| **Version** | 2.2 |
 | **Status** | Approved |
 | **Classification** | Test Catalogue |
 | **Owner** | Project Architecture / Engineering |
-| **Last Updated** | 28 August 2026 |
+| **Last Updated** | 1 September 2026 |
 
 ## Revision History
 
@@ -29,6 +29,7 @@
 | 1.9 | 26 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v1.9 and HJ-107 v1.7 Approved. Preserved all 44 existing `AI-*` IDs, added AI-API-001–004 and AI-VAL-001 for the approved CON-023–CON-026 API and validation architecture, and delegated the corresponding observable behaviour to the current HJ-107 catalogue. |
 | 2.0 | 26 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v2.0 and HJ-107 v1.8 Approved. Preserved all 49 active `AI-*` IDs and reconciled AI-APP-004, AI-API-003 and AI-VAL-001 with the approved unified `RequestValidationFailure` and `registrationValidationFailed` mapping. |
 | 2.1 | 28 August 2026 | Regenerated using PR-005 from HJ-010, HJ-011 and HJ-012 v2.1 and HJ-107 v1.9 Approved. Preserved all 49 active `AI-*` IDs, made 13 previously dependent relay and enforcement obligations Derivable, and added 18 independently diagnosable relay, RabbitMQ, Compliance receipt, migration, observability, health, architecture-harness and CI obligations for CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039. |
+| 2.2 | 1 September 2026 | Applied CR-TBD-HJ013 using PR-005. Preserved all 67 active `AI-*` IDs and added AI-CFG-001–003 and AI-SEC-001–002 for approved CON-032/CON-033 configuration, bootstrap, secret-isolation and rotation architecture. |
 
 ## Related Documents
 
@@ -39,9 +40,9 @@
 | HJ-005 | Coding Standards | 2.0 | Approved | Defines implementation boundaries, Domain modelling, persistence and enforcement expectations. |
 | HJ-006 | Testing Strategy and Standards | 2.0 | Approved | Authoritative Test Levels, Test Classifications and catalogue rules. |
 | HJ-007 | Enforcement Strategy | 2.0 | Approved | Defines build, static-analysis, dependency-validation and review mechanisms. |
-| HJ-010 | Current Application Architectural Concerns | 2.1 | Approved | Complete concern register including the approved reliable-publication and enforcement cohort. |
-| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 2.1 | Approved | Active delivery boundary including relay, broker, Compliance receipt and operational controls. |
-| HJ-012 | Established Application Architecture Patterns | 2.1 | Approved | Authoritative approved architecture baseline. |
+| HJ-010 | Current Application Architectural Concerns | 2.2 | Approved | Complete concern register including the approved reliable-publication and enforcement cohort. |
+| HJ-011 | Epic 1 Vendor Registration Implementation Scope | 2.2 | Approved | Active delivery boundary including relay, broker, Compliance receipt and operational controls. |
+| HJ-012 | Established Application Architecture Patterns | 2.2 | Approved | Authoritative approved architecture baseline. |
 | HJ-SM-001 | System Model | 1.0 | Approved | Confirms visible component relationships; visibility does not create delivery scope. |
 | HJ-104 | Vendor Registration Fields Matrix | 3.6 | Approved | Defines registration information, exact contact validation and canonicalisation, positional Address translation, composite Vendor identity and semantic registration equivalence. |
 | HJ-105 | Vendor Registration Sequence Diagram | 4.1 | Approved | Defines collaboration, publication, receipt, replay and failure paths. |
@@ -58,7 +59,7 @@
 
 HJ-013 catalogues executable tests and controlled verification obligations required to validate conformance with approved HotJoes application architecture and implementation standards.
 
-This catalogue covers the thirty-four Approved concerns in HJ-012 v2.1 applicable to the active delivery boundary:
+This catalogue covers the thirty-six Approved concerns in the HJ-012 v2.2 candidate applicable to the active delivery boundary:
 
 ```text
 CON-001–CON-029, CON-035–CON-037, CON-039 and CON-040
@@ -72,9 +73,9 @@ HJ-013 complements HJ-107. HJ-107 owns service and Domain behaviour derived from
 
 | Artefact | Authority Classification | Use in This Derivation |
 |---|---|---|
-| HJ-012 v2.1 Approved | Primary approved architecture | Supplies thirty-four applicable Approved concerns, including reliable publication and enforcement. |
-| HJ-010 v2.1 Approved | Architectural governance | Supplies complete concern states and remaining unresolved dependencies. |
-| HJ-011 v2.1 Approved | Active delivery scope | Includes Vendor Registration, relay, RabbitMQ, Compliance receipt and operational controls. |
+| HJ-012 v2.2 candidate | Primary approved architecture candidate | Supplies thirty-six applicable Approved concerns, including reliable publication, enforcement, centralized configuration and secret management. |
+| HJ-010 v2.2 candidate | Architectural governance candidate | Supplies complete concern states and remaining unresolved dependencies. |
+| HJ-011 v2.2 candidate | Active delivery-scope candidate | Adds the approved configuration and secret-management boundary to the existing Vendor Registration, relay, RabbitMQ, Compliance receipt and operational controls. |
 | HJ-SM-001 v1.0 | System context | Confirms visible relationships; components outside HJ-011 remain outside this derivation. |
 | HJ-004 v2.8 | Domain authority | Defines the Vendor Aggregate, internal fact, exact published v1 contract, Vendor-owned Address snapshot and Domain concepts used by the in-scope operations. |
 | HJ-104 v3.6 and HJ-105 v4.1 | Information and interaction authority | Define registration information and the complete interaction/publication sequence. |
@@ -84,7 +85,7 @@ HJ-013 complements HJ-107. HJ-107 owns service and Domain behaviour derived from
 | ADR-001, ADR-003 v1.3, ADR-004, ADR-006 v1.3, ADR-007 v1.1 and ADR-008 v1.5 | Accepted decisions | Supply decision authority for applicable Approved patterns. |
 | Controlled HJ-013 v2.0 | Reconciliation baseline only | Sole baseline for preserving and reconciling `AI-*` IDs. |
 
-No normative source conflict was identified. CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039 now supply approved relay, broker, receipt, migration, observability, health, enforcement and CI authority. CON-032, CON-033, CON-034 and CON-038 remain outside this approved cohort and are not silently resolved.
+No normative source conflict was identified. CON-032 and CON-033 now supply approved centralized-configuration and secret-management authority. CON-034 and CON-038 remain outside this approved cohort and are not silently resolved.
 
 # 3. Scope and Derivation Rules
 
@@ -92,8 +93,8 @@ No normative source conflict was identified. CON-018, CON-021, CON-022, CON-029,
 
 | Boundary | Applied Baseline |
 |---|---|
-| Approved architecture | HJ-012 v2.1 Approved: applicable CON-001–CON-029, CON-035–CON-037, CON-039 and CON-040 |
-| Active delivery scope | HJ-011 v2.1 Approved: Epic 1 Vendor Registration and reliable publication |
+| Approved architecture | HJ-012 v2.2 candidate: applicable CON-001–CON-29, CON-032, CON-033, CON-035–CON-037, CON-039 and CON-040 |
+| Active delivery scope | HJ-011 v2.2 candidate: Epic 1 Vendor Registration, reliable publication, centralized configuration and secret management |
 | Generation mode | Controlled Regeneration |
 | Previous HJ-013 baseline | HJ-013 v1.9 Approved |
 | Current behavioural catalogue | HJ-107 v1.9 Approved |
@@ -101,7 +102,7 @@ No normative source conflict was identified. CON-018, CON-021, CON-022, CON-029,
 | Applicable visible architecture | Vendor Domain, PostgreSQL persistence, reliable publication and the Address/Compliance boundaries only where exercised by HJ-011 |
 | Visible but excluded architecture | Later Vendor lifecycle commands, Identity behaviour, future queries/read models and other capabilities excluded by HJ-011 |
 
-Approved architecture is instantiated only within HJ-011 v2.1. The wider Domain Model and System Model do not independently expand this catalogue version.
+Approved architecture is instantiated only within the HJ-011 v2.2 candidate. The wider Domain Model and System Model do not independently expand this catalogue version.
 
 ## 3.2 Derivation Rule
 
@@ -181,6 +182,9 @@ A dependency is not evidence that an Approved concern is deficient. A concern be
 | CON-036 | Separate liveness and readiness | Deployables expose responsibility-specific health. | API, relay, consumer | AI-HEALTH-001–002 | No duplicate behavioural obligation | CON-038 only for exact hosting |
 | CON-037 | Composition Roots + dedicated architecture tests | Forbidden dependencies and structures fail automatically. | All executable hosts | Existing enforcement IDs plus AI-ARCH-001 | No duplicate behavioural obligation | None |
 | CON-039 | Mandatory GitHub Actions gates | Non-conforming changes cannot progress. | Repository delivery workflow | AI-CI-001–002 | Runs, but does not own, behavioural tests | None |
+
+| CON-032 | Azure App Configuration + component-owned strongly typed options + immutable validated snapshots + geo-replicated failover | Non-secret configuration is complete, environment-appropriate, valid before readiness and resilient without partial refresh or unsafe cold start. | Applicable Epic 1 deployables and supporting runtime | Structural isolation, configuration integration, failure injection and readiness evidence | None; no Vendor service behaviour changes | Existing CON-036 health obligations apply; CON-038 governs exact runtime hosting and composition |
+| CON-033 | Azure Key Vault + managed identity + controlled local injection + overlap-and-cutover rotation | Secrets remain separate, least-privileged, versioned, safely rotated and absent from source, logs and output. | Applicable Epic 1 deployable edges and production identities | Secret scanning, deployment validation, rotation/failure injection and provider-isolation evidence | None; no Vendor service behaviour changes | Existing CON-036 health obligations apply; CON-038 governs exact runtime hosting and composition |
 
 # 5. Architecture and Implementation Test Catalogue
 
@@ -348,6 +352,16 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 | AI-CI-001 | GitHub Actions executes every mandatory gate | Selected-SDK restore, warning-free build, unit, architecture, migration, PostgreSQL, RabbitMQ and API tests run for pull requests/protected branches using disposable real infrastructure. | CON-039; HJ-012; HJ-005–HJ-007 | Automated Enforcement | Not applicable | P2 | Workflow/run evidence proves every gate executes and warnings fail. | None. | Derivable |
 | AI-CI-002 | Failed required checks prevent progression safely | Deliberate test, migration and architecture failures prevent merge eligibility while publishing useful diagnostics without secrets or payloads. | CON-039; HJ-012 | Automated Enforcement | Not applicable | P2 | Failing-run and branch-protection/equivalent evidence proves enforcement and sanitized artifacts. | None. | Derivable |
 
+## 5.12 CON-032–CON-033 — Centralized Configuration and Secret Management
+
+| Test ID | Title | Requirement | Source | Verification Form | Classification / Level | Priority | Expected Evidence | Dependency | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| AI-CFG-001 | Cloud configuration remains at deployable edges | Domain and Application assemblies contain no Azure App Configuration, Key Vault, managed-identity or other cloud-provider SDK, identity or resource representation; each deployable binds only component-owned strongly typed options. | CON-032; CON-033; HJ-012; ADR-009; HJ-005 §14.3 | Automated Enforcement | Not applicable | P0 | Project-reference and type-dependency evidence rejects provider types in Domain/Application and arbitrary string-key access outside composition/configuration adapters. | CON-037 governs the reusable enforcement mechanism; focused dependency evidence is independently derivable. | Derivable |
+| AI-CFG-002 | Bootstrap obtains one valid authoritative snapshot through replica failover | Each applicable production deployable prefers its regional App Configuration replica, fails over to an approved cross-region replica and does not become ready until one complete snapshot and required secrets are resolved and validated. Total authoritative-source failure leaves the new instance unready without partial initialization. | CON-032; CON-033; HJ-011 §§2.6–2.7; HJ-012; ADR-009 | Executable Test | System Integration / Integration | P0 | Controlled connectivity and invalid-input failures prove preferred-replica use, failover, complete validation, missing-secret failure and absence of ready state or downstream business processing when bootstrap cannot complete. | AI-HEALTH-001–002 govern broader health-endpoint evidence; CON-038 governs exact runtime hosting and composition. | Derivable |
+| AI-CFG-003 | Refresh preserves one complete last-valid configuration | A running service atomically accepts only a complete valid reload-safe snapshot, rejects invalid or partial replacement, and retains the last validated configuration during App Configuration outage. Consistency-sensitive settings do not hot reload without explicit verified support. | CON-032; HJ-011 §2.6; HJ-012; ADR-009 | Executable Test | System Integration / Integration | P0 | Failure injection proves whole-snapshot replacement, invalid/partial rejection, continuity during outage, rollback to a known snapshot and reload-safe classification; feature-management behaviour is absent. | None within the configuration boundary. | Derivable |
+| AI-SEC-001 | Secrets remain separate and non-observable | Secret values are absent from source control, App Configuration values, normal configuration files, logs, diagnostics, API responses, test evidence and recovery output; local injection is controlled and production uses managed identity where supported. | CON-033; HJ-002; HJ-005 §20.3; HJ-011 §2.7; ADR-009 | Automated Enforcement | Not applicable | P0 | Secret scanning, configuration inspection, redaction tests and deployment-policy evidence prove separation, least privilege and absence of value leakage. | CON-037 governs reusable enforcement integration; focused scans and tests are independently derivable. | Derivable |
+| AI-SEC-002 | Credential rotation cuts over without premature revocation | Remaining Key Vault secrets are versioned and rotated by validating the replacement, allowing overlap where supported, refreshing atomically or rolling healthy instances, then revoking the previous credential. Failure stops before revoking a credential required by healthy instances. | CON-033; HJ-011 §2.7; HJ-012; ADR-009 | Executable Test | System Integration / Integration | P0 | Rotation and failure-injection evidence proves new-version validation, overlap, health-gated rollout, rollback, preserved in-flight/durable work and absence of premature revocation or secret logging. | Resource-specific rotation adapters are selected during approved implementation design; the architectural sequence is fixed. | Derivable |
+
 # 6. Cross-Catalogue Responsibility
 
 | Guarantee | HJ-107 Responsibility | HJ-013 Responsibility |
@@ -372,6 +386,8 @@ For the Epic 1 RegisterVendor and RetrieveRegisteredVendor operations, HJ-004 id
 | Technical API contract | Exact runtime HTTP/JSON requests, responses, formats and headers | Generated OpenAPI congruence with the approved runtime contract |
 | Controlled failure mapping | Exact statuses, codes, error envelope and information-exclusion behaviour | Centralized mapping and exception-handler ownership enforcement |
 | Validation allocation | Structural, Application and Domain validation behaviour, one aggregated `RequestValidationFailure`, canonicalisation, ordering and absence of pre-commit effects | Closed-result structure under AI-APP-004; observable validation and API mapping delegated to HJ-107; no duplicate HJ-013 behavioural test |
+| Centralized configuration | No Vendor service behaviour change | AI-CFG-001–003 own provider isolation, bootstrap/failover, readiness and snapshot-refresh mechanisms |
+| Secret management | No Vendor service behaviour change | AI-SEC-001–002 own secret separation, identity, rotation, rollback and leakage evidence |
 
 The same Required Guarantee may have tests at distinct boundaries, but identical stimuli and evidence shall not be duplicated across the catalogues.
 
@@ -415,9 +431,12 @@ The same Required Guarantee may have tests at distinct boundaries, but identical
 | CON-037 | Composition and structural boundaries fail automated tests. | AI-ARCH-001 and the eleven approved enforcement IDs | Applicable prohibited-behaviour references | Covered | None |
 | CON-039 | Mandatory CI gates prevent non-conforming progression. | AI-CI-001–002 | Executes current HJ-107 | Covered | None |
 
+| CON-032 | Non-secret configuration is complete, environment-appropriate, valid before readiness and resilient without partial refresh or unsafe cold start. | AI-CFG-001–003 | None; no externally observable Vendor service behaviour changes | Covered | AI-HEALTH-001–002 for health evidence; CON-038 for exact hosting/composition |
+| CON-033 | Secrets are separate, least-privileged, safely rotated and never exposed. | AI-CFG-001–002; AI-SEC-001–002 | None; no externally observable Vendor service behaviour changes | Covered | AI-HEALTH-001–002 for health evidence; CON-038 for exact hosting/composition |
+
 # 8. Derivation Findings and Dependencies
 
-No evidence requires any of the thirty-four applicable Approved concerns to become Challenged.
+No evidence requires any of the thirty-six applicable Approved concerns to become Challenged.
 
 | Current Concern | Effect on HJ-013 |
 |---|---|
@@ -440,11 +459,12 @@ No evidence requires any of the thirty-four applicable Approved concerns to beco
 | CON-028 | Resolved; real-PostgreSQL mapping and enforcement evidence is derivable. |
 | CON-029 | Resolved; AI-MIG-001–002 own migration lifecycle evidence. |
 | CON-035 | Resolved; AI-OBS-001–002 own trace, logging and metric evidence. |
+| CON-032, CON-033 | Resolved; AI-CFG-001–003 and AI-SEC-001–002 own the focused configuration and secret-management evidence. CON-038 retains broader runtime-composition responsibility. |
 | CON-036 | Resolved at its approved boundary; AI-HEALTH-001–002 remain explicit about CON-038 hosting. |
 | CON-037 | Resolved; existing enforcement obligations and AI-ARCH-001 are Derivable. |
 | CON-039 | Resolved; AI-CI-001–002 own mandatory CI evidence. |
 
-Remaining CON-032 and CON-038 dependencies constrain configured values and exact hosting only; all obligations separate the evidence already derivable.
+Remaining CON-038 dependencies constrain exact hosting only; all CON-032/CON-033 obligations are otherwise independently derivable.
 
 This regeneration found no behavioural-catalogue omission, normative conflict or evidence requiring an Approved concern to become Challenged.
 
@@ -454,31 +474,29 @@ This regeneration found no behavioural-catalogue omission, normative conflict or
 |---|---|---|
 | **Derivable** | Every active `AI-*` obligation except those delegated to HJ-107; this includes all prior enforcement IDs, AI-OUT-005, AI-EVT-003 and AI-RELAY, AI-BROKER, AI-CONS, AI-MIG, AI-OBS, AI-HEALTH, AI-ARCH and AI-CI additions. | Generate focused executable tests, automated enforcement and reviews within each obligation's stated boundary. |
 | **HJ-107 Coverage** | AI-AGG-001; AI-ENT-001; AI-DE-002; AI-OUT-004; AI-QRY-002; AI-QRY-003; AI-API-004; AI-VAL-001 | Generate no duplicate HJ-013 executable test; use the referenced HJ-107 coverage. |
-| **Dependent** | None at the currently approved obligation boundaries. | CON-032 and CON-038 remain explicit qualifications only where configured values or exact hosting are outside the obligation. |
+| **Dependent** | None at the currently approved obligation boundaries. | CON-038 remains an explicit qualification only where exact hosting is outside the obligation. |
 
 HJ-107 test-candidate readiness remains governed by HJ-107. This catalogue does not modify or reconcile any `VR-*` ID.
 
-Readiness for a test candidate does not authorise unrestricted implementation generation or selection of CON-032/CON-038 decisions.
+Readiness for a test candidate does not authorise unrestricted implementation generation or selection of the unresolved CON-038 decision.
 
 # 10. Regeneration Reconciliation
 
 ## 10.1 AI Test ID Reconciliation
 
-HJ-013 v2.0 is the sole `AI-*` stable-ID baseline.
+HJ-013 v2.1 is the sole `AI-*` stable-ID baseline.
 
 | AI Test ID | Previous Treatment | Regenerated Treatment | Reason |
 |---|---|---|---|
-| AI-OUT-005; AI-EVT-003 | Dependent on unresolved relay/broker authority. | Derivable exact-event recovery and no-reconstruction tests. | CON-018 and CON-021 are Approved. |
-| AI-AGG-002; AI-ENT-002; AI-DE-001; AI-DE-003; AI-REP-001; AI-OUT-003; AI-ADDR-001; AI-ADDR-007; AI-APP-002; AI-API-001; AI-API-003 | Dependent on unresolved enforcement authority. | Derivable automated enforcement in the dedicated architecture-test harness. | CON-037 is Approved. |
-| AI-RELAY-001–003; AI-BROKER-001–003; AI-CONS-001–003; AI-MIG-001–002; AI-OBS-001–002; AI-HEALTH-001–002; AI-ARCH-001; AI-CI-001–002 | Did not exist. | Added as independently diagnosable obligations. | Approved CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039 require new mechanism evidence. |
-| Remaining 36 active AI-* IDs | Controlled HJ-013 v2.0 treatment. | Preserved without material obligation change. | Their authority is unchanged. |
+| AI-CFG-001–003; AI-SEC-001–002 | Did not exist. | Added as five independently diagnosable obligations. | Approved CON-032/CON-033 require provider-isolation, bootstrap, refresh, secret-separation and safe-rotation evidence. |
+| Existing 67 active `AI-*` IDs | Controlled HJ-013 v2.1 treatment. | Preserved without retirement, reuse or reassignment. | Their approved architecture and delivery applicability are unchanged. |
 
 Reconciliation totals:
 
-- 49 active `AI-*` IDs retained;
-- 36 preserved without material obligation change;
-- 13 materially amended from Dependent to Derivable;
-- 18 added;
+- 67 active `AI-*` IDs retained;
+- 67 preserved without material obligation change;
+- 0 materially amended;
+- 5 added;
 - 0 retired, merged, split, superseded, reused or reassigned; and
 - 0 unresolved stable-ID mappings.
 
@@ -499,10 +517,10 @@ Behavioural reconciliation totals:
 
 # 11. Review Checklist
 
-- [x] Uses the supplied execution context and HJ-011 v2.1 delivery boundary.
-- [x] Derives active obligations only from Approved entries in HJ-012 v2.1.
-- [x] Uses HJ-013 v1.9 as the sole `AI-*` stable-ID baseline.
-- [x] Retains all 49 active `AI-*` IDs and reconciles the three material amendments.
+- [x] Uses the supplied execution context and HJ-011 v2.2 delivery boundary.
+- [x] Derives active obligations only from Approved entries in HJ-012 v2.2.
+- [x] Uses HJ-013 v2.1 as the sole `AI-*` stable-ID baseline.
+- [x] Retains all 67 existing `AI-*` IDs and adds five unique, independently diagnosable obligations.
 - [x] Does not create, modify, retire or reconcile any `VR-*` ID.
 - [x] References only behavioural IDs present in HJ-107 v1.9 Approved.
 - [x] Duplicates no HJ-107 behavioural obligation as an HJ-013 executable test.
@@ -515,7 +533,6 @@ Behavioural reconciliation totals:
 
 # 12. Next Steps
 
-1. Review and apply HJ-013 v2.1 derived from HJ-012 v2.1 and HJ-107 v1.9 Approved.
-2. Reconcile the current implementation cohort against the newly Derivable obligations.
-3. Resume PR-006 with a focused reliable-publication and enforcement implementation plan.
-4. Preserve CON-032 configuration and CON-038 hosting qualifications rather than selecting their unresolved decisions during implementation.
+1. Review and apply HJ-013 v2.2 derived from HJ-012 v2.2 and HJ-107 v1.9 Approved.
+2. After controlled application, use PR-006 to define small test-driven configuration and secret-management implementation slices.
+3. Preserve the unresolved CON-038 hosting boundary and the separately governed wider resilience cohort.

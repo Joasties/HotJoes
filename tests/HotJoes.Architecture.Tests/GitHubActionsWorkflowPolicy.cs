@@ -7,6 +7,10 @@ public static partial class GitHubActionsWorkflowPolicy
     private const string WorkflowRelativePath =
         ".github/workflows/build.yml";
     private const string ObligationId = "AI-CI-001/AI-CI-002";
+    private const string SecurityObligationId = "AI-SEC-001";
+    private const string ApprovedSecretScannerImage =
+        "ghcr.io/gitleaks/gitleaks@sha256:" +
+        "c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f";
 
     public static IReadOnlyList<ArchitectureViolation> EvaluateCurrent()
     {
@@ -38,6 +42,7 @@ public static partial class GitHubActionsWorkflowPolicy
 
         RequireTriggers(normalized, violations);
         RequireQualityGate(normalized, violations);
+        RequireSecretScan(normalized, violations);
         RequireTestGates(normalized, violations);
         RequireSafeDiagnostics(normalized, violations);
 
@@ -177,6 +182,43 @@ public static partial class GitHubActionsWorkflowPolicy
         }
     }
 
+    private static void RequireSecretScan(
+        string workflow,
+        ICollection<ArchitectureViolation> violations)
+    {
+        string approvedCommand =
+            $"docker run --rm -v \"$PWD:/repo\" " +
+            $"{ApprovedSecretScannerImage} " +
+            "git --redact --no-banner /repo";
+
+        if (!workflow.Contains(
+                approvedCommand,
+                StringComparison.Ordinal))
+        {
+            violations.Add(SecurityViolation(
+                "Mandatory redacted repository-history secret scan is not " +
+                    "executed."));
+        }
+
+        if (workflow.Contains(
+                "ghcr.io/gitleaks/gitleaks",
+                StringComparison.Ordinal) &&
+            !workflow.Contains(
+                ApprovedSecretScannerImage,
+                StringComparison.Ordinal))
+        {
+            violations.Add(SecurityViolation(
+                "Secret scan does not use the approved immutable scanner " +
+                    "image."));
+        }
+
+        if (!FullHistorySecretScanCheckout().IsMatch(workflow))
+        {
+            violations.Add(SecurityViolation(
+                "Secret scan checkout does not fetch repository history."));
+        }
+    }
+
     private static void RequireProjectTest(
         string workflow,
         string projectPath,
@@ -235,6 +277,15 @@ public static partial class GitHubActionsWorkflowPolicy
             description);
     }
 
+    private static ArchitectureViolation SecurityViolation(
+        string description)
+    {
+        return new ArchitectureViolation(
+            SecurityObligationId,
+            WorkflowRelativePath,
+            description);
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);
@@ -269,6 +320,17 @@ public static partial class GitHubActionsWorkflowPolicy
         "(?m)^\\s*continue-on-error:\\s*true\\s*$",
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]
     private static partial Regex ContinueOnError();
+
+    [GeneratedRegex(
+        "(?m)uses: actions/checkout@v6\\n" +
+            "\\s+with:\\n" +
+            "\\s+fetch-depth: 0\\n" +
+            "(?:\\s*\\n)?" +
+            "\\s+- (?:name: [^\\n]+\\n\\s+)?run: docker run " +
+            "--rm -v \\\"\\$PWD:/repo\\\" " +
+            "ghcr\\.io/gitleaks/gitleaks@sha256:",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex FullHistorySecretScanCheckout();
 
     [GeneratedRegex(
         "(?im)^\\s*-?\\s*run:\\s*(?:printenv|env(?:\\s|$)|" +

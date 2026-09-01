@@ -10,9 +10,11 @@ public static class ArchitectureHarnessCompletenessRuleSet
     private static readonly string[] ApprovedRuleSetNames =
     [
         nameof(ApiAddressStructuralRuleSet),
+        nameof(CloudConfigurationStructuralRuleSet),
         nameof(DomainApplicationStructuralRuleSet),
         nameof(MigrationStructuralRuleSet),
-        nameof(ProjectDependencyRuleSet)
+        nameof(ProjectDependencyRuleSet),
+        nameof(SecretExposureStructuralRuleSet)
     ];
 
     private static readonly string[] ApprovedObligationIds =
@@ -24,6 +26,7 @@ public static class ArchitectureHarnessCompletenessRuleSet
         "AI-API-003",
         "AI-APP-002",
         "AI-ARCH-001",
+        "AI-CFG-001",
         "AI-CI-001",
         "AI-CI-002",
         "AI-CONS-003",
@@ -32,7 +35,9 @@ public static class ArchitectureHarnessCompletenessRuleSet
         "AI-ENT-002",
         "AI-MIG-002",
         "AI-OUT-003",
-        "AI-REP-001"
+        "AI-REP-001",
+        "AI-SEC-001",
+        "AI-SEC-002"
     ];
 
     public static IReadOnlyList<ArchitectureViolation> Evaluate(

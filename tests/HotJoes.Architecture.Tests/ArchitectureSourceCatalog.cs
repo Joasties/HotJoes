@@ -47,7 +47,7 @@ public sealed class ArchitectureSourceCatalog
         SourceFileDescriptor[] files = Directory
             .EnumerateFiles(
                 sourceRoot,
-                "*.cs",
+                "*",
                 SearchOption.AllDirectories)
             .Select(absolutePath => new
             {
@@ -57,7 +57,7 @@ public sealed class ArchitectureSourceCatalog
                         absolutePath)
                     .Replace('\\', '/')
             })
-            .Where(file => !IsBuildArtifact(file.RelativePath))
+            .Where(file => IsGovernedSource(file.RelativePath))
             .Select(file => new SourceFileDescriptor(
                 file.RelativePath,
                 File.ReadAllText(file.AbsolutePath)))
@@ -96,6 +96,17 @@ public sealed class ArchitectureSourceCatalog
     {
         return relativePath.Contains("/bin/", StringComparison.Ordinal) ||
             relativePath.Contains("/obj/", StringComparison.Ordinal);
+    }
+
+    private static bool IsGovernedSource(string relativePath)
+    {
+        return !IsBuildArtifact(relativePath) &&
+            (relativePath.EndsWith(
+                    ".cs",
+                    StringComparison.OrdinalIgnoreCase) ||
+                relativePath.EndsWith(
+                    ".json",
+                    StringComparison.OrdinalIgnoreCase));
     }
 
     private static string FindRepositoryRoot()

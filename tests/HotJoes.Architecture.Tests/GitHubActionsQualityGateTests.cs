@@ -16,6 +16,9 @@ public sealed class GitHubActionsQualityGateTests
             runs-on: ubuntu-latest
             steps:
               - uses: actions/checkout@v6
+                with:
+                  fetch-depth: 0
+              - run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --no-banner /repo
               - uses: actions/setup-dotnet@v6
                 with:
                   dotnet-version: '10.0.x'
@@ -221,6 +224,71 @@ public sealed class GitHubActionsQualityGateTests
             "Workflow contains an unsafe diagnostic-publication command.");
     }
 
+    [Fact]
+    public void AI_SEC_001_MissingRepositoryHistorySecretScan_IsDetected()
+    {
+        string workflow = CompliantWorkflow.Replace(
+            SecretScanCommand,
+            "echo secret scan omitted",
+            StringComparison.Ordinal);
+
+        AssertSecurityViolation(
+            workflow,
+            "Mandatory redacted repository-history secret scan is not " +
+                "executed.");
+    }
+
+    [Fact]
+    public void AI_SEC_001_NonRedactedSecretScan_IsDetected()
+    {
+        string workflow = CompliantWorkflow.Replace(
+            " git --redact --no-banner /repo",
+            " git --no-banner /repo",
+            StringComparison.Ordinal);
+
+        AssertSecurityViolation(
+            workflow,
+            "Mandatory redacted repository-history secret scan is not " +
+                "executed.");
+    }
+
+    [Fact]
+    public void AI_SEC_001_MutableSecretScannerImage_IsDetected()
+    {
+        string workflow = CompliantWorkflow.Replace(
+            "ghcr.io/gitleaks/gitleaks@sha256:" +
+                "c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+            "ghcr.io/gitleaks/gitleaks:v8.30.1",
+            StringComparison.Ordinal);
+
+        AssertSecurityViolation(
+            workflow,
+            "Secret scan does not use the approved immutable scanner image.");
+    }
+
+    [Fact]
+    public void AI_SEC_001_ShallowSecretScanCheckout_IsDetected()
+    {
+        string workflow = CompliantWorkflow.Replace(
+            "      - uses: actions/checkout@v6\n" +
+                "        with:\n" +
+                "          fetch-depth: 0\n" +
+                "      - run: " + SecretScanCommand,
+            "      - uses: actions/checkout@v6\n" +
+                "      - run: " + SecretScanCommand,
+            StringComparison.Ordinal);
+
+        AssertSecurityViolation(
+            workflow,
+            "Secret scan checkout does not fetch repository history.");
+    }
+
+    private const string SecretScanCommand =
+        "docker run --rm -v \"$PWD:/repo\" " +
+        "ghcr.io/gitleaks/gitleaks@sha256:" +
+        "c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f " +
+        "git --redact --no-banner /repo";
+
     private static void AssertViolation(
         string workflow,
         string expectedDescription)
@@ -230,6 +298,23 @@ public sealed class GitHubActionsQualityGateTests
 
         ArchitectureViolation violation = Assert.Single(violations);
         Assert.Equal("AI-CI-001/AI-CI-002", violation.ObligationId);
+        Assert.Equal(".github/workflows/build.yml", violation.ProjectName);
+        Assert.Equal(expectedDescription, violation.Description);
+    }
+
+    private static void AssertSecurityViolation(
+        string workflow,
+        string expectedDescription)
+    {
+        IReadOnlyList<ArchitectureViolation> violations =
+            GitHubActionsWorkflowPolicy.Evaluate(workflow);
+
+        ArchitectureViolation violation = Assert.Single(
+            violations,
+            candidate =>
+                candidate.ObligationId == "AI-SEC-001" &&
+                candidate.Description == expectedDescription);
+        Assert.Equal("AI-SEC-001", violation.ObligationId);
         Assert.Equal(".github/workflows/build.yml", violation.ProjectName);
         Assert.Equal(expectedDescription, violation.Description);
     }

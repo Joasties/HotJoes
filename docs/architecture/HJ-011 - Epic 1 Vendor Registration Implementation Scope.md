@@ -6,11 +6,11 @@
 | --- | --- |
 | **Document ID** | HJ-011 |
 | **Document Title** | Epic 1 Vendor Registration Implementation Scope |
-| **Version** | 2.1 |
+| **Version** | 2.3 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 28 August 2026 |
+| **Last Updated** | 1 September 2026 |
 
 ## Revision History
 
@@ -28,6 +28,8 @@
 | 1.9 | 25 August 2026 | Added the approved CON-023–CON-026 thin Minimal API boundary, technical HTTP/JSON contract, centralized controlled-failure mapping and authoritative Application validation allocation to Epic 1. |
 | 2.0 | 26 August 2026 | Reconciled the approved unified Application validation-failure outcome across the Epic 1 RegisterVendor delivery scope. |
 | 2.1 | 28 August 2026 | Added the approved reliable-publication worker, RabbitMQ, Compliance receipt, migration, observability, health, architecture enforcement and CI scope for CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039. |
+| 2.2 | 31 August 2026 | Applied CR-TBD-HJ011. Propagated approved CON-032/CON-033 Azure App Configuration, Key Vault, managed-identity, snapshot, failover, bootstrap and rotation boundaries into Epic 1 scope. |
+| 2.3 | 1 September 2026 | Applied CR-TBD-HJ011. Synchronized HJ-010/HJ-012 baseline references after completed architecture and test-catalogue propagation; changed no delivery scope or completion criterion. |
 
 ## Related Documents
 
@@ -37,8 +39,8 @@
 | HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
 | HJ-004 | Vendor Domain Models | Approved |
-| HJ-010 | Current Application Architectural Concerns | Approved v1.8 |
-| HJ-012 | Established Application Architecture Patterns | Approved v1.8 |
+| HJ-010 | Current Application Architectural Concerns | Approved v2.3 |
+| HJ-012 | Established Application Architecture Patterns | Approved v2.3 |
 | HJ-104 | Vendor Registration Fields Matrix | Approved |
 | HJ-105 | Vendor Registration Sequence Diagram | Approved |
 | HJ-106 | Vendor Registration Service Contract | Approved |
@@ -174,38 +176,30 @@ Compatible optional fields may be added within v1; breaking changes require a ne
 
 Configuration is **in scope**.
 
-Epic 1 implements a Centralized Configuration Service providing centrally managed configuration required by the Epic 1 execution path.
+Azure is the primary Epic 1 reference cloud. Azure App Configuration provides centrally managed, environment-specific non-secret configuration for applicable Epic 1 deployables and supporting infrastructure. Each deployable owns strongly typed options for only the values it consumes and validates its complete required configuration before readiness.
 
-Configuration retrieval shall be supported by the following components where configuration is applicable:
+Production configuration is promoted as validated immutable snapshots. Running services retain their current validated snapshot during temporary provider outage or invalid refresh. Runtime refresh is limited to settings explicitly classified as reload-safe; consistency-sensitive settings use health-gated rolling restart unless atomic reload is implemented and verified.
 
-- Vendor Web client;
-- API Gateway;
-- Vendor Service;
-- Address Domain Stub;
-- Compliance Event Consumer Stub;
-- Vendor persistence components;
-- Event Bus / Message Broker and associated publication components; and
-- other components already classified as In Scope, Stubbed / Simulated, or Supporting runtime / delivery for Epic 1, where explicitly identified by the implementation design.
+Production App Configuration uses cross-region replication and provider failover. A new or recovering instance does not report readiness until one complete approved snapshot has been obtained and validated. If no approved replica is available, the instance fails readiness rather than using incomplete, invalid or unmanaged locally cached configuration.
 
-Epic 1 configuration includes:
+Configuration retrieval applies where relevant to the Vendor Web client, API Gateway, Vendor Service, Address Domain Stub, Compliance Event Consumer Stub, Vendor persistence, Event Bus / Message Broker, publication components and other explicitly in-scope supporting deployables.
 
-- application settings;
-- environment-specific configuration;
-- service and infrastructure endpoints;
-- non-secret connection and integration settings; and
-- configuration required to connect Epic 1 components consistently across environments.
+Epic 1 configuration includes application settings, environment-specific settings, endpoints, non-secret connection and integration settings, and consistent component-connection information. It shall not contain secret values, business rules, service contracts, Integration Events, mutable request state or shared hidden coupling.
 
-Secrets, credentials and other sensitive configuration shall continue to be handled securely and shall not be exposed merely because configuration is centrally managed.
-
-Feature-management behaviour is out of scope for Epic 1. The selected Centralized Configuration Service may possess such capability, but Epic 1 shall neither implement nor exercise it.
-
-Centralized configuration and secret management remain distinct responsibilities. Inclusion of the Centralized Configuration Service does not change the requirement for secure handling of credentials, secrets and connection information.
+Feature-management behaviour remains out of scope.
 
 ## 2.7 Security
 
 Security is **in scope**.
 
-Epic 1 implements:
+Azure Key Vault is the production secret store. Production workloads use managed identity wherever the target Azure service supports it. Remaining secrets are versioned in Key Vault and have an identified owner, purpose, consumers, lifetime, rotation mechanism and recovery procedure. App Configuration may contain non-secret references but never secret values.
+
+Local execution uses developer identity or controlled local secret injection. Secret values are excluded from source control, normal configuration files, logs, diagnostics, API responses and recovery evidence.
+
+Rotation uses overlap-and-cutover where supported: validate the replacement, make it available to consumers, complete verified refresh or health-gated rolling replacement, then revoke the previous credential. Rotation failure stops before revoking a credential required by healthy instances.
+
+Epic 1 also implements:
+
 
 - HTTPS for externally exposed endpoints;
 - secure handling of secrets and credentials;
@@ -396,8 +390,9 @@ Epic 1 Vendor Registration is complete when:
 9. Failure of event publication cannot result in loss of the publication obligation.
 10. The published integration event is successfully received and deserialized by the Compliance Event Consumer Stub.
 11. The complete Epic 1 execution can be observed and diagnosed sufficiently to identify registration, persistence and publication failures.
-12. Epic 1 components requiring centrally managed configuration can retrieve and validate their required configuration from the Centralized Configuration Service.
-13. `POST /vendors` and `GET /vendors/{vendorId}` expose the approved Application operations through thin endpoint adapters using the approved JSON, success and controlled-failure contracts.
-14. Direct Vendor Application invocation remains authoritative for registration validation without requiring an HTTP caller, and every pre-commit failure leaves no Vendor, event, outcome or outbox work.
+12. Epic 1 components requiring centrally managed configuration can retrieve one complete approved snapshot from Azure App Configuration through regional or cross-region provider failover, validate it before readiness and retain the last validated running configuration during temporary provider outage.
+13. Production components retrieve required secrets from Azure Key Vault using managed identity where supported and demonstrate safe versioned rotation without premature credential revocation.
+14. `POST /vendors` and `GET /vendors/{vendorId}` expose the approved Application operations through thin endpoint adapters using the approved JSON, success and controlled-failure contracts.
+15. Direct Vendor Application invocation remains authoritative for registration validation without requiring an HTTP caller, and every pre-commit failure leaves no Vendor, event, outcome or outbox work.
 
 Real Compliance processing of the published `VendorRegistered` integration event is outside the Epic 1 completion boundary.

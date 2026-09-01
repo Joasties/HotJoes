@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-010 |
 | **Document Title** | Current Application Architectural Concerns |
-| **Version** | 2.1 |
+| **Version** | 2.3 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 28 August 2026 |
+| **Last Updated** | 1 September 2026 |
 
 ## Revision History
 
@@ -29,6 +29,8 @@
 | 1.9 | 25 August 2026 | Reconciled the approved CON-023–CON-026 Epic 1 HTTP adaptation, technical API contract, controlled failure mapping and validation-allocation cohort as part of the synchronized HJ-010/HJ-012 v1.9 architecture baseline. |
 | 2.0 | 26 August 2026 | Reconciled the approved unified Application validation-failure decision for CON-025, CON-026 and CON-040 as part of the synchronized HJ-010/HJ-012 v2.0 architecture baseline. |
 | 2.1 | 28 August 2026 | Reconciled the approved CON-018, CON-021, CON-022, CON-029, CON-035–CON-037 and CON-039 reliable-publication and enforcement cohort as part of the synchronized HJ-010/HJ-012 v2.1 architecture baseline. |
+| 2.2 | 31 August 2026 | Applied CR-TBD-HJ010. Reconciled the approved CON-032/CON-033 Azure centralized-configuration and secret-management cohort as part of the synchronized HJ-010/HJ-012 v2.2 architecture baseline. |
+| 2.3 | 1 September 2026 | Applied CR-TBD-HJ010. Corrected document-control references and the approved-concern reconciliation summary after downstream regeneration; changed no concern row, Approach, guarantee, state, priority or verification treatment. |
 
 ## Related Documents
 
@@ -42,12 +44,12 @@
 | HJ-005 | Coding Standards | Approved | Governs implementation and technical conventions where applicable. |
 | HJ-006 | Testing Strategy and Standards | Approved | Governs test classification, design and quality. |
 | HJ-007 | Enforcement Strategy | Approved | Defines enforcement mechanisms for architectural and engineering rules. |
-| HJ-011 v2.1 | Epic 1 Vendor Registration Implementation Scope | Approved | Active implementation boundary aligned to the approved reliable-publication and enforcement cohort. |
+| HJ-011 v2.3 | Epic 1 Vendor Registration Implementation Scope | Approved | Active implementation boundary aligned to the complete approved Epic 1 architecture cohort. |
 | HJ-104 | Vendor Registration Information Contract | Approved | Defines registration information, validation and ownership. |
 | HJ-105 | Vendor Registration Sequence Diagram | Approved | Defines approved registration and retrieval interactions. |
 | HJ-106 | Vendor Registration Service Contract | Approved | Defines RegisterVendor and RetrieveRegisteredVendor business service contracts. |
-| HJ-107 v1.6 | Vendor Registration Test Catalogue | Approved | Current approved behavioural-verification catalogue; regeneration is required after CON-023–CON-026 reach HJ-106. |
-| HJ-013 v1.8 | Architecture and Implementation Test Catalogue | Approved | Current approved architecture and implementation verification catalogue; regeneration is required after HJ-107. |
+| HJ-107 v1.9 | Vendor Registration Test Catalogue | Approved | Current approved behavioural-verification catalogue. |
+| HJ-013 v2.2 | Architecture and Implementation Test Catalogue | Approved | Current approved architecture and implementation verification catalogue. |
 | ADR-001 | Domain-Driven Design as the Primary Architectural Style | Accepted | Governs application of DDD patterns. |
 | ADR-003 | Event-Driven Collaboration | Accepted | Governs asynchronous bounded-context collaboration. |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Accepted | Governs registration lifecycle and Registration Session boundary. |
@@ -58,7 +60,7 @@
 | CR-037 | Restructure HJ-010 as the Current Application Architectural Concerns Register | Approved for application | Authorises this revision. |
 | CR-038 | Align HJ-010 Concern Resolution and Approval Lifecycle | Approved for application | Authorises the v0.3 concern-resolution and approval lifecycle. |
 | CR-039 | Establish Complete Concern Tracking and Publish First Approved Architecture Batch | Applied | Authorises the complete concern lifecycle, first approved batch and v1.0 baseline. |
-| HJ-012 v1.0 | Established Application Architecture Patterns | Approved | Authoritative catalogue of approved application architecture and challenged resolutions retained for traceability. |
+| HJ-012 v2.3 | Established Application Architecture Patterns | Approved | Synchronized authoritative catalogue of approved application architecture and challenged resolutions retained for traceability. |
 
 ## 1. Purpose
 
@@ -86,7 +88,7 @@ HJ-010 does not define C# projects, namespaces, folders or classes before the ap
 | Field | Baseline |
 |---|---|
 | **Active Implementation Scope** | Epic 1 - Vendor Registration |
-| **Authoritative Scope** | HJ-011 v1.9 |
+| **Authoritative Scope** | HJ-011 v2.3 |
 | **System Model Baseline** | HJ-SM-001 v1.0, Approved |
 | **Last Concern Reconciliation** | 23 August 2026 (amended CON-020) |
 | **Applicable Sources** | The approved and accepted sources listed in Related Documents, plus HJ-107 as the current downstream behavioural test catalogue |
@@ -165,7 +167,7 @@ Verification may be provided through HJ-107, **HJ-013 - Architecture and Impleme
 
 ## 4. Epic 1 Concern-Extraction Boundary
 
-The current concern set covers the complete executable boundary established by HJ-011 v1.9 and HJ-SM-001 v1.0:
+The current concern set covers the complete executable boundary established by HJ-011 v2.3 and HJ-SM-001 v1.0:
 
 ```mermaid
 flowchart LR
@@ -241,8 +243,8 @@ For Epic 1:
 | CON-029 | Schema migration lifecycle | Epic 1 schema changes are repeatable, ordered, deployment-safe and verified against supported database states. | HJ-011 §2.4; HJ-005 §10.7; HJ-007; CON-018; CON-022; CON-028; CON-039 | Reviewed versioned EF Core migrations + explicit pre-readiness deployment migration step + real-PostgreSQL clean and upgrade validation | Approved | P1 | Approved combined Epic 1 Reliable Publication and Enforcement decision. PostgreSQL schema evolution uses reviewed versioned EF Core migrations owned by Vendor persistence infrastructure and committed to source control. Relay-state and consumer-receipt schemas are introduced through migrations, not EnsureCreated, test-only schema construction or ad hoc application-startup SQL. An explicit deployment/migration step applies migrations before dependent instances become ready; the API, relay and consumer do not automatically migrate production databases during ordinary startup. Migrations use stable descriptive names and deterministic ordering. Additive and backward-compatible changes are preferred; destructive or data-losing changes require explicit review and separate deployment treatment. CI proves clean-database application and upgrade from the immediately preceding supported schema baseline against real PostgreSQL, including agreement between the EF Core model and actual keys, constraints, indexes, nullability and representations. Production recovery prefers a reviewed forward-fix migration rather than dependence on a destructive automatic down-migration. | Real-PostgreSQL migration tests apply all migrations to an empty database and upgrade the immediately preceding supported baseline; schema assertions cover keys, constraints, indexes, nullability and representations; tests prove ordinary API, relay and consumer startup does not auto-migrate; CI/deployment validation rejects missing, unordered or model-divergent migrations and flags destructive operations for review. |
 | CON-030 | API Gateway boundary | Gateway routing/version forwarding, validation allocation, error propagation and correlation forwarding do not duplicate domain/application responsibilities. | HJ-SM-001; HJ-011 §2.3 | Thin reverse-proxy/gateway configuration; explicit route policy | Exploring | P1 | Architectural Principles: HJ-002; platform/implementation decision unresolved | Gateway routing, TLS, header/correlation and failure propagation integration tests. |
 | CON-031 | Web client Registration Session | The Web client alone owns transient registration state, disposes it after success/abandonment and submits a complete self-contained request. | HJ-011 §2.2; HJ-105; ADR-004; ADR-008 | Client-side session state + explicit submit/retry workflow | Exploring | P1 | Existing ADRs: ADR-004, ADR-008 for boundary; client mechanism unresolved | Client journey/state tests; HJ-107 VR-REQ-001, VR-SCOPE-001 and retry behaviour. |
-| CON-032 | Centralized configuration | In-scope components obtain and validate environment-appropriate non-secret configuration consistently, with explicit bootstrap, refresh and failure behaviour. | HJ-SM-001; HJ-011 §2.6; CR-036 | Central configuration provider/client; startup validation; cached/fail-fast policy | Exploring | P0 | New ADR assessment required due cross-component/product-level effect; feature management excluded | Configuration bootstrap, validation, outage and environment-separation tests in HJ-013 Architecture and Implementation Test Catalogue. |
-| CON-033 | Secret and credential management | Centralized configuration cannot expose secrets; credentials are retrieved, protected, rotated and excluded from logs/configuration output. | HJ-011 §§2.6-2.7; HJ-002; HJ-005 | Dedicated secret provider + configuration references; secure runtime injection | Exploring | P0 | Architectural Principle/Engineering Standard: HJ-002, HJ-005; platform selection unresolved | Secret scanning, configuration/log leakage checks and deployment validation. |
+| CON-032 | Centralized configuration | In-scope components obtain one complete environment-appropriate non-secret configuration consistently; validate it before readiness; survive transient and regional provider failure without partial refresh or replacement of the last valid running configuration; and fail closed when no approved authoritative configuration is available for cold start. | HJ-SM-001; HJ-011 §2.6; CR-036; ADR-009 | Azure App Configuration using component-owned strongly typed options, validated immutable snapshots, geo-replicated provider failover, atomic reload-safe refresh and fail-closed bootstrap | Approved | P0 | Approved Decision Mode resolution, 31 August 2026; ADR-009. Azure is the primary Epic 1 reference cloud. Production non-secret configuration is held in Azure App Configuration and promoted as validated immutable snapshots. A running service retains its current validated snapshot during provider outage or invalid refresh. Runtime refresh is limited to explicitly reload-safe settings; consistency-sensitive settings require health-gated rolling restart unless atomic reload is proven. Production uses cross-region replicas and provider failover. A new or recovering instance does not become ready until one complete approved snapshot is obtained and validated. Feature-management behaviour remains excluded. Provider SDKs and representations remain confined to deployable composition roots and Infrastructure adapters. | HJ-013 tests for environment separation, typed binding, complete-snapshot validation, invalid/partial refresh rejection, last-valid continuity, replica failover, unavailable-bootstrap readiness failure, reload-safe classification and absence of Azure configuration types from Domain/Application assemblies. |
+| CON-033 | Secret and credential management | Centralized configuration never contains secret values; production workloads avoid stored credentials where managed identity is available; every remaining secret is retrieved with least privilege, versioned, rotated without unsafe cutover and excluded from source, logs, diagnostics and configuration output. | HJ-011 §§2.6-2.7; HJ-002; HJ-005; ADR-009 | Azure Key Vault + managed identity; Key Vault references or edge retrieval; controlled local developer identity/secret injection; overlap-and-cutover rotation | Approved | P0 | Approved Decision Mode resolution, 31 August 2026; ADR-009. Production uses managed identity wherever the target Azure service supports it. Remaining secrets use Azure Key Vault with an identified owner, purpose, consumers, lifetime, rotation and recovery procedure. Rotation versions the replacement, validates it before revocation and uses credential overlap where supported. Runtime secret refresh is permitted only where the consumer atomically replaces credentials without corrupting in-flight work or durable obligations; otherwise health-gated rolling replacement is required. Rotation failure stops before revoking a credential required by healthy instances. Local execution uses developer identity or controlled local injection. Secret values never enter App Configuration, source control, logs, diagnostics, API responses or recovery evidence. Provider SDKs, identities and resource representations remain confined to deployable composition roots and Infrastructure adapters. | HJ-013 secret-scanning and leakage checks; identity/least-privilege deployment validation; missing-secret readiness tests; Key Vault version and rotation tests; overlap, rolling replacement, rollback and premature-revocation failure tests; architecture tests excluding provider/secret types from Domain/Application assemblies. |
 | CON-034 | Transport and registration-data protection | External endpoints use HTTPS and registration information is protected against unauthorised modification or disclosure with secure defaults. | HJ-011 §2.7; HJ-SM-001 | TLS termination and trusted forwarding; encryption/platform controls; log redaction | Exploring | P0 | Architectural Principles: HJ-002; platform convention and deployment decision unresolved | TLS/gateway tests, security configuration validation, sensitive-data redaction tests and review. |
 | CON-035 | Correlation and observability | Registration, persistence, idempotency, outbox publication and consumer receipt can be correlated and diagnosed without leaking sensitive data. | HJ-SM-001; HJ-011 §2.8; HJ-005 §15; CON-018; CON-021; CON-022 | Structured logs + W3C trace context persisted as outbox metadata and forwarded in RabbitMQ headers + focused relay and consumer metrics | Approved | P1 | Approved combined Epic 1 Reliable Publication and Enforcement decision. Epic 1 uses structured logs and W3C traceparent with optional tracestate; no HotJoes-specific correlation header is introduced. Valid trace context is accepted or created through the standard ASP.NET Core diagnostic boundary. Asynchronous trace context is persisted as outbox metadata and forwarded through RabbitMQ headers without changing the immutable VendorRegistered v1 JSON payload. The relay creates a publication activity linked to the originating registration trace and the consumer continues valid received context. Stable structured properties include EventId, VendorId where appropriate, EventType, EventVersion, outbox attempt, relay outcome and consumer receipt outcome. Logs exclude full requests, serialized event payloads, Address/contact details, credentials, connection strings and unsafe exception details. Required metrics cover eligible and oldest outbox work, retries, stalled items, publication outcomes, dead letters, consumer outcomes and duplicate receipts. This decision does not select a production telemetry vendor or full observability platform. | End-to-end trace propagation tests from registration through outbox, RabbitMQ and consumer receipt; tests prove trace metadata remains outside the Integration Event payload; structured-log property and redaction tests; metrics tests for eligible age/count, retries, stalled work, publication, dead-letter and consumer/duplicate outcomes; failure-diagnosis scenarios with no sensitive-data leakage. |
 | CON-036 | Health and readiness | Each deployable exposes health/readiness evidence that distinguishes process health from unavailable required dependencies. | HJ-SM-001; HJ-011 §2.8; CON-018; CON-021; CON-022; CON-038 | Separate liveness and dependency-specific readiness checks for the Vendor API, relay worker and Compliance consumer | Approved | P1 | Approved combined Epic 1 Reliable Publication and Enforcement decision. Every Epic 1 deployable exposes distinct liveness and readiness evidence. Liveness proves process/event-loop function and invokes no external dependency. Readiness proves the deployable can perform its own responsibility. Vendor API readiness requires PostgreSQL and its in-process registration dependencies but not RabbitMQ, because broker unavailability does not prevent atomic registration and outbox staging. Relay readiness requires PostgreSQL and RabbitMQ. Compliance consumer readiness requires RabbitMQ and its durable receipt database. Readiness failure removes an instance from new work without deleting durable state or converting committed registration into failure. Health output contains only stable component/status information. Stalled outbox and dead-letter work are degraded operational evidence and metrics, not liveness failure. Exact hosting and orchestration remain under CON-038. | Health integration tests distinguish liveness from readiness and simulate each required dependency unavailable; tests prove RabbitMQ outage does not make the Vendor API unready, but does make relay and consumer readiness fail; recovery tests prove readiness restores without state loss; response-safety tests reject credentials, connection strings, exception messages and business data; stalled/dead-letter work is observable without failing liveness. |
@@ -387,28 +389,25 @@ No v0.1 concern is silently discarded. Its architectural requirement is retained
 | Field | Result |
 |---|---|
 | **Active scope** | Epic 1 - Vendor Registration |
-| **Authoritative scope** | HJ-011 v1.9 |
+| **Authoritative scope** | HJ-011 v2.3 |
 | **System Model baseline** | HJ-SM-001 v1.0 |
 | **Deferred concerns promoted** | None; the separate deferred register does not yet exist. |
 | **New concerns added** | Technical API contract, Address reference contract, detailed idempotency mechanics, Integration Event contract, broker delivery, Compliance Stub, PostgreSQL mapping/migrations, API Gateway, Web client/session, centralized configuration, secret management, security, observability, health, runtime composition and CI controls. |
-| **Approved concerns retained** | CON-001–CON-024, CON-026–CON-029, CON-035–CON-037, CON-039 and CON-040. CON-023–CON-026 are newly reconciled from explicit approval evidence. |
-| **HJ-012 synchronization** | Twenty-six Approved concerns are represented in the synchronized HJ-012 v1.9 baseline. |
+| **Approved concerns retained** | CON-001–CON-029, CON-032, CON-033, CON-035–CON-037, CON-039 and CON-040. CON-032 and CON-033 are the latest decision cohort reconciled from explicit approval evidence. |
+| **HJ-012 synchronization** | Thirty-six Approved concerns are represented in the synchronized HJ-012 v2.3 Approved baseline. |
 | **Blocked concern dependencies** | No selected concern remains Blocked. CON-018, CON-021 and CON-029 retain responsibility for relay, broker-delivery and migration-lifecycle mechanics. |
 | **Challenged concerns** | None. |
 | **Concerns deferred** | None in this revision; candidate deferred areas are identified in §9 for separate controlled capture. |
 | **Concerns superseded or removed** | Verification-only AC-023 to AC-025 removed as standalone concerns and incorporated into underlying Verification Treatments. Other changes are recorded in §10. |
-| **Reconciliation date** | 25 August 2026; CON-023–CON-026 reconciliation |
+| **Reconciliation date** | 31 August 2026; CON-032/CON-033 reconciliation |
 
 ## 12. Open Decisions and Follow-up
 
 The following controlled work follows this reconciliation:
 
 1. create the Deferred Architectural Concerns register;
-2. assess whether the approved architecture requires changes to HJ-106 or other authoritative Vendor Registration artefacts;
-3. regenerate HJ-107 from HJ-106 and its applicable authoritative sources where required;
-4. regenerate HJ-013 from the applicable Approved architectural guarantees and active delivery scope where required;
-5. resolve the P0 blocked contracts and architectural decisions in §6;
-6. create or amend ADRs only where the analysis demonstrates architectural significance; and
-7. generate implementation and execute the applicable HJ-107 and HJ-013 tests.
+2. resolve remaining unresolved concerns through PR-000 before selecting their Approaches;
+3. create or amend ADRs only where analysis demonstrates architectural significance; and
+4. use HJ-107 v1.9 and HJ-013 v2.2 as the current behavioural and architecture-verification authorities for small PR-006 implementation slices.
 
-HJ-106 and HJ-107 are not amended by this revision. Any impact discovered through resolution of the Current Architectural Concerns must be handled through subsequent controlled change.
+The CON-032/CON-033 impact assessment changed neither HJ-105, HJ-106 nor HJ-107. HJ-013 v2.2 contains the resulting architecture and implementation obligations. Future authoritative changes remain subject to their owning controlled generation processes.

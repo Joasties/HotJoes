@@ -3,11 +3,11 @@
 | **Document ID** | ADR-008 |
 |-----------------|---------|
 | **Document Title** | Idempotent Operations and Reliable Event Publication |
-| **Version** | 1.4 |
+| **Version** | 1.5 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 22 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ---
 
@@ -20,6 +20,7 @@
 | 1.2 | 13 August 2026 | Applied CR-034 to remove delivery-slice Pending Activation assumptions from Register Vendor idempotency and testing semantics. |
 | 1.3 | 21 August 2026 | Defined the approved Epic 1 PostgreSQL concurrency authority, permanent replay-outcome persistence, atomic registration transaction and explicit EF Core mapping mechanics for CON-014–CON-016 and CON-028. |
 | 1.4 | 22 August 2026 | Applied CR-062. Defined pre-outbox VendorRegistered translation, immutable serialized-event staging and the approved versioned publication contract under CON-019 and CON-020. |
+| 1.5 | 28 August 2026 | Defined the Epic 1 PostgreSQL relay, RabbitMQ delivery, migration, trace-context and recovery mechanics for CON-018, CON-021, CON-029 and CON-035. |
 
 ---
 
@@ -166,7 +167,17 @@ Any failure before commit leaves none of these records committed. Address resolu
 
 Vendor Infrastructure uses explicit EF Core fluent mappings. PostgreSQL mappings define keys, lengths, nullability, conversions, enum representations, indexes and restrictive deletion behaviour. Persisted normalized Trading Name and Legal Operator Name together with `CanonicalAddressId` form the database-enforced unique constraint. A one-to-one registration-outcome record retains the semantic fingerprint and original result. Registration Declarations and the opaque Address Resolution reference are not Vendor state. Registration outcomes and outbox records do not cascade-delete.
 
-Schema-migration lifecycle, outbox relay mechanism and broker-delivery mechanics remain governed separately. The `VendorRegistered` Integration Event v1 contract and pre-outbox translation are governed by CON-019 and CON-020.
+Schema migration, outbox relay and broker delivery use the approved Epic 1 profile in §2.8. The `VendorRegistered` Integration Event v1 contract and pre-outbox translation are governed by CON-019 and CON-020.
+
+## 2.8 Epic 1 Relay, Broker and Migration Profile
+
+## Epic 1 Reliable Publication Profile
+
+Epic 1 uses a dedicated Vendor relay worker that polls PostgreSQL in bounded batches and claims eligible outbox records using leased `FOR UPDATE SKIP LOCKED` semantics. It publishes the stored immutable event bytes through durable RabbitMQ topology with publisher confirms, then marks the record published. Expired claims recover automatically. Failed attempts use validated bounded exponential backoff; exhausted work becomes durable `Stalled` work requiring explicit administrative requeue. Records are not deleted.
+
+Delivery is at least once. EventId is the stable message identity; exactly-once and ordering guarantees are not claimed. Consumers acknowledge only after durable idempotent receipt, use bounded retry, and route exhausted or non-retryable messages to a durable dead-letter queue without changing EventId, EventVersion or payload.
+
+W3C traceparent and optional tracestate are persisted as outbox metadata and forwarded in RabbitMQ headers; they do not alter the immutable Integration Event JSON. PostgreSQL schema evolution uses reviewed versioned EF Core migrations applied by an explicit pre-readiness deployment step. Clean creation and upgrade from the previous supported baseline are verified against real PostgreSQL. Ordinary API, relay and consumer startup does not migrate production databases.
 
 ---
 

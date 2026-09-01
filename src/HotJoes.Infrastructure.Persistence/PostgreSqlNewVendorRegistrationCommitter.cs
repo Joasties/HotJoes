@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
 
 namespace HotJoes.Infrastructure.Persistence;
@@ -14,16 +17,20 @@ public sealed class PostgreSqlNewVendorRegistrationCommitter
 
     private readonly VendorRegistrationDbContext _dbContext;
     private readonly VendorRegisteredIntegrationEventSerializer _serializer;
+    private readonly ILogger<PostgreSqlNewVendorRegistrationCommitter> _logger;
 
     public PostgreSqlNewVendorRegistrationCommitter(
         VendorRegistrationDbContext dbContext,
-        VendorRegisteredIntegrationEventSerializer serializer)
+        VendorRegisteredIntegrationEventSerializer serializer,
+        ILogger<PostgreSqlNewVendorRegistrationCommitter>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(serializer);
 
         _dbContext = dbContext;
         _serializer = serializer;
+        _logger = logger ??
+            NullLogger<PostgreSqlNewVendorRegistrationCommitter>.Instance;
     }
 
     public async Task CommitAsync(
@@ -36,6 +43,12 @@ public sealed class PostgreSqlNewVendorRegistrationCommitter
             _serializer.Serialize(commit.IntegrationEvent);
         VendorRegistrationRecord vendorRecord =
             VendorRegistrationRecordMapper.ToRecord(commit.Vendor);
+        Activity? currentActivity = Activity.Current;
+        bool hasW3CTraceContext = currentActivity is
+        {
+            IdFormat: ActivityIdFormat.W3C,
+            Id: not null
+        };
 
         vendorRecord.NormalizedTradingName =
             commit.Identity.NormalizedTradingName.ToLowerInvariant();
@@ -59,6 +72,10 @@ public sealed class PostgreSqlNewVendorRegistrationCommitter
             VendorId = commit.Vendor.Id.Value,
             EventVersion = serializedEvent.EventVersion,
             SerializedEvent = serializedEvent.SerializedEvent.ToArray(),
+            TraceParent = hasW3CTraceContext ? currentActivity!.Id : null,
+            TraceState = hasW3CTraceContext
+                ? currentActivity!.TraceStateString
+                : null,
             PublishedAtUtc = null
         };
 
@@ -78,13 +95,61 @@ public sealed class PostgreSqlNewVendorRegistrationCommitter
             when (IsCompositeIdentityConflict(exception))
         {
             await transaction.RollbackAsync(CancellationToken.None);
+            RecordPersistenceOutcome(
+                commit,
+                serializedEvent,
+                "concurrentConflict",
+                LogLevel.Warning);
             throw new ConcurrentVendorRegistrationException();
         }
         catch
         {
             await transaction.RollbackAsync(CancellationToken.None);
+            RecordPersistenceOutcome(
+                commit,
+                serializedEvent,
+                "failed",
+                LogLevel.Warning);
             throw;
         }
+
+        RecordPersistenceOutcome(
+            commit,
+            serializedEvent,
+            "committed",
+            LogLevel.Information);
+    }
+
+    private void RecordPersistenceOutcome(
+        NewVendorRegistrationCommit commit,
+        SerializedIntegrationEvent serializedEvent,
+        string outcome,
+        LogLevel level)
+    {
+        if (level == LogLevel.Information)
+        {
+            _logger.LogInformation(
+                "Vendor {VendorId} persistence {PersistenceOutcome} for " +
+                "{EventType} event {EventId} version {EventVersion}",
+                commit.Vendor.Id.Value,
+                outcome,
+                "VendorRegistered",
+                serializedEvent.EventId,
+                serializedEvent.EventVersion);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Vendor {VendorId} persistence {PersistenceOutcome} for " +
+                "{EventType} event {EventId} version {EventVersion}",
+                commit.Vendor.Id.Value,
+                outcome,
+                "VendorRegistered",
+                serializedEvent.EventId,
+                serializedEvent.EventVersion);
+        }
+
+        RegistrationPersistenceMetrics.RecordPersistenceOutcome(outcome);
     }
 
     private static bool IsCompositeIdentityConflict(

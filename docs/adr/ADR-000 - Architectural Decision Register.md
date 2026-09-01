@@ -3,11 +3,11 @@
 | **Document ID** | ADR-000 |
 |-----------------|--------|
 | **Document Title** | Architectural Decision Register |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 July 2026 |
+| **Last Updated** | 31 August 2026 |
 
 ---
 
@@ -16,6 +16,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Register created. |
+| 1.1 | 31 August 2026 | Applied CR-TBD-ADR000. Corrected the erroneous ADR-009 reservation and registered the accepted Azure reference cloud, centralized configuration and secret-management decision as ADR-009. |
 
 ---
 
@@ -84,7 +85,7 @@ ADRs are never deleted. When a decision changes, a new ADR supersedes the previo
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | Accepted |
 | ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted |
 | ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted |
-| ADR-009 | AI-Assisted Development with Human Accountability | Accepted |
+| ADR-009 | Azure Reference Cloud, Centralized Configuration and Secret Management | Accepted |
 
 ---
 

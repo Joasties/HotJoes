@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 4.0 |
+| **Version** | 4.1 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 26 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ## Revision History
 
@@ -27,8 +27,8 @@
 | 3.7 | 22 August 2026 | Applied CR-064. Added the approved CON-019 pre-outbox mapping step and CON-020 VendorRegistered v1 envelope, payload, serialization and compatibility rules. |
 | 3.8 | 23 August 2026 | Applied CR-TBD-HJ105. Added the approved deterministic VendorRegistered v1 JSON representations to the publication behaviour and preserved the existing interaction sequence. |
 | 3.9 | 25 August 2026 | Added the approved CON-023–CON-026 HTTP adaptation, technical contract, controlled failure mapping and validation ownership and ordering to the registration and retrieval interactions. |
-
 | 4.0 | 26 August 2026 | Reconciled the approved unified RegisterVendor validation-failure outcome and API mapping for CON-025, CON-026 and CON-040. |
+| 4.1 | 28 August 2026 | Added the approved independent relay, RabbitMQ confirmation and retry, durable Compliance receipt, and duplicate and dead-letter behaviour. |
 
 ## Related Documents
 
@@ -515,6 +515,32 @@ Compatible optional additions are permitted within v1 and consumers tolerate unk
 The contract purpose is to support downstream Compliance and Pending Activation processing without a synchronous Vendor callback.
 
 Registration Declarations shall never appear in the Integration Event. Implementation-specific metadata may be added provided the minimum business content and contract semantics are preserved.
+
+## 10.2 Epic 1 Publication and Receipt Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Relay as Vendor Relay Worker
+    participant Outbox as PostgreSQL Outbox
+    participant Broker as RabbitMQ
+    participant Consumer as Compliance Stub
+    participant Receipt as PostgreSQL Receipt Store
+    Relay->>Outbox: Claim eligible batch with leased SKIP LOCKED
+    Relay->>Broker: Publish stored immutable bytes (EventId)
+    Broker-->>Relay: Publisher confirm
+    Relay->>Outbox: Mark published
+    Broker->>Consumer: Deliver at least once
+    Consumer->>Receipt: Insert EventId and serialized-byte hash
+    alt First or equivalent duplicate
+        Receipt-->>Consumer: Durable receipt / existing equivalent receipt
+        Consumer-->>Broker: Acknowledge
+    else Conflicting bytes or exhausted failure
+        Consumer-->>Broker: Dead-letter without changing message
+    end
+```
+
+A relay crash between broker acceptance and marking published may cause duplicate delivery. The durable EventId receipt makes that duplicate harmless. No ordering guarantee is assumed.
 
 # 11. Client / BFF-Owned Registration Session Lifecycle
 

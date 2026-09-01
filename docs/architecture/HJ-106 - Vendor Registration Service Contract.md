@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-106 |
 | **Document Title** | Vendor Registration Service Contract |
-| **Version** | 1.8 |
+| **Version** | 1.9 |
 | **Status** | Approved |
 | **Classification** | Service Contract |
 | **Owner** | Project Architecture |
-| **Last Updated** | 26 August 2026 |
+| **Last Updated** | 28 August 2026 |
 
 ## Revision History
 
@@ -23,8 +23,8 @@
 | 1.5 | 22 August 2026 | Regenerated using PR-002 from the approved CON-019 and CON-020 baseline. Defined the Vendor Application-owned pre-outbox translation boundary and the VendorRegistered Integration Event v1 envelope, payload, independent BusinessAddress representation, serialization and compatibility rules; removed the resolved event-contract deferrals. |
 | 1.6 | 23 August 2026 | Regenerated using PR-002 from HJ-004 v2.7, HJ-105 v3.8 and the synchronized HJ-010/HJ-012 v1.8 Approved baseline. Defined the exact VendorRegistered v1 JSON member structure and deterministic contract-owned identifier, timestamp, time-only and enum representations; removed the resolved wire-format ambiguity. |
 | 1.7 | 25 August 2026 | Regenerated using PR-002 from HJ-004 v2.8, HJ-104 v3.6, HJ-105 v3.9 and the synchronized HJ-010/HJ-012 v1.9 Approved baseline. Defined the approved CON-023–CON-026 HTTP/JSON contract, controlled error mapping, validation allocation and Contact Email and Primary Contact Telephone profiles; removed superseded proposed and unresolved API wording. |
-
 | 1.8 | 26 August 2026 | Regenerated using PR-002 from HJ-104 v3.6, HJ-105 v4.0 and the synchronized HJ-010/HJ-012 v2.0 Approved baseline. Consolidated every Application validation failure into one `RequestValidationFailure` and one `registrationValidationFailed` API outcome; removed the superseded separate declaration and conditional-rule failure outcomes and codes. |
+| 1.9 | 28 August 2026 | Regenerated using PR-002 from HJ-105 v4.1, ADR-003 v1.3, ADR-007 v1.1, ADR-008 v1.5 and the synchronized HJ-010/HJ-012 v2.1 Approved baseline. Defined the approved PostgreSQL relay, at-least-once RabbitMQ delivery, durable idempotent Compliance receipt, retry, dead-letter and trace-context semantics; removed the resolved relay, broker-delivery and correlation deferrals. |
 
 ## Related Documents
 
@@ -35,18 +35,18 @@
 | HJ-003 | Ubiquitous Language Guide | Approved | Authoritative Vendor terminology and query language |
 | HJ-004 v2.8 | Vendor Domain Models | Approved | Vendor aggregate, lifecycle, invariants, events, retrieval model and defensive Contact Email and Telephone Value Object rules |
 | HJ-005 | Coding Standards | Approved | API boundary, validation, error and HTTP conventions |
-| HJ-010 v2.0 | Current Application Architectural Concerns | Approved | Records the approved CON-023–CON-026 API and validation cohort and the amended unified validation-failure treatment for CON-025, CON-026 and CON-040, while retaining relay and broker-delivery mechanics under CON-018 and CON-021 |
-| HJ-011 v2.0 | Epic 1 Vendor Registration Implementation Scope | Approved | Places the thin Minimal API, technical contract, unified controlled validation-failure outcome and validation boundary within Epic 1 delivery scope |
-| HJ-012 v2.0 | Established Application Architecture Patterns | Approved | Defines the approved HTTP adaptation, technical API contract, unified validation-failure mapping and validation allocation |
+| HJ-010 v2.1 | Current Application Architectural Concerns | Approved | Records the approved reliable-publication, broker-delivery, Compliance receipt, migration, observability, health and enforcement cohort |
+| HJ-011 v2.1 | Epic 1 Vendor Registration Implementation Scope | Approved | Places the relay worker, RabbitMQ delivery, Compliance receipt stub and supporting operational controls within Epic 1 delivery scope |
+| HJ-012 v2.1 | Established Application Architecture Patterns | Approved | Defines the approved reliable-publication and enforcement patterns |
 | HJ-104 v3.6 | Vendor Registration Fields Matrix | Approved | Authoritative registration information, business validation, canonicalisation and Contact Email and Telephone profiles |
-| HJ-105 v4.0 | Vendor Registration Sequence Diagram | Approved | Authoritative interaction order, API adaptation, validation ordering, outcomes and failure behaviour |
+| HJ-105 v4.1 | Vendor Registration Sequence Diagram | Approved | Authoritative interaction order, publication and receipt sequence, outcomes and failure behaviour |
 | ADR-002 | Business Capabilities and Bounded Contexts | Accepted | Capability and persistence ownership |
-| ADR-003 v1.2 | Event-Driven Collaboration | Accepted | Pre-outbox Application mapping and prohibition of relay-time reconstruction |
+| ADR-003 v1.3 | Event-Driven Collaboration | Accepted | Pre-outbox mapping, at-least-once RabbitMQ collaboration and durable idempotent receipt |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Accepted | Registration Session, service and Vendor-existence boundaries |
 | ADR-005 | Registered Information vs Vendor Managed Information | Accepted | Information classification and editability |
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | Accepted | Address trust boundary and snapshot invariant |
-| ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted | Compliance and activation separation |
-| ADR-008 v1.4 | Idempotent Operations and Reliable Event Publication | Accepted | Register Vendor idempotency, atomic publication staging and immutable serialized-event handling |
+| ADR-007 v1.1 | Vendor Compliance as a Separate Bounded Context | Accepted | Compliance separation and the durable idempotent Epic 1 consumer stub |
+| ADR-008 v1.5 | Idempotent Operations and Reliable Event Publication | Accepted | Atomic staging, PostgreSQL relay, RabbitMQ delivery, migration, trace-context and recovery mechanics |
 | CR-040 | Align HJ-106 with the Approved Architecture Baseline | Applied | Records the architecture-impact assessment and authorises this traceability-only revision |
 
 # 1. Purpose
@@ -77,18 +77,18 @@ Part A, Sections 1–5, is the inferred business contract. Part B, Section 6, de
 | HJ-004 v2.8 | Defines the business model exposed by this contract | Aggregate properties, creation invariants, Contact Email and Telephone Value Objects, lifecycle, commands, events, the exact VendorRegistered v1 published contract, persisted retrieval source, result content and query side-effect invariant |
 | HJ-005 | Separates business contract from implementation conventions | Separate API models, controlled errors, layered validation, status-code guidance and safe response rules |
 | HJ-104 v3.6 | Is the authoritative registration information contract | Required, optional, conditional, derived and transient fields; validation ownership; exact contact profiles; canonicalisation; composite Vendor uniqueness identity; semantic registration equivalence; ownership; lifecycle |
-| HJ-105 v4.0 | Defines observable interaction behaviour | Thin HTTP adaptation, complete request boundary, unified validation-failure outcome and mapping, validation ordering, Address collaboration, idempotency, pre-outbox event mapping, reliable publication and registered Vendor retrieval |
+| HJ-105 v4.1 | Defines observable interaction behaviour | Thin HTTP adaptation, complete request boundary, validation, Address collaboration, idempotency, pre-outbox mapping, independent relay, RabbitMQ delivery, durable Compliance receipt and registered Vendor retrieval |
 | ADR-002 | Prevents ownership leakage | Vendor capability owns Vendor registration and persistence; other capabilities retain their own behaviour and data |
-| ADR-003 v1.2 | Governs asynchronous collaboration | Completed business facts cross boundaries through explicit Integration Events mapped before outbox persistence and never reconstructed by the relay |
+| ADR-003 v1.3 | Governs asynchronous collaboration | Completed business facts cross boundaries through explicit immutable Integration Events using approved at-least-once delivery and durable idempotent receipt |
 | ADR-004 | Defines when a Vendor exists | No Vendor exists before successful registration; Registration Session remains outside the Vendor service boundary |
 | ADR-005 | Governs information classification | Registered Information and Vendor Managed Information have distinct post-registration lifecycles |
 | ADR-006 v1.3 | Defines Address authority | Address Domain supplies canonical identity, immutable snapshot and applicable regulatory authorities |
-| ADR-007 | Preserves compliance separation | Registration creates Pending Activation; Compliance and activation decisions remain outside registration |
-| ADR-008 v1.4 | Defines mandatory reliability behaviour | Explicit Register Vendor idempotency safeguard; atomic persistence; pre-outbox VendorRegistered mapping; serialization and immutable outbox storage; retry without reconstruction or repeated business effects |
+| ADR-007 v1.1 | Preserves compliance separation | Registration creates Pending Activation; the Epic 1 Compliance adapter durably deduplicates receipt without introducing Compliance Domain behaviour |
+| ADR-008 v1.5 | Defines mandatory reliability behaviour | Atomic staging; leased PostgreSQL relay claims; immutable at-least-once RabbitMQ publication; retry, recovery and dead-letter behaviour; deployment-applied migrations; W3C trace-context metadata |
 
-No contradictory business rule was found among the supplied source artefacts. HJ-104 v3.6 specializes the approved registration-information and validation rules. HJ-004 v2.8 and HJ-105 v4.0 preserve the approved concrete VendorRegistered v1 contract, defensive contact invariants and HTTP adaptation sequence while consolidating Application validation failures into one outcome. HJ-005 supplies compatible engineering constraints; CON-023–CON-026 provide the approved Epic 1 technical specialization.
+No contradictory business rule was found among the supplied source artefacts. HJ-104 v3.6 specializes the approved registration-information and validation rules. HJ-004 v2.8 and HJ-105 v4.1 preserve the approved concrete VendorRegistered v1 contract, defensive contact invariants and HTTP adaptation sequence while defining the independent publication and receipt sequence. HJ-005 supplies compatible engineering constraints; CON-023–CON-026 provide the approved Epic 1 technical specialization.
 
-HJ-010 v2.0 and HJ-012 v2.0 are the controlled architectural governance baseline for this contract. CON-006–CON-011 establish the Address collaboration boundary, consumed result and failure semantics. CON-013–CON-017 and CON-028 establish idempotency, concurrency, replay persistence, transaction, reliable staging and database enforcement. CON-019/CON-020 establish the published-event boundary. CON-023–CON-026 and amended CON-040 establish the thin HTTP adaptation, exact API representation, unified controlled validation failure and validation allocation used below. Relay processing and broker delivery remain governed separately by unresolved CON-018 and CON-021.
+HJ-010 v2.1 and HJ-012 v2.1 are the controlled architectural governance baseline for this contract. CON-006–CON-011 establish the Address collaboration boundary, consumed result and failure semantics. CON-013–CON-017 and CON-028 establish idempotency, concurrency, replay persistence, transaction, reliable staging and database enforcement. CON-019/CON-020 establish the published-event boundary. CON-023–CON-026 and amended CON-040 establish the thin HTTP adaptation, exact API representation, unified controlled validation failure and validation allocation used below. CON-018, CON-021, CON-022, CON-029 and CON-035 establish the Epic 1 relay, broker delivery, durable consumer receipt, migration and trace-context semantics. CON-036, CON-037 and CON-039 govern operational health and automated enforcement without changing the business request or response contract.
 
 # 3. Business Operation Summary
 
@@ -230,7 +230,7 @@ A first successful invocation:
 - atomically records the immutable serialized event as durable publication work; and
 - synchronously returns a committed successful outcome containing, at minimum, VendorId and Vendor State `PendingActivation`.
 
-Pending Activation and Integration Event dispatch continue asynchronously and do not alter the synchronous successful outcome.
+Pending Activation and Integration Event dispatch continue asynchronously and do not alter the synchronous successful outcome. Successful registration requires durable outbox staging, not immediate RabbitMQ delivery or downstream receipt.
 
 RegisteredAt, Trading Preference and other persisted Vendor properties are committed state but are deliberately excluded from the approved minimum `RegisterVendor` HTTP response. Callers obtain complete committed state through `RetrieveRegisteredVendor`.
 
@@ -331,6 +331,12 @@ Optional values are represented explicitly as `null`. Compatible optional fields
 
 Vendor persistence and durable recording of the serialized Integration Event must commit atomically. Dispatch failure leaves the registered Vendor unchanged and the durable publication record available for retry. A publication retry does not repeat registration or create another business fact or event record.
 
+After commit, a dedicated Vendor relay polls PostgreSQL in bounded batches and claims eligible outbox records using leased `FOR UPDATE SKIP LOCKED` semantics. It publishes the stored immutable bytes through durable RabbitMQ topology with publisher confirms and marks a record published only after broker confirmation. Expired claims are recoverable. Failed attempts use bounded exponential backoff; exhausted work becomes durable `Stalled` work requiring explicit administrative requeue, and publication records are not deleted.
+
+Delivery is at least once. `EventId` is the stable message identity; exactly-once delivery and ordering are not claimed. The Compliance consumer stub durably records EventId, EventType, EventVersion, receipt time and a hash of the serialized bytes before acknowledgement. An equivalent duplicate is acknowledged without another receipt. The same EventId with different bytes is a contract-integrity failure and is dead-lettered. Retry exhaustion or a non-retryable delivery also routes the unchanged message to a durable dead-letter queue.
+
+W3C `traceparent` and optional `tracestate` are persisted as outbox metadata and propagated as RabbitMQ headers. They do not alter the immutable Integration Event JSON. Their absence does not invalidate the business event.
+
 ## 4.11 Business Failures
 
 | Failure | Trigger | Business Meaning | Retryable | Expected Caller Behaviour |
@@ -342,7 +348,10 @@ Vendor persistence and durable recording of the serialized Integration Event mus
 | Aggregate invariant failure | Valid-looking inputs still violate Vendor creation rules | The Vendor cannot be created in a valid state | Yes, if correctable | Correct the reported business information; do not interpret technical exceptions as business messages |
 | Persistence or atomic-recording failure | Vendor and publication work cannot commit atomically | Registration has not succeeded | Yes through the idempotency safeguard | Retry safely; do not treat the Vendor as registered without a successful response |
 | Duplicate or concurrent equivalent submission | Same composite Vendor identity and semantically equivalent successful registration information | Registration has already completed | Not a failure; convergent replay | Accept the original committed successful result; do not start another registration |
-| Integration Event dispatch failure | Durable publication exists but external dispatch fails | Registration remains successful; downstream notification is delayed | Caller retry not required | Do not register again; infrastructure retries publication |
+| Integration Event dispatch failure | Durable publication exists but relay claim, broker publication or publisher confirmation fails | Registration remains successful; downstream notification is delayed | Caller retry not required | Do not register again; the relay retries with bounded backoff and preserves the original event |
+| Publication retry exhausted | The relay exhausts its configured bounded attempts | Registration remains successful but publication work requires intervention | No automatic retry while stalled | Administratively inspect and explicitly requeue the durable `Stalled` record |
+| Consumer processing or receipt failure | The Compliance stub cannot durably record receipt before acknowledgement | Delivery has not been safely accepted by the consumer | Yes, through broker redelivery or bounded consumer retry | Allow redelivery; do not invoke RegisterVendor again |
+| Poison or contract-integrity message | Delivery is non-retryable, retries are exhausted, or an existing EventId has different serialized bytes | The message cannot be safely processed as the original fact | No automatic processing after dead-lettering | Inspect the durable dead-letter record; preserve EventId, EventVersion and payload |
 | IdempotencyConflict | The same composite Vendor identity is associated with materially different registration information from the prior successful registration | The submission is neither an equivalent replay nor an update and must not create or change business state | No as submitted; an update requires a separate future administration operation | Do not treat the response as registration success; use the future authorized administration operation if an existing Vendor must change |
 
 Every pre-commit validation, Address or invariant failure persists no Vendor and records no Domain Event, Integration Event or publication work. Controlled errors must not expose stack traces, database details, internal class names or framework diagnostics.
@@ -607,11 +616,13 @@ No caller-supplied `Idempotency-Key` or equivalent header is accepted. No custom
 | Retrieval sequence and not-found outcome | HJ-105 | §14 | Repository lookup uses VendorId only and produces Found or controlled Not Found |
 | Retrieval exclusions and side effects | HJ-004; HJ-105 | HJ-004 §1.7; HJ-105 §§14–15 | No search, mutation, event, Identity, Address, Compliance or read-model dependency |
 | Approved Domain implementation architecture | HJ-012 | CON-001 to CON-005 | Aggregate, Value Object, Entity, Domain Event and Repository Approaches fulfil existing Domain and service guarantees without adding service behaviour |
-| Reliable publication implementation architecture | HJ-012 | CON-017 | Transactional Outbox is the approved implementation Approach for the existing atomic durable-publication guarantee; relay and broker details remain unresolved elsewhere |
+| Reliable publication and broker delivery | HJ-010; HJ-012; HJ-105; ADR-003; ADR-008 | CON-017, CON-018, CON-021 and CON-029; HJ-105 §10.2; ADR-003 §2; ADR-008 §§2.6–2.8 | Atomic outbox staging is followed by leased PostgreSQL relay claims, immutable at-least-once RabbitMQ publication with confirms, bounded retry, stalled-work recovery and durable dead-letter handling |
+| Durable Compliance receipt | HJ-010; HJ-012; HJ-105; ADR-003; ADR-007 | CON-022; HJ-105 §10.2; ADR-007 §2 | The thin Compliance adapter records EventId and a byte hash before acknowledgement, suppresses equivalent duplicates and dead-letters identity conflicts without introducing Compliance Domain behaviour |
+| Publication trace context | HJ-010; HJ-012; ADR-008 | CON-035; ADR-008 §2.8 | W3C trace context is propagated as outbox metadata and RabbitMQ headers without changing the immutable Integration Event payload |
 | Registered Vendor retrieval implementation architecture | HJ-012 | CON-027 | Query handler, Repository and response mapper fulfil the existing persisted-source, purpose-specific result and side-effect-free retrieval contract |
 | Address application boundary and consumed result | HJ-012; ADR-006; HJ-104; HJ-105 | CON-006–CON-011; ADR-006 §2; HJ-104 §§2, 5.4; HJ-105 §§6, 12.2 | Application port and typed adapter resolve the permanent contextual reference, apply the approved positional source-line mapping, and distinguish semantic from retryable technical failure |
 | HTTP adaptation and validation | HJ-010; HJ-012; HJ-011; HJ-104; HJ-105 | CON-023–CON-026 and CON-040; HJ-011 §2.3; HJ-104 §§5.2–5.3; HJ-105 §§4.1, 12.1 | Thin Minimal API adapters expose the two Application operations using the approved JSON, status and error-envelope rules; every Application validation failure uses one `RequestValidationFailure` mapped to `registrationValidationFailed` |
-| Remaining architecture dependencies | HJ-010 | CON-018, CON-021 and CON-035 | Relay, broker-delivery and correlation remain separately governed and are not invented by this contract |
+| Operational and enforcement controls | HJ-010; HJ-012; HJ-011 | CON-029, CON-036, CON-037 and CON-039 | Reviewed deployment-applied migrations, dependency-sensitive health, architecture tests and CI gates support the contract without becoming request, response or event members |
 | Separate API models | HJ-005 | §§9.4, 16.1 | HTTP requests/results do not expose domain aggregate or persistence entities |
 | Controlled errors and HTTP guidance | HJ-005 | §§12.4, 16.3 | Technical mapping uses safe error bodies and result-appropriate status codes |
 
@@ -619,7 +630,7 @@ No caller-supplied `Idempotency-Key` or equivalent header is accepted. No custom
 
 | Classification | Item | Consequence / Required Decision |
 |---|---|---|
-| Confirmed | HJ-002 v2.0, HJ-003 v2.3, HJ-004 v2.8, HJ-104 v3.6 and HJ-105 v4.0 are Approved | They are authoritative inputs to this regenerated contract |
+| Confirmed | HJ-002 v2.0, HJ-003 v2.3, HJ-004 v2.8, HJ-104 v3.6 and HJ-105 v4.1 are Approved | They are authoritative inputs to this regenerated contract |
 | Confirmed | Register Vendor creates one Vendor in PendingActivation and Offline | No draft Vendor or Registration lifecycle state is exposed |
 | Confirmed | Register Vendor’s successful HTTP response contains only VendorId and Vendor State PendingActivation | First processing and equivalent replay return the original `201 Created` outcome; complete state is available through retrieval |
 | Confirmed | Vendor uniqueness identity is trimmed, case-insensitive Trading Name plus trimmed, case-insensitive Legal Operator Name plus Canonical Address Identifier | Derive it after Address resolution; retain the original registered name display values |
@@ -634,10 +645,11 @@ No caller-supplied `Idempotency-Key` or equivalent header is accepted. No custom
 | Confirmed | Business Address Snapshot schema and positional translation used by Vendor Registration and retrieval | Address source Line 1 maps to optional RecipientOrOrganisationName; source Lines 2–4 map respectively to AddressLine1–3; Post Town, Postcode and optional County map directly; no concatenation, compression, shifting or reordering occurs |
 | Confirmed | Address Resolution reference semantics and failure taxonomy | Permanent, opaque, non-expiring, non-revocable, reusable and non-consuming; InvalidReference and InvalidAddressResult are semantic failures; temporary technical failure is caller-retryable with no in-process retry |
 | Confirmed | `VendorRegistered` Integration Event v1 schema, translation, serialization and compatibility | CON-019 and amended CON-020 define the Application mapper, exact nested member structure, deterministic UUID, UTC timestamp, time-only and lower-camel enum formats, contract-owned representations, independent BusinessAddress, explicit-null optionals, UTF-8 camel-case serialization, compatible optional additions and new-version requirements for breaking changes |
-| Missing Information | Outbox relay processing and broker delivery semantics | CON-018 and CON-021: resolve claim, retry, acknowledgement, duplicate delivery, ordering and poison-message treatment without reconstructing the stored event |
+| Confirmed | Outbox relay processing and broker delivery semantics | CON-018, CON-021 and ADR-008 v1.5 define leased claims, publisher confirms, bounded retry, stalled work, at-least-once delivery, no ordering claim and dead-letter handling without event reconstruction |
+| Confirmed | Compliance receipt and duplicate handling | CON-022 and ADR-007 v1.1 define durable receipt before acknowledgement, equivalent duplicate suppression and byte-conflict dead-lettering |
 | Confirmed | Contact Email and Primary Contact Telephone validation and canonicalisation | CON-026 and HJ-104 v3.6 define the exact supported profiles, canonical stored values and structural-only boundary |
 | Confirmed | Expected failure envelope, validation paths/codes and HTTP mappings | Amended CON-025, CON-026 and CON-040 define one `RequestValidationFailure` containing all independently detectable validation errors and one `registrationValidationFailed` API mapping in §6.4–§6.5; Epic 1 does not use `422` |
-| Missing Information | Correlation propagation and ownership | CON-035 remains responsible; no custom header or error member is made normative here |
+| Confirmed | Correlation propagation and ownership | CON-035 uses W3C trace context as outbox metadata and RabbitMQ headers; it does not change the event JSON or introduce a custom API error member |
 
 # 9. Review Checklist
 
@@ -661,6 +673,6 @@ No caller-supplied `Idempotency-Key` or equivalent header is accepted. No custom
 - [x] Introduces no unsupported search, Identity dependency, lifecycle state or read-model infrastructure.
 - [x] Separates the transport-independent business contract from the approved Epic 1 HTTP adaptation.
 - [x] Records missing information and ambiguities instead of silently resolving them.
-- [x] Reconciles the HJ-010/HJ-012 v2.0 Approved baseline, including the amended unified validation-failure treatment for CON-025, CON-026 and CON-040, without deciding unresolved relay, broker-delivery or correlation mechanics.
+- [x] Reconciles the HJ-010/HJ-012 v2.1 Approved baseline, including the reliable-publication, broker-delivery, durable receipt, migration, trace-context and enforcement cohort.
 - [x] Keeps approved implementation patterns from becoming unnecessary service-contract requirements.
 - [x] Keeps the remaining unresolved architectural choices explicit and traceable to HJ-010 concerns.

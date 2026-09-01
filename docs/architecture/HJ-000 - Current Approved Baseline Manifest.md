@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-000 |
 | **Document Title** | Current Approved Baseline Manifest |
-| **Version** | 0.21 |
+| **Version** | 0.28 |
 | **Status** | Approved |
 | **Classification** | Operational Control |
 | **Owner** | Project Architecture |
-| **Last Updated** | 26 August 2026 |
+| **Last Updated** | 1 September 2026 |
 
 ## Revision History
 
@@ -31,14 +31,17 @@
 | 0.15 | 25 August 2026 | Prepared manifest synchronization accompanying HJ-106 v1.7 regeneration from the approved CON-023–CON-026 baseline. HJ-107 and HJ-013 remain at their current approved versions pending controlled regeneration. |
 | 0.16 | 26 August 2026 | Prepared manifest synchronization accompanying HJ-107 v1.7 regeneration from HJ-106 v1.7 Approved. HJ-013 remains at v1.8 Approved pending controlled regeneration through PR-005. |
 | 0.17 | 26 August 2026 | Prepared manifest synchronization accompanying HJ-013 v1.9 regeneration from HJ-012 v1.9 and HJ-107 v1.7 Approved. |
-
 | 0.18 | 26 August 2026 | Prepared manifest synchronization for the HJ-010, HJ-011 and HJ-012 v2.0 and HJ-105 v4.0 review candidates carrying the approved unified validation-failure decision; retained downstream generated artefacts pending controlled regeneration. |
-
 | 0.19 | 26 August 2026 | Prepared manifest synchronization accompanying HJ-106 v1.8 regeneration from the approved unified validation-failure baseline. HJ-107 and HJ-013 remain at their current approved versions pending controlled regeneration. |
-
 | 0.20 | 26 August 2026 | Prepared manifest synchronization accompanying HJ-107 v1.8 regeneration from HJ-106 v1.8 Approved. HJ-013 remains at v1.9 Approved pending controlled regeneration through PR-005. |
-
 | 0.21 | 26 August 2026 | Prepared manifest synchronization accompanying HJ-013 v2.0 regeneration from HJ-012 v2.0 and HJ-107 v1.8 Approved. |
+| 0.22 | 28 August 2026 | Prepared manifest synchronization for the HJ-010/HJ-012 v2.1 reliable-publication and enforcement baseline and affected ADR, scope and sequence candidates; retained HJ-106, HJ-107 and HJ-013 pending controlled regeneration. |
+| 0.23 | 28 August 2026 | Prepared manifest synchronization accompanying HJ-106 v1.9 regeneration from the approved reliable-publication and enforcement baseline. HJ-107 and HJ-013 remain at their current approved versions pending controlled regeneration. |
+| 0.24 | 28 August 2026 | Prepared manifest synchronization accompanying HJ-107 v1.9 regeneration from HJ-106 v1.9 Approved. HJ-013 remains at v2.0 Approved pending controlled regeneration through PR-005. |
+| 0.25 | 28 August 2026 | Prepared manifest synchronization accompanying HJ-013 v2.1 regeneration from HJ-012 v2.1 and HJ-107 v1.9 Approved. |
+| 0.26 | 31 August 2026 | Applied CR-TBD-HJ000. Prepared manifest synchronization for HJ-010, HJ-011, HJ-012 and HJ-013 v2.2 carrying approved CON-032/CON-033. |
+| 0.27 | 1 September 2026 | Applied CR-TBD-HJ000. Synchronized the final CON-032/CON-033 baseline, corrected the compact Approved concern index to include CON-025 and recorded the current post-propagation workflow position. |
+| 0.28 | 1 September 2026 | Recorded successful final verification of the CON-032/CON-033 implementation cohort and advanced the workflow position to deferred repository-hygiene normalization and controlled check-in. No concern, approach, guarantee, priority, contract or test obligation was changed. |
 
 ## 1. Purpose
 
@@ -60,14 +63,14 @@ If this manifest disagrees with a controlled artefact, the disagreement is a bas
 
 | Role | Artefact | Version | Status | Controlled Filename |
 |---|---|---:|---|---|
-| Architectural concern register | HJ-010 | 2.0 | Approved | `HJ-010 - Current Application Architectural Concerns.md` |
-| Active delivery scope | HJ-011 | 2.0 | Approved | `HJ-011 - Epic 1 Vendor Registration Implementation Scope.md` |
-| Established architecture patterns | HJ-012 | 2.0 | Approved | `HJ-012 - Established Application Architecture Patterns.md` |
-| Architecture and implementation test catalogue | HJ-013 | 2.0 | Approved | `HJ-013 - Architecture and Implementation Test Catalogue.md` |
+| Architectural concern register | HJ-010 | 2.3 | Approved | `HJ-010 - Current Application Architectural Concerns.md` |
+| Active delivery scope | HJ-011 | 2.3 | Approved | `HJ-011 - Epic 1 Vendor Registration Implementation Scope.md` |
+| Established architecture patterns | HJ-012 | 2.3 | Approved | `HJ-012 - Established Application Architecture Patterns.md` |
+| Architecture and implementation test catalogue | HJ-013 | 2.2 | Approved | `HJ-013 - Architecture and Implementation Test Catalogue.md` |
 | Vendor Registration information contract | HJ-104 | 3.6 | Approved | `HJ-104 - Vendor Registration Fields Matrix.md` |
-| Vendor Registration behavioural sequence | HJ-105 | 4.0 | Approved | `HJ-105 - Vendor Registration Sequence Diagram.md` |
-| Vendor Registration service contract | HJ-106 | 1.8 | Approved | `HJ-106 - Vendor Registration Service Contract.md` |
-| Vendor Registration behavioural test catalogue | HJ-107 | 1.8 | Approved | `HJ-107 - Vendor Registration Test Catalogue.md` |
+| Vendor Registration behavioural sequence | HJ-105 | 4.1 | Approved | `HJ-105 - Vendor Registration Sequence Diagram.md` |
+| Vendor Registration service contract | HJ-106 | 1.9 | Approved | `HJ-106 - Vendor Registration Service Contract.md` |
+| Vendor Registration behavioural test catalogue | HJ-107 | 1.9 | Approved | `HJ-107 - Vendor Registration Test Catalogue.md` |
 
 ## 3. Approved Concern Baseline
 
@@ -77,16 +80,19 @@ The current approved implementation-authority cohort recorded by HJ-010 and HJ-0
 approved_concerns:
   continuous_range:
     from: CON-001
-    to: CON-017
+    to: CON-024
   additional:
-    - CON-019
-    - CON-020
-    - CON-023
-    - CON-024
     - CON-025
     - CON-026
     - CON-027
     - CON-028
+    - CON-029
+    - CON-032
+    - CON-033
+    - CON-035
+    - CON-036
+    - CON-037
+    - CON-039
     - CON-040
 ```
 
@@ -139,31 +145,31 @@ HJ-000 is updated only when a controlled baseline artefact is added, removed, re
 
 ```yaml
 architecture_baseline:
-  HJ-010: 2.0 Approved
-  HJ-011: 2.0 Approved
-  HJ-012: 2.0 Approved
+  HJ-010: 2.3 Approved
+  HJ-011: 2.3 Approved
+  HJ-012: 2.3 Approved
 
 service_and_test_baseline:
   HJ-104: 3.6 Approved
-  HJ-105: 4.0 Approved
-  HJ-106: 1.8 Approved
-  HJ-107: 1.8 Approved
-  HJ-013: 2.0 Approved
+  HJ-105: 4.1 Approved
+  HJ-106: 1.9 Approved
+  HJ-107: 1.9 Approved
+  HJ-013: 2.2 Approved
 
 implementation_direction:
-  capability: Vendor Registration
-  next_activity: Review and apply HJ-013 v2.0 and HJ-000 v0.21, then resume PR-006 Slice 10C for the approved API and validation cohort.
+  capability: Epic 1 centralized configuration and secret management
+  next_activity: Complete deferred repository-hygiene normalization and controlled check-in, then obtain hosted evidence from all mandatory pull-request gates.
 ```
 
 The workflow-position block is operational guidance only. It shall be updated or removed when it ceases to describe the active work and shall never be treated as delivery-scope authority.
 
 ## 8. Review Checklist
 
-- [ ] Every listed file exists under its controlled filename.
-- [ ] Every listed internal version and status matches its controlled artefact.
-- [ ] HJ-010 and HJ-012 describe the same approved concern baseline.
-- [ ] HJ-011 remains the active delivery-scope authority.
-- [ ] HJ-106 is the current approved service-contract source for HJ-107.
-- [ ] HJ-107 is the current behavioural source used downstream by HJ-013.
-- [ ] The manifest introduces no architecture, behaviour, approval or delivery scope.
-- [ ] Any drift is reported rather than silently reconciled.
+- [x] Every listed file exists under its controlled filename.
+- [x] Every listed internal version and status matches its controlled artefact.
+- [x] HJ-010 and HJ-012 describe the same approved concern baseline.
+- [x] HJ-011 remains the active delivery-scope authority.
+- [x] HJ-106 is the current approved service-contract source for HJ-107.
+- [x] HJ-107 is the current behavioural source used downstream by HJ-013.
+- [x] The manifest introduces no architecture, behaviour, approval or delivery scope.
+- [x] Any drift is reported rather than silently reconciled.

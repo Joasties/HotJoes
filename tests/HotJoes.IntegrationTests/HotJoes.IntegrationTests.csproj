@@ -31,6 +31,8 @@
     <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Address/HotJoes.Infrastructure.Vendor.Address.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.VendorRelay/HotJoes.Infrastructure.VendorRelay.csproj" />
     <ProjectReference Include="../../src/HotJoes.Api.Vendor/HotJoes.Api.Vendor.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Worker.ComplianceConsumer/HotJoes.Worker.ComplianceConsumer.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../src/HotJoes.Worker.VendorRelay/HotJoes.Worker.VendorRelay.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

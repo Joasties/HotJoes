@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../src/HotJoes.Api.Vendor/HotJoes.Api.Vendor.csproj" />
     <ProjectReference Include="../../src/HotJoes.Application.Vendor/HotJoes.Application.Vendor.csproj" />
-    <ProjectReference Include="..\..\src\HotJoes.Api.Vendor\HotJoes.Api.Vendor.csproj" />
   </ItemGroup>
 
   <ItemGroup>

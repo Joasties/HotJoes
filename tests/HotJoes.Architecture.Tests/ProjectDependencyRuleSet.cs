@@ -8,22 +8,28 @@ public static class ProjectDependencyRuleSet
         {
             ["HotJoes.Api.Vendor"] = new(
                 "AI-API-001",
-                ["HotJoes.Application.Vendor"]),
-            ["HotJoes.Application.Address"] = new(
-                "AI-APP-002",
-                []),
+                [
+                    "HotJoes.Application.Address",
+                    "HotJoes.Application.Vendor",
+                    "HotJoes.Domain.Vendor",
+                    "HotJoes.Infrastructure.Persistence",
+                    "HotJoes.Infrastructure.Vendor.Address"
+                ]),
+            ["HotJoes.Application.Address"] = new("AI-APP-002", []),
             ["HotJoes.Application.Vendor"] = new(
                 "AI-APP-002",
                 ["HotJoes.Domain.Vendor"]),
-            ["HotJoes.Domain.Vendor"] = new(
-                "AI-DE-001",
-                []),
+            ["HotJoes.Database.Migrations"] = new(
+                "AI-ARCH-001",
+                [
+                    "HotJoes.Infrastructure.ComplianceConsumer",
+                    "HotJoes.Infrastructure.Persistence"
+                ]),
+            ["HotJoes.Domain.Vendor"] = new("AI-DE-001", []),
             ["HotJoes.Infrastructure.ComplianceConsumer"] = new(
                 "AI-CONS-003",
                 []),
-            ["HotJoes.Infrastructure.Health"] = new(
-                "AI-ARCH-001",
-                []),
+            ["HotJoes.Infrastructure.Health"] = new("AI-ARCH-001", []),
             ["HotJoes.Infrastructure.Persistence"] = new(
                 "AI-REP-001",
                 ["HotJoes.Application.Vendor"]),
@@ -35,7 +41,21 @@ public static class ProjectDependencyRuleSet
                 ]),
             ["HotJoes.Infrastructure.VendorRelay"] = new(
                 "AI-REP-001",
-                ["HotJoes.Infrastructure.Persistence"])
+                ["HotJoes.Infrastructure.Persistence"]),
+            ["HotJoes.Web.Edge"] = new("AI-GW-005", []),
+            ["HotJoes.Worker.ComplianceConsumer"] = new(
+                "AI-ARCH-001",
+                [
+                    "HotJoes.Infrastructure.ComplianceConsumer",
+                    "HotJoes.Infrastructure.Health"
+                ]),
+            ["HotJoes.Worker.VendorRelay"] = new(
+                "AI-ARCH-001",
+                [
+                    "HotJoes.Infrastructure.Health",
+                    "HotJoes.Infrastructure.Persistence",
+                    "HotJoes.Infrastructure.VendorRelay"
+                ])
         };
 
     private static readonly string[] ForbiddenInnerPackageFragments =

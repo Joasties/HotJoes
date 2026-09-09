@@ -78,6 +78,8 @@ Use when a previous HJ-013 exists and a controlled change or new approved archit
 - reconcile every `AI-*` change; and
 - record every source baseline used.
 
+Controlled Regeneration shall correct inherited Coverage Summary structural defects while preserving concern meaning, architecture authority and stable `AI-*` ownership.
+
 ## Verification Only
 
 Use to test this prompt or assess a possible regeneration without publishing HJ-013.
@@ -506,6 +508,8 @@ Provide a table containing:
 
 Every active Approved HJ-012 concern applicable to the supplied delivery boundary must appear.
 
+The Coverage Summary shall be rendered as one syntactically valid, contiguous Markdown table. Every applicable Approved concern shall appear exactly once and shall be ordered deterministically by numeric CON identifier unless a documented grouping is required. Blank lines, unheaded continuation tables and disconnected concern cohorts are prohibited.
+
 ## 5. Architecture and Implementation Test Catalogue
 
 Organise obligations by stable Approved concern or another clearly traceable structure.
@@ -592,6 +596,7 @@ Confirm that the generated or regenerated HJ-013:
 - does not treat System Model visibility as delivery scope;
 - preserves applicable earlier HJ-013 obligations across later delivery scopes;
 - uses the previous HJ-013 as the sole `AI-*` stable-ID baseline;
+- renders the Coverage Summary as one contiguous Markdown table containing every applicable Approved concern exactly once in deterministic numeric `CON-*` order, unless an explicit documented grouping applies;
 - creates, changes and reconciles only `AI-*` IDs;
 - does not create, modify, retire or reconcile behavioural IDs;
 - references only current behavioural IDs that exist in the supplied behavioural catalogue;
@@ -626,7 +631,8 @@ The output is complete when:
 7. every stable-ID change is reconciled;
 8. every source conflict or missing authority is visible;
 9. possible architectural challenges are evidence-backed and distinguished from derivation or implementation defects; and
-10. generation readiness is sufficiently explicit to constrain subsequent test and implementation generation.
+10. generation readiness is sufficiently explicit to constrain subsequent test and implementation generation; and
+11. the Coverage Summary is one structurally valid table with no missing, duplicate, disconnected or unheaded concern rows and deterministic numeric `CON-*` ordering unless another grouping is explicitly documented.
 
 If completion cannot be achieved, produce the valid partial catalogue and a precise findings section unless missing authority makes any responsible output impossible.
 

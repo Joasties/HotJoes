@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HotJoes.Infrastructure.Health/HotJoes.Infrastructure.Health.csproj" />
+    <ProjectReference Include="../HotJoes.Infrastructure.Persistence/HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="../HotJoes.Infrastructure.VendorRelay/HotJoes.Infrastructure.VendorRelay.csproj" />
+  </ItemGroup>
+
+</Project>

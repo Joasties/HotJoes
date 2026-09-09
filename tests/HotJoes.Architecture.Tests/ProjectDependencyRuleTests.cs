@@ -9,12 +9,16 @@ public sealed class ProjectDependencyRuleTests
         "HotJoes.Api.Vendor",
         "HotJoes.Application.Address",
         "HotJoes.Application.Vendor",
+        "HotJoes.Database.Migrations",
         "HotJoes.Domain.Vendor",
         "HotJoes.Infrastructure.ComplianceConsumer",
         "HotJoes.Infrastructure.Health",
         "HotJoes.Infrastructure.Persistence",
         "HotJoes.Infrastructure.Vendor.Address",
-        "HotJoes.Infrastructure.VendorRelay"
+        "HotJoes.Infrastructure.VendorRelay",
+        "HotJoes.Web.Edge",
+        "HotJoes.Worker.ComplianceConsumer",
+        "HotJoes.Worker.VendorRelay"
     ];
 
     [Fact]

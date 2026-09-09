@@ -1,0 +1,47 @@
+{
+  "revision": "epic1-address-catalogue-v1",
+  "entries": [
+    {
+      "reference": "addr-restaurant-hotjoes-001",
+      "tradingLocation": "restaurant",
+      "canonicalAddressId": "canonical-hotjoes-restaurant-001",
+      "addressLine1": "Hot Joes",
+      "addressLine2": "Blackheath Avenue",
+      "addressLine3": null,
+      "addressLine4": null,
+      "postTown": "London",
+      "postcode": "SE10 8XJ",
+      "county": null,
+      "foodRegistrationAuthority": "Royal Borough of Greenwich",
+      "primaryTradingAuthority": null
+    },
+    {
+      "reference": "addr-stall-hotjoes-001",
+      "tradingLocation": "stall",
+      "canonicalAddressId": "canonical-hotjoes-stall-001",
+      "addressLine1": "Hot Joes Stall",
+      "addressLine2": "Greenwich Market",
+      "addressLine3": null,
+      "addressLine4": null,
+      "postTown": "London",
+      "postcode": "SE10 9HZ",
+      "county": null,
+      "foodRegistrationAuthority": "Royal Borough of Greenwich",
+      "primaryTradingAuthority": "Royal Borough of Greenwich"
+    },
+    {
+      "reference": "addr-kitchen-hotjoes-001",
+      "tradingLocation": "kitchen",
+      "canonicalAddressId": "canonical-hotjoes-kitchen-001",
+      "addressLine1": "Hot Joes Kitchen",
+      "addressLine2": "1 Synthetic Yard",
+      "addressLine3": null,
+      "addressLine4": null,
+      "postTown": "London",
+      "postcode": "SE10 0AA",
+      "county": null,
+      "foodRegistrationAuthority": "Royal Borough of Greenwich",
+      "primaryTradingAuthority": null
+    }
+  ]
+}

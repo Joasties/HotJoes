@@ -20,7 +20,7 @@ The batch shall contain every artefact candidate required to propagate the selec
 
 For every affected artefact, generate:
 
-1. one Change Request affecting that artefact only;
+1. one artefact-specific execution/reconciliation record, or a Change Request only where the execution identifies a separately approval-requiring change outside routine propagation;
 2. a concise summary of its proposed changes;
 3. traceability to the applicable Approved concerns and upstream sources;
 4. the complete proposed updated artefact;
@@ -29,7 +29,7 @@ For every affected artefact, generate:
 
 After generating every affected candidate, produce one cross-artefact consistency and completion report and stop at a single human review gate.
 
-PR-007 does not apply, publish or promote generated candidates. Its normal and default authority is **Proposal Only**.
+PR-007 does not apply, publish or promote generated candidates. The external review package is proposed and non-authoritative; each complete candidate carries its intended controlled target status. Repository modification authority remains **Read Only**, and human application is required.
 
 ---
 
@@ -142,7 +142,7 @@ During one execution PR-007 shall:
 1. reconcile the working input into provisional HJ-010 and HJ-012 candidates;
 2. determine the complete affected artefact set;
 3. generate every valid affected candidate in authority order;
-4. generate a separate artefact-specific Change Request and summary for each candidate;
+4. generate a separate artefact-specific execution/reconciliation record and summary for each candidate, escalating to a Change Request only under the rules below;
 5. verify every candidate individually;
 6. verify the complete provisional candidate set across artefacts;
 7. identify required application order and invalidation dependencies; and
@@ -177,7 +177,7 @@ This is permitted only within the batch-generation workspace.
 
 Apply these rules:
 
-1. Every generated candidate remains explicitly **Proposed — not controlled**.
+1. Every external review package remains explicitly **Proposed — not controlled**; each complete candidate retains the status intended after human application, normally **Approved**.
 2. A provisional candidate may be used to generate a downstream candidate only when its dependency is recorded.
 3. Provisional use does not make the upstream candidate authoritative.
 4. Each downstream candidate shall identify the exact provisional upstream versions used.
@@ -187,32 +187,27 @@ Apply these rules:
 
 ---
 
-# Change Request Granularity
+# Routine Execution Evidence and Change Request Escalation
 
-Each generated Change Request shall affect exactly one controlled target artefact.
+Routine PR-007 propagation does not require a Change Request for each affected artefact. It is routine when it applies an explicitly Approved concern batch through the authority chain and changes only what the existing controlled prompts already authorise.
 
-One concern batch may therefore produce:
+For each routinely affected artefact, generate an artefact-specific **Execution/Reconciliation Record** containing the target, baselines, Approved concerns, authority chain, exact delta, explicit non-changes, verification, dependencies and human application gate. Candidate revision histories shall identify the PR-007 execution, applicable concern batch and approval evidence without inventing a CR identifier.
 
-```text
-one CR for HJ-010
-one CR for HJ-012
-one CR for ADR-006
-one CR for the Address consumed contract
-one CR for HJ-003
-one CR for HJ-004
-one CR for HJ-104
-one CR for HJ-105
-one CR for HJ-011
-one CR for HJ-106
-one CR for HJ-107
-one CR for HJ-013
-```
+Generate a formal Change Request only when the proposed work itself requires separate approval because it:
 
-Do not create an omnibus Change Request spanning several artefacts.
+- creates or changes architectural or delivery scope not already approved by the selected concern authority;
+- creates, amends or supersedes the substantive decision content of an individual ADR or another independent architectural decision authority;
+- changes a controlled prompt, governance rule, lifecycle, ownership boundary or document structure;
+- corrects an authoritative source defect not authorised by the Approved concern batch; or
+- otherwise exceeds routine propagation authority.
 
-HJ-010 and HJ-012 retain separate artefact-specific Change Requests but form one transactional baseline candidate pair. They shall be applied together or not applied.
+Each such Change Request shall affect exactly one controlled target artefact unless the governing process change is explicitly approved as one inseparable multi-prompt amendment. Do not create placeholder or empty Change Requests for routine propagation or no-change results.
 
-If impact assessment concludes that an artefact requires no change, generate a **No-Change Determination** rather than an empty or speculative Change Request.
+Routine synchronization of **ADR-000 - Architectural Decision Register** does not require a separate Change Request when it only adds, removes or updates index entries to reflect separately approved ADR creation, amendment, supersession, deprecation or status change and updates the associated document control. Generate an ADR-000 execution/reconciliation record in that case. ADR-000 requires its own Change Request only when the proposed change alters the register's structure, lifecycle, numbering convention, ownership, governance or other substantive authority, or corrects an independent authoritative defect not covered by the approved decision batch.
+
+HJ-010 and HJ-012 remain one transactional baseline candidate pair and shall be applied together or not applied. Their routine reconciliation records remain artefact-specific even though their application is transactional.
+
+If impact assessment concludes that an artefact requires no change, generate a **No-Change Determination** rather than an execution record or speculative Change Request.
 
 ---
 
@@ -269,7 +264,7 @@ Generate:
 - baseline reconciliation findings;
 - affected artefact inventory;
 - propagation dependency graph;
-- proposed Change Request inventory;
+  - proposed execution-record inventory and any Change Request escalations;
 - target-specific generation methods; and
 - Decision Mode findings.
 
@@ -291,7 +286,7 @@ Use after human review comments or an upstream candidate revision.
 Verify an existing review batch without publishing or applying it.
 
 - check every candidate against its declared source chain;
-- check every CR against its single target;
+- check every execution record and any escalated CR against its single target;
 - check cross-artefact consistency;
 - identify stale candidates; and
 - produce a verification report.
@@ -325,7 +320,7 @@ Do not silently repair an unapproved concern decision during propagation.
 - retain the complete concern population;
 - preserve unaffected concern rows;
 - update document control and reconciliation sections;
-- generate one HJ-010-only CR; and
+- generate one HJ-010-only execution/reconciliation record, or a Change Request only when escalation criteria apply; and
 - generate the complete proposed HJ-010.
 
 ### HJ-012 candidate
@@ -336,7 +331,7 @@ Do not silently repair an unapproved concern decision during propagation.
 - retain previously Approved Challenged entries correctly;
 - exclude never-Approved Exploring, Selected and Blocked concerns;
 - verify matching nine-column data;
-- generate one HJ-012-only CR; and
+- generate one HJ-012-only execution/reconciliation record, or a Change Request only when escalation criteria apply; and
 - generate the complete proposed HJ-012.
 
 ### Pair verification
@@ -385,7 +380,7 @@ For each affected artefact:
 
 1. identify the highest applicable authority;
 2. classify every required change;
-3. generate one artefact-specific CR;
+3. generate one artefact-specific execution/reconciliation record, or an artefact-specific Change Request only when escalation criteria apply;
 4. generate a concise change summary;
 5. generate the complete proposed updated artefact;
 6. compare it with the controlled baseline;
@@ -413,7 +408,7 @@ For each derived artefact:
 - use the complete declared provisional upstream candidate set;
 - preserve its governing prompt's authority hierarchy;
 - reconcile stable IDs only within its owned namespace;
-- generate one artefact-specific CR;
+- generate one artefact-specific execution/reconciliation record, or an artefact-specific Change Request only when escalation criteria apply;
 - generate the complete proposed updated artefact;
 - verify target-specific completeness; and
 - record every provisional upstream dependency.
@@ -511,16 +506,36 @@ Not every category affects every artefact. Record material no-change conclusions
 4. A target-specific prompt retains authority over its target's derivation, stable IDs and required structure.
 5. PR-007 shall not create, modify, retire or reconcile stable IDs outside the owning target's method.
 6. A downstream review finding shall be traced to its architectural root before change is proposed.
-7. Do not make a spreadsheet, candidate, review report or unapplied CR normative.
+7. Do not make a spreadsheet, candidate, execution record, review report or unapplied CR normative.
 8. Do not infer architectural approval from implementation or passing tests.
 9. Do not create an ADR merely to complete a table; assess architectural significance using the established governance rules.
 10. Do not introduce architecture absent from the Approved concern baseline.
 
 ---
 
+# Artefact-Specific Execution Record Requirements
+
+Every routine artefact-specific execution/reconciliation record shall include:
+
+- title naming the single target artefact;
+- record status: Proposed execution evidence — not controlled;
+- governing prompt and execution mode;
+- target artefact and controlled baseline version;
+- proposed target version and intended controlled status;
+- applicable Approved concern IDs and approval evidence;
+- purpose and approved decision baseline;
+- exact authorised target changes and explicit non-goals;
+- source authority and provisional dependencies;
+- target impact and document-control treatment;
+- verification criteria and results;
+- completion standard; and
+- next controlled action and human application gate.
+
+The record shall state that it is execution evidence and does not independently authorise or apply the candidate.
+
 # Artefact-Specific Change Request Requirements
 
-Every generated CR shall include:
+When the escalation criteria require a formal CR, it shall include:
 
 - CR ID placeholder or supplied ID;
 - title naming the single target artefact;
@@ -560,7 +575,7 @@ Include:
 - applicable concern IDs;
 - direct and provisional upstream sources;
 - downstream dependants; and
-- candidate status: Proposed — not controlled.
+- candidate target status and the separate review-package state: Proposed — not controlled.
 
 ## B. Change Summary
 
@@ -573,9 +588,9 @@ Summarize:
 - document-control changes; and
 - explicit non-changes.
 
-## C. Artefact-Specific Change Request
+## C. Artefact-Specific Execution Evidence
 
-Provide the complete CR affecting only this target.
+Provide the complete execution/reconciliation record affecting only this target. Where escalation criteria apply, provide the complete artefact-specific CR instead and identify why routine execution authority was insufficient.
 
 ## D. Complete Proposed Updated Artefact
 
@@ -673,11 +688,25 @@ Provide every affected authoritative artefact package in dependency order.
 
 Provide every affected derived artefact package in generation order.
 
-## 9. No-Change Determinations
+## 9. HJ-000 Baseline Manifest Candidate
+
+When the review batch proposes any new controlled artefact version, generate the complete proposed **HJ-000 - Current Approved Baseline Manifest** under its exact controlled filename after all other candidates have been finalized.
+
+HJ-000 shall:
+
+- record the complete candidate version set and intended statuses;
+- identify the PR-007 execution and Approved concern batch as reconciliation evidence;
+- contain no placeholder CR reference for routine propagation;
+- be applied by the human after the artefacts whose versions it records; and
+- receive its own formal CR only when HJ-000's structure, authority or governance changes rather than its ordinary baseline content.
+
+If no controlled artefact version changes, generate an HJ-000 No-Change Determination.
+
+## 10. No-Change Determinations
 
 Provide the consolidated no-change table.
 
-## 10. Decision Mode and Blocking Findings
+## 11. Decision Mode and Blocking Findings
 
 Identify:
 
@@ -688,11 +717,11 @@ Identify:
 - provisionally generated candidates unsafe to apply; and
 - downstream invalidation impact.
 
-## 11. Cross-Artefact Verification Report
+## 12. Cross-Artefact Verification Report
 
 Report each cross-artefact check and its result.
 
-## 12. Application and Regeneration Plan
+## 13. Application and Regeneration Plan
 
 State:
 
@@ -702,7 +731,7 @@ State:
 - which candidates must be regenerated if an upstream candidate changes; and
 - final promotion checks.
 
-## 13. Human Review Gate
+## 14. Human Review Gate
 
 End with these available treatments:
 
@@ -723,14 +752,14 @@ For every candidate:
 - use the current controlled target as the document/stable-ID baseline;
 - increment version according to the proposed change;
 - retain applicable revision history;
-- add one revision-history entry identifying the artefact-specific CR;
-- set Status according to the proposed publication treatment, not automatically;
+- add one revision-history entry identifying the governing prompt execution and Approved concern batch, or the artefact-specific CR where escalation occurred;
+- set Status to the intended controlled status after human application, not to the external review-package state;
 - update Last Updated consistently;
 - reconcile Related Documents where materially relevant;
 - identify provisional source versions used; and
 - do not append version/status text to a standard filename unless controlled convention requires it.
 
-Candidate generation does not make a candidate Approved.
+Candidate generation does not make a candidate authoritative or applied, even when the candidate correctly carries target Status **Approved**.
 
 ---
 
@@ -738,8 +767,9 @@ Candidate generation does not make a candidate Approved.
 
 Do not:
 
-- create one CR for multiple target artefacts;
-- give HJ-010 and HJ-012 one shared CR;
+- create routine Change Requests merely because controlled artefact content or versions change through approved propagation;
+- create one CR for multiple target artefacts unless an explicitly approved inseparable process amendment requires it;
+- give HJ-010 and HJ-012 one shared execution record or CR;
 - treat HJ-010 or HJ-012 as independently applicable within the baseline pair;
 - apply, publish or promote generated candidates;
 - pause routine generation after each valid artefact candidate;
@@ -754,6 +784,7 @@ Do not:
 - amend stable IDs outside their owning method;
 - patch downstream symptoms whose causes are upstream;
 - omit complete updated artefacts from the review batch;
+- omit the complete HJ-000 candidate when the proposed controlled version set changes;
 - generate implementation code; or
 - claim that batch generation constitutes architectural application.
 
@@ -766,11 +797,12 @@ Confirm that the generated batch:
 - uses controlled HJ-010/HJ-012 as the starting architecture baseline;
 - treats the working register as non-authoritative input;
 - reconciles the complete concern batch into provisional HJ-010/HJ-012 first;
-- includes separate HJ-010-only and HJ-012-only CRs;
+- includes separate HJ-010-only and HJ-012-only execution records, or separately justified CR escalations;
 - treats HJ-010/HJ-012 as one transactional application unit;
 - includes every affected artefact and explains every exclusion;
-- creates one CR per changed artefact;
+- creates one execution/reconciliation record per routinely changed artefact and a formal CR only where escalation criteria apply;
 - provides one summary and complete candidate per changed artefact;
+- includes a complete HJ-000 candidate when indexed candidate versions change;
 - uses applicable target-specific generation prompts;
 - records every provisional dependency;
 - identifies downstream invalidation from upstream revision;
@@ -793,15 +825,16 @@ The Architecture Propagation Review Batch is complete when:
 1. every selected concern has been reconciled against explicit approval evidence;
 2. the provisional HJ-010/HJ-012 pair is synchronized;
 3. the complete affected artefact set has been determined;
-4. every valid affected artefact has one CR, summary, complete candidate, comparison and verification report;
+4. every valid affected artefact has one execution/reconciliation record or justified CR escalation, summary, complete candidate, comparison and verification report;
 5. every no-change artefact has a documented determination;
 6. every blocked candidate and Decision Mode issue is explicit;
 7. every provisional dependency and invalidation relationship is recorded;
 8. derived artefacts use their governing prompts and correct stable baselines;
 9. cross-artefact verification is complete;
-10. required application order is explicit;
-11. no candidate has been treated as applied or authoritative; and
-12. the output ends at one final human review gate.
+10. the complete HJ-000 candidate is present whenever indexed candidate versions change;
+11. required application order is explicit, with HJ-000 applied after the artefacts it records;
+12. no candidate has been treated as applied or authoritative; and
+13. the output ends at one final human review gate.
 
 If complete valid generation is impossible, produce the maximum internally valid batch and a precise account of blocked or unsafe candidates. Do not fill gaps by inventing architecture.
 
@@ -837,6 +870,6 @@ Requirements:
 - provide complete candidates rather than fragments;
 - keep summaries concise while retaining full traceability;
 - record missing authority and conflicts rather than inventing content;
-- clearly label all candidates Proposed — not controlled;
+- clearly distinguish the proposed, non-controlled review package from complete candidates carrying their intended controlled target status;
 - do not generate implementation code; and
 - end with the single batch-level human action required.

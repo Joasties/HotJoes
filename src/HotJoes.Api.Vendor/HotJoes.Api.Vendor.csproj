@@ -15,7 +15,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotJoes.Application.Address\HotJoes.Application.Address.csproj" />
     <ProjectReference Include="..\HotJoes.Application.Vendor\HotJoes.Application.Vendor.csproj" />
+    <ProjectReference Include="..\HotJoes.Domain.Vendor\HotJoes.Domain.Vendor.csproj" />
+    <ProjectReference Include="..\HotJoes.Infrastructure.Persistence\HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="..\HotJoes.Infrastructure.Vendor.Address\HotJoes.Infrastructure.Vendor.Address.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="AddressBootstrap\address-bootstrap-catalogue.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,9 @@ namespace HotJoes.Architecture.Tests;
 
 public static class MigrationStructuralRuleSet
 {
+    private const string ApprovedMigrationProjectPath =
+        "src/HotJoes.Database.Migrations/";
+
     private static readonly string[] ApprovedDesignTimePaths =
     [
         "src/HotJoes.Infrastructure.Persistence/" +
@@ -63,7 +66,10 @@ public static class MigrationStructuralRuleSet
 
     private static bool IsApprovedMigrationBoundary(string relativePath)
     {
-        return relativePath.Contains(
+        return relativePath.StartsWith(
+                ApprovedMigrationProjectPath,
+                StringComparison.Ordinal) ||
+            relativePath.Contains(
                 "/Migrations/",
                 StringComparison.Ordinal) ||
             ApprovedDesignTimePaths.Contains(

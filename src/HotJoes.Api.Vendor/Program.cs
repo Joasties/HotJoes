@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using HotJoes.Api.Vendor;
 using HotJoes.Application.Vendor;
+using HotJoes.Api.Vendor.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +27,9 @@ builder.Services.AddSingleton<RegisterVendorResponseMapper>();
 builder.Services.AddSingleton<RegisteredVendorDetailsResponseMapper>();
 builder.Services.AddSingleton<VendorApiErrorMapper>();
 
-builder.Services.AddScoped<IRegisterVendorService, RegisterVendorService>();
-builder.Services.AddScoped<IRetrieveRegisteredVendorService, RetrieveRegisteredVendorService>();
+builder.Services.AddVendorApiComposition(
+    builder.Configuration,
+    builder.Environment.ContentRootPath);
 
 var app = builder.Build();
 

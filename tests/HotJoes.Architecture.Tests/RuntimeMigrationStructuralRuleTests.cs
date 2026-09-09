@@ -53,6 +53,10 @@ public sealed class RuntimeMigrationStructuralRuleTests
 
     [Theory]
     [InlineData(
+        "src/HotJoes.Database.Migrations/Program.cs")]
+    [InlineData(
+        "src/HotJoes.Database.Migrations/DatabaseMigrationOperation.cs")]
+    [InlineData(
         "src/HotJoes.Infrastructure.Persistence/Migrations/Example.cs")]
     [InlineData(
         "src/HotJoes.Infrastructure.Persistence/" +

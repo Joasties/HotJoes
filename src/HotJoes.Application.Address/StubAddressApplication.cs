@@ -22,6 +22,20 @@ public sealed class StubAddressApplication : IAddressResolutionService
         return reference;
     }
 
+    public void AddKnownResult(
+        string reference,
+        TradingLocation tradingLocation,
+        CompleteAddressResult result)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reference);
+        ArgumentNullException.ThrowIfNull(result);
+
+        _boundResults.Add(
+            reference,
+            new ValidBoundResolution(tradingLocation, result));
+        _currentAddressData[result.CanonicalAddressId] = result;
+    }
+
     public string AddKnownResultWithoutCanonicalAddressId(
         TradingLocation tradingLocation)
     {

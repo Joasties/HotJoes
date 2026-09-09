@@ -3,11 +3,11 @@
 | **Document ID** | ADR-000 |
 |-----------------|--------|
 | **Document Title** | Architectural Decision Register |
-| **Version** | 1.1 |
+| **Version** | 1.4 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 31 August 2026 |
+| **Last Updated** | 7 September 2026 |
 
 ---
 
@@ -17,6 +17,9 @@
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Register created. |
 | 1.1 | 31 August 2026 | Applied CR-TBD-ADR000. Corrected the erroneous ADR-009 reservation and registered the accepted Azure reference cloud, centralized configuration and secret-management decision as ADR-009. |
+| 1.2 | 4 September 2026 | Registered the accepted Angular Vendor Web client decision as ADR-010 and the accepted Playwright Test browser UI testing and automation decision as ADR-011. |
+| 1.3 | 7 September 2026 | Registered the accepted feature-oriented Angular Vendor Web client application architecture as ADR-012. |
+| 1.4 | 7 September 2026 | Synchronized ADR-011 v1.1 and registered ADR-013 for the accepted CON-038 runtime and deployment composition decision. |
 
 ---
 
@@ -86,6 +89,10 @@ ADRs are never deleted. When a decision changes, a new ADR supersedes the previo
 | ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted |
 | ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted |
 | ADR-009 | Azure Reference Cloud, Centralized Configuration and Secret Management | Accepted |
+| ADR-010 | Angular for the Vendor Web Client | Accepted |
+| ADR-011 | Playwright Test for Browser UI Testing and Automation | Accepted |
+| ADR-012 | Feature-Oriented Angular Architecture for the Vendor Web Client | Accepted |
+| ADR-013 | Epic 1 Runtime and Deployment Composition | Accepted |
 
 ---
 

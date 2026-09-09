@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-009 |
 | **Document Title** | AI Operating Guide |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | Approved |
 | **Classification** | Guide |
 | **Owner** | Project Architecture |
-| **Last Updated** | 9 August 2026 |
+| **Last Updated** | 3 September 2026 |
 
 ## Revision History
 
@@ -17,6 +17,7 @@
 | 0.1 | 21 July 2026 | Initial draft. |
 | 0.2 | 21 July 2026 | Introduced the human-orchestrated AI operating model, human review between AI roles, AI self-review, tool-usage guidance, structured role hand-offs, escalation guidance, prompt lifecycle controls, and revised workflow diagrams and Golden Rules. |
 | 1.0 | 9 August 2026 | Completed human review and promoted the AI Operating Guide from Draft to Approved. Existing AI operating behaviour and human-governance rules were retained unchanged. Markdown presentation was aligned with the current HotJoes documentation standard and related-document status references were reconciled. |
+| 1.1 | 3 September 2026 | Applied CR-060. Defined read-only AI access to controlled repositories, separated approval from application authority, required candidate generation outside controlled repositories and required writable verification to use a disposable copy or isolated sandbox. |
 
 ## Related Documents
 
@@ -30,6 +31,7 @@
 | HJ-006 | Testing Strategy and Standards | Approved |
 | HJ-007 | Enforcement Strategy | Approved |
 | HJ-008 | AI Roles and Responsibilities | Approved |
+| CR-060 | Establish AI Repository Access and Application Authority | Approved |
 
 # 1. Purpose
 
@@ -312,6 +314,66 @@ AI should:
 
 AI should read before writing.
 
+## 7.1 Repository Access and Application Authority
+
+Project repositories containing controlled architecture documentation, source code or test code are human-controlled.
+
+AI access to a controlled repository is **read-only by default**.
+
+AI may:
+
+- read and inspect controlled documentation, source code, tests and version-control history;
+
+- analyse proposed changes;
+
+- generate Change Requests, complete candidate artefacts, code, tests and patches outside the controlled repository;
+
+- create a disposable copy or isolated sandbox outside the controlled repository; and
+
+- build, test and verify proposed changes within that disposable environment.
+
+AI shall not:
+
+- create, modify, rename, move or delete files in the controlled repository;
+
+- apply an approved Change Request or candidate artefact to controlled documentation;
+
+- apply generated or approved source code or test code to the controlled source tree;
+
+- stage, commit, merge, rebase, push or otherwise alter repository or version-control state; or
+
+- interpret approval of a decision, Change Request, candidate document, code change or test change as authority to apply it.
+
+The controlled workflow separates generation, approval and application:
+
+```text
+AI Generates Proposed Candidate
+            │
+            ▼
+Human Reviews and Approves or Rejects
+            │
+            ▼
+Human Applies the Approved Candidate
+```
+
+Human approval confirms that a candidate is accepted for application. It does not transfer application responsibility to AI.
+
+A complete candidate artefact shall contain the status, version and other metadata it will have when applied. Unless the governing process requires another status, the candidate shall carry **Approved** as its target document status. **Proposed — not controlled** describes the candidate's external review-package state before human application; it does not replace the target status inside the candidate.
+
+Only the human applies approved architecture documentation, source code and test code to a controlled repository.
+
+Direct AI modification of a controlled repository is permitted only where the human gives a separate explicit instruction that:
+
+1. identifies the controlled repository as the write target;
+2. identifies the exact files or bounded change authorised; and
+3. explicitly authorises direct repository modification for that task.
+
+Requests such as `update`, `implement`, `apply` or `continue`, and statements that an artefact is approved, do not by themselves grant repository-write authority.
+
+Where build, test, formatting, migration or generation commands would write files, caches or build outputs, AI shall run them against a disposable copy or isolated sandbox outside the controlled repository. Verification shall not modify the controlled repository.
+
+Repository-local AI instruction files may repeat or strengthen this boundary. They do not weaken the human application gate defined by this guide.
+
 # 8. Working with Documentation
 
 Documentation is considered a first-class deliverable.
@@ -537,6 +599,8 @@ The following activities require human approval:
 Every AI-role output is subject to human review before it becomes an
 accepted project input.
 
+Human approval makes an output eligible to become an accepted project input. It does not authorise AI to apply the output to controlled documentation, source code or test code. Application remains a separate human-controlled action unless separately and explicitly delegated for one bounded task.
+
 The human may approve, reject, request revision, or defer.
 
 AI must not treat silence as approval. It must not invoke another role
@@ -690,6 +754,8 @@ An AI task is complete only when:
 
 - no unapproved changes were applied
 
+- no controlled repository was modified without separate, explicit and bounded repository-write authority
+
 - control has been returned to the human
 
 # 20. Appendix A --- Standard Human-Orchestrated AI Workflow
@@ -745,6 +811,8 @@ Preserve approved architecture.
 Follow the Ubiquitous Language.
 
 Keep humans in control.
+
+Approval is not application authority.
 
 Perform only the assigned role.
 

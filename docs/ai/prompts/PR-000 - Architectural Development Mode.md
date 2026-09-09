@@ -159,6 +159,37 @@ First determine whether the comment exposes:
 
 Independent review informs the architecture. It does not have authority to change it.
 
+### 4.1 Proposal and Repository-Application Boundary
+
+Execution Mode generates proposed Change Requests, complete candidate artefacts, source-code changes, tests and verification evidence for human review. It does not apply those candidates to a controlled repository.
+
+The normal and default authority is:
+
+```text
+Repository modification authority: Read Only
+Candidate generation authority: Complete Candidate
+Candidate target status: Approved unless the governing process requires another status
+Human application gate: Required
+```
+
+AI may inspect the controlled repository and may use a disposable copy or isolated sandbox outside it to generate, build and test proposals. Build, test, formatting, migration or generation activity shall not modify the controlled repository.
+
+Human approval confirms that an architectural decision, Change Request, candidate artefact, source-code change or test change is accepted for application. Approval does not grant AI authority to apply it.
+
+Only the human applies approved architecture documentation, source code and test code to the controlled repository unless the human gives a separate explicit instruction that:
+
+1. identifies the controlled repository as the write target;
+2. identifies the exact files or bounded change authorised; and
+3. explicitly authorises direct repository modification for that task.
+
+Requests such as `update`, `implement`, `apply` or `continue` do not by themselves satisfy this authority requirement.
+
+A generated candidate shall be complete and shall contain the document status, version and other metadata it will have when applied. Unless the governing process requires another status, the candidate document shall therefore carry **Approved**, not **Proposed**, as its target status.
+
+Before human application, **Proposed — not controlled** describes the external review-package state of the candidate. It does not replace or override the target status written inside the candidate document.
+
+AI shall return control after presenting the complete candidate and verification evidence.
+
 ---
 
 ## 5. Mode Transitions
@@ -240,7 +271,10 @@ The AI is responsible for:
 - refusing to silently invent missing architectural decisions during Execution Mode;
 - identifying when a review comment is a suggestion rather than an architectural defect;
 - making mode transitions visible where they are inferred;
-- returning genuine contradictions to Decision Mode rather than resolving them implicitly.
+- returning genuine contradictions to Decision Mode rather than resolving them implicitly;
+- generating proposed candidates outside the controlled repository and returning them to the human for application;
+- treating repository access as read-only unless separately given explicit, file-bounded repository-write authority; and
+- using a disposable copy or isolated sandbox where generation or verification requires filesystem writes.
 
 Neither participant should allow convenience to bypass the process where doing so would weaken architectural clarity, consistency or traceability.
 
@@ -251,5 +285,7 @@ Neither participant should allow convenience to bypass the process where doing s
 Architectural effort should be concentrated on discovering and making good decisions.
 
 Once a decision has been approved, propagation of that decision through the artefact set should be systematic, complete and largely mechanical.
+
+Propagation produces reviewed candidates. It does not transfer responsibility for applying those candidates to the controlled repository from the human to AI.
 
 The architectural decision-maker should spend time deciding **what the architecture means**, not repeatedly explaining how an already-approved decision should be reflected throughout the documentation.

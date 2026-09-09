@@ -82,6 +82,8 @@ public sealed class ComplianceConsumerHostProcessTests
         startInfo.ArgumentList.Add("run");
         startInfo.ArgumentList.Add("--no-build");
         startInfo.ArgumentList.Add("--no-launch-profile");
+        startInfo.ArgumentList.Add("--configuration");
+        startInfo.ArgumentList.Add(BuildConfiguration());
         startInfo.ArgumentList.Add("--project");
         startInfo.ArgumentList.Add(projectPath);
         startInfo.Environment["ASPNETCORE_URLS"] =
@@ -184,6 +186,18 @@ public sealed class ComplianceConsumerHostProcessTests
     private static async Task DrainAsync(StreamReader reader)
     {
         _ = await reader.ReadToEndAsync();
+    }
+
+    private static string BuildConfiguration()
+    {
+        string? configuration = new DirectoryInfo(AppContext.BaseDirectory)
+            .Parent?
+            .Name;
+
+        return configuration is "Debug" or "Release"
+            ? configuration
+            : throw new InvalidOperationException(
+                "Could not determine the active test build configuration.");
     }
 
     private static string FindRepositoryRoot()

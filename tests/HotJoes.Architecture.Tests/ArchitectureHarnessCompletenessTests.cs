@@ -34,6 +34,10 @@ public sealed class ArchitectureHarnessCompletenessTests
         "AI-MIG-002",
         "AI-OUT-003",
         "AI-REP-001",
+        "AI-RUNTIME-001",
+        "AI-RUNTIME-002",
+        "AI-RUNTIME-004",
+        "AI-RUNTIME-006",
         "AI-SEC-001",
         "AI-SEC-002"
     ];

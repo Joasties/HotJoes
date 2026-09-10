@@ -15,6 +15,9 @@ public sealed class VendorApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Production");
+        builder.UseSetting(
+            "ConnectionStrings:VendorDatabase",
+            "Host=127.0.0.1;Port=1;Database=hotjoes_test;Username=test;Password=test;Timeout=1");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<IRegisterVendorService>();

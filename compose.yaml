@@ -1,0 +1,158 @@
+name: ${HOTJOES_COMPOSE_PROJECT:?HOTJOES_COMPOSE_PROJECT is required}
+
+x-dotnet-service: &dotnet-service
+  restart: "no"
+  networks: [hotjoes-internal]
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: hotjoes_vendor
+      POSTGRES_USER: hotjoes
+      POSTGRES_PASSWORD: ${HOTJOES_POSTGRES_PASSWORD:?HOTJOES_POSTGRES_PASSWORD is required}
+    volumes:
+      - vendor-postgres-data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotjoes -d hotjoes_vendor"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks: [hotjoes-internal]
+
+  rabbitmq:
+    image: rabbitmq:4.3.5-management-alpine
+    volumes: [rabbitmq-data:/var/lib/rabbitmq]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks: [hotjoes-internal]
+
+  database-migrations:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Database.Migrations/HotJoes.Database.Migrations.csproj
+        ENTRYPOINT_DLL: HotJoes.Database.Migrations.dll
+    environment:
+      ConnectionStrings__VendorDatabase: Host=postgres;Database=hotjoes_vendor;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      ConnectionStrings__ComplianceDatabase: Host=postgres;Database=hotjoes_compliance;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  vendor-api:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Api.Vendor/HotJoes.Api.Vendor.csproj
+        ENTRYPOINT_DLL: HotJoes.Api.Vendor.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__VendorDatabase: Host=postgres;Database=hotjoes_vendor;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+    depends_on:
+      database-migrations: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  vendor-relay:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Worker.VendorRelay/HotJoes.Worker.VendorRelay.csproj
+        ENTRYPOINT_DLL: HotJoes.Worker.VendorRelay.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      HotJoes__VendorRelay__VendorDatabase: Host=postgres;Database=hotjoes_vendor;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      HotJoes__VendorRelay__RabbitMq: amqp://guest:guest@rabbitmq:5672
+      HotJoes__VendorRelay__ExchangeName: hotjoes.vendor
+      HotJoes__VendorRelay__ExchangeType: direct
+      HotJoes__VendorRelay__QueueName: hotjoes.compliance
+      HotJoes__VendorRelay__RoutingKey: vendor.registered
+      HotJoes__VendorRelay__PollIntervalMilliseconds: 250
+      HotJoes__VendorRelay__LeaseDurationSeconds: 30
+      HotJoes__VendorRelay__BatchSize: 10
+      HotJoes__VendorRelay__RetryInitialDelaySeconds: 1
+      HotJoes__VendorRelay__RetryMaximumDelaySeconds: 10
+      HotJoes__VendorRelay__AutomaticAttemptLimit: 3
+    depends_on:
+      database-migrations: { condition: service_completed_successfully }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  compliance-consumer:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Worker.ComplianceConsumer/HotJoes.Worker.ComplianceConsumer.csproj
+        ENTRYPOINT_DLL: HotJoes.Worker.ComplianceConsumer.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      HotJoes__ComplianceConsumer__ComplianceDatabase: Host=postgres;Database=hotjoes_compliance;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      HotJoes__ComplianceConsumer__RabbitMq: amqp://guest:guest@rabbitmq:5672
+      HotJoes__ComplianceConsumer__PrimaryExchangeName: hotjoes.vendor
+      HotJoes__ComplianceConsumer__PrimaryExchangeType: direct
+      HotJoes__ComplianceConsumer__PrimaryQueueName: hotjoes.compliance
+      HotJoes__ComplianceConsumer__PrimaryRoutingKey: vendor.registered
+      HotJoes__ComplianceConsumer__RetryExchangeName: hotjoes.compliance.retry
+      HotJoes__ComplianceConsumer__RetryQueueName: hotjoes.compliance.retry
+      HotJoes__ComplianceConsumer__RetryRoutingKey: vendor.registered.retry
+      HotJoes__ComplianceConsumer__DeadLetterExchangeName: hotjoes.compliance.deadletter
+      HotJoes__ComplianceConsumer__DeadLetterQueueName: hotjoes.compliance.deadletter
+      HotJoes__ComplianceConsumer__DeadLetterRoutingKey: vendor.registered.deadletter
+      HotJoes__ComplianceConsumer__PollIntervalMilliseconds: 250
+      HotJoes__ComplianceConsumer__RetryDelaySeconds: 1
+      HotJoes__ComplianceConsumer__MaximumAutomaticAttempts: 3
+    depends_on:
+      database-migrations: { condition: service_completed_successfully }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  web-edge:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Web.Edge/HotJoes.Web.Edge.csproj
+        ENTRYPOINT_DLL: HotJoes.Web.Edge.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Edge__VendorApiBaseAddress: http://vendor-api:8080
+    depends_on:
+      vendor-api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks:
+      - hotjoes-internal
+      - hotjoes-ingress
+    ports:
+      - "127.0.0.1:${HOTJOES_EDGE_PORT:-8080}:8080"
+
+networks:
+  hotjoes-internal:
+    internal: true
+  hotjoes-ingress:
+
+volumes:
+  vendor-postgres-data:
+  rabbitmq-data:

@@ -16,9 +16,7 @@ public static class EdgeConfiguration
             .Get<EdgeOptions>() ?? throw new InvalidOperationException(
                 "Mandatory Edge configuration is missing.");
 
-        if (!Uri.TryCreate(
-                options.VendorApiBaseAddress,
-                UriKind.Absolute,
+        if (!Uri.TryCreate(options.VendorApiBaseAddress, UriKind.Absolute,
                 out Uri? vendorApi) ||
             (vendorApi.Scheme != Uri.UriSchemeHttp &&
              vendorApi.Scheme != Uri.UriSchemeHttps))
@@ -60,27 +58,23 @@ public static class EdgeConfiguration
                 ClusterId = "vendor-api",
                 Destinations = new Dictionary<string, DestinationConfig>
                 {
-                    ["vendor-api"] = new()
-                    {
-                        Address = vendorApi.AbsoluteUri
-                    }
+                    ["vendor-api"] = new() { Address = vendorApi.AbsoluteUri }
                 }
             }
         ];
 
         services.AddReverseProxy().LoadFromMemory(routes, clusters);
+        services.AddHttpClient("vendor-api-readiness", client =>
+        {
+            client.BaseAddress = vendorApi;
+            client.Timeout = TimeSpan.FromSeconds(2);
+        });
         return services;
     }
 
     private static IReadOnlyList<IReadOnlyDictionary<string, string>>
-        ForwardingHeaderTransforms()
-    {
-        return
+        ForwardingHeaderTransforms() =>
         [
-            new Dictionary<string, string>
-            {
-                ["X-Forwarded"] = "Off"
-            }
+            new Dictionary<string, string> { ["X-Forwarded"] = "Off" }
         ];
-    }
 }

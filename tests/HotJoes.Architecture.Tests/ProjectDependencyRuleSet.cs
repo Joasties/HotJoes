@@ -12,6 +12,7 @@ public static class ProjectDependencyRuleSet
                     "HotJoes.Application.Address",
                     "HotJoes.Application.Vendor",
                     "HotJoes.Domain.Vendor",
+                    "HotJoes.Infrastructure.Health",
                     "HotJoes.Infrastructure.Persistence",
                     "HotJoes.Infrastructure.Vendor.Address"
                 ]),

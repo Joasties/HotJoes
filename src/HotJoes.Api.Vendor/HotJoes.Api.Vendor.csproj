@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotJoes.Infrastructure.Health\HotJoes.Infrastructure.Health.csproj" />
     <ProjectReference Include="..\HotJoes.Application.Address\HotJoes.Application.Address.csproj" />
     <ProjectReference Include="..\HotJoes.Application.Vendor\HotJoes.Application.Vendor.csproj" />
     <ProjectReference Include="..\HotJoes.Domain.Vendor\HotJoes.Domain.Vendor.csproj" />

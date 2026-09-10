@@ -26,7 +26,42 @@ public sealed partial class Program
             status = "healthy"
         }));
 
+        app.MapGet("/health/ready", async (
+            IHttpClientFactory clients,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                using HttpResponseMessage response = await clients
+                    .CreateClient("vendor-api-readiness")
+                    .GetAsync("/health/ready", cancellationToken);
+                bool healthy = response.IsSuccessStatusCode;
+                return Results.Json(
+                    new
+                    {
+                        component = "web-edge",
+                        status = healthy ? "healthy" : "unhealthy"
+                    },
+                    statusCode: healthy
+                        ? StatusCodes.Status200OK
+                        : StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (HttpRequestException)
+            {
+                return Unhealthy();
+            }
+            catch (OperationCanceledException)
+                when (!cancellationToken.IsCancellationRequested)
+            {
+                return Unhealthy();
+            }
+        });
+
         app.MapReverseProxy();
         app.Run();
     }
+
+    private static IResult Unhealthy() => Results.Json(
+        new { component = "web-edge", status = "unhealthy" },
+        statusCode: StatusCodes.Status503ServiceUnavailable);
 }

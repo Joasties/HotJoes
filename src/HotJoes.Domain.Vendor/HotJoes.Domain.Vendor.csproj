@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="HotJoes.Infrastructure.Persistence" />
+    <InternalsVisibleTo Include="HotJoes.Infrastructure.Vendor.Persistence" />
   </ItemGroup>
 
 </Project>

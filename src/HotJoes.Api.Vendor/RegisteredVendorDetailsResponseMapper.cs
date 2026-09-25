@@ -36,16 +36,20 @@ public sealed class RegisteredVendorDetailsResponseMapper
     {
         return new RegisteredVendorTradingCharacteristicsResponse(
             ToLowerCamelCase(trading.TradingLocation.ToString()),
-            new RegisteredVendorOpeningHoursResponse(
-                trading.OpeningHours.StartTime.ToString(
-                    "HH:mm:ss",
-                    CultureInfo.InvariantCulture),
-                trading.OpeningHours.EndTime.ToString(
-                    "HH:mm:ss",
-                    CultureInfo.InvariantCulture)),
+            new RegisteredVendorWeeklyOpeningHoursResponse(
+                trading.WeeklyOpeningHours.Days.Select(day =>
+                    new RegisteredVendorDailyOpeningHoursResponse(
+                        ToLowerCamelCase(day.Day.ToString()),
+                        day.IsClosed,
+                        day.IsOpenAllDay,
+                        FormatTime(day.StartTime),
+                        FormatTime(day.EndTime))).ToArray()),
             trading.ServiceIncludesHotFood,
             trading.AlcoholService);
     }
+
+    private static string? FormatTime(TimeOnly? value) =>
+        value?.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
 
     private static RegisteredVendorBusinessAddressResponse Map(
         RegisteredVendorBusinessAddress address)

@@ -45,11 +45,51 @@ public sealed class GatewayForwardingTests
             forwarded.Headers["traceparent"].Split('-')[1]);
     }
 
+    [Fact]
+    public async Task AddressSearch_IsAllowlistedWithoutSemanticTransformation()
+    {
+        await using DownstreamServer downstream = await DownstreamServer.Start(HttpStatusCode.OK);
+        await using EdgeFactory edge = new(downstream.Address);
+        using HttpClient client = edge.CreateClient();
+
+        using HttpResponseMessage response = await client.GetAsync(
+            "/address-search?query=Greenwich&tradingLocation=stall");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        RecordedRequest forwarded = Assert.Single(downstream.Requests);
+        Assert.Equal("GET", forwarded.Method);
+        Assert.Equal(
+            "/address-search?query=Greenwich&tradingLocation=stall",
+            forwarded.Path);
+    }
+
+    [Fact]
+    public async Task RequiredLicenceTypesDetermination_IsAllowlistedWithoutSemanticTransformation()
+    {
+        await using DownstreamServer downstream = await DownstreamServer.Start(HttpStatusCode.OK);
+        await using EdgeFactory edge = new(downstream.Address);
+        using HttpClient client = edge.CreateClient();
+        const string body = "{\"legalOperatorType\":\"limitedCompany\"}";
+
+        using HttpResponseMessage response = await client.PostAsync(
+            "/vendor-registration/required-licence-types",
+            new StringContent(body, Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        RecordedRequest forwarded = Assert.Single(downstream.Requests);
+        Assert.Equal("POST", forwarded.Method);
+        Assert.Equal(
+            "/vendor-registration/required-licence-types",
+            forwarded.Path);
+        Assert.Equal(body, forwarded.Body);
+    }
+
     [Theory]
     [InlineData("GET", "/vendors", HttpStatusCode.MethodNotAllowed)]
     [InlineData("POST", "/vendors/not-allowed", HttpStatusCode.MethodNotAllowed)]
     [InlineData("GET", "/addresses", HttpStatusCode.NotFound)]
     [InlineData("POST", "/address-resolution", HttpStatusCode.NotFound)]
+    [InlineData("GET", "/vendor-registration/required-licence-types", HttpStatusCode.MethodNotAllowed)]
     public async Task AI_GW_001_NonAllowlistedRequestsNeverReachVendorApi(
         string method,
         string path,
@@ -170,7 +210,7 @@ public sealed class GatewayForwardingTests
 
                 requests.Enqueue(new RecordedRequest(
                     context.Request.Method,
-                    context.Request.Path,
+                    context.Request.Path + context.Request.QueryString,
                     body,
                     context.Request.Headers.ToDictionary(
                         header => header.Key,

@@ -25,14 +25,21 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/HotJoes.Application.Address/HotJoes.Application.Address.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Application.Community/HotJoes.Application.Community.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Application.Compliance/HotJoes.Application.Compliance.csproj" />
     <ProjectReference Include="../../src/HotJoes.Application.Vendor/HotJoes.Application.Vendor.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.Community.Persistence/HotJoes.Infrastructure.Community.Persistence.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.CommunityConsumer/HotJoes.Infrastructure.CommunityConsumer.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.CommunityRelay/HotJoes.Infrastructure.CommunityRelay.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.ComplianceConsumer/HotJoes.Infrastructure.ComplianceConsumer.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.Health/HotJoes.Infrastructure.Health.csproj" />
-    <ProjectReference Include="../../src/HotJoes.Infrastructure.Persistence/HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Persistence/HotJoes.Infrastructure.Vendor.Persistence.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Address/HotJoes.Infrastructure.Vendor.Address.csproj" />
+    <ProjectReference Include="../../src/HotJoes.Infrastructure.Vendor.Compliance/HotJoes.Infrastructure.Vendor.Compliance.csproj" />
     <ProjectReference Include="../../src/HotJoes.Infrastructure.VendorRelay/HotJoes.Infrastructure.VendorRelay.csproj" />
     <ProjectReference Include="../../src/HotJoes.Api.Vendor/HotJoes.Api.Vendor.csproj" />
     <ProjectReference Include="../../src/HotJoes.Worker.ComplianceConsumer/HotJoes.Worker.ComplianceConsumer.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../src/HotJoes.Worker.CommunityConsumer/HotJoes.Worker.CommunityConsumer.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="../../src/HotJoes.Worker.VendorRelay/HotJoes.Worker.VendorRelay.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 

@@ -57,9 +57,9 @@ public sealed class RuntimeMigrationStructuralRuleTests
     [InlineData(
         "src/HotJoes.Database.Migrations/DatabaseMigrationOperation.cs")]
     [InlineData(
-        "src/HotJoes.Infrastructure.Persistence/Migrations/Example.cs")]
+        "src/HotJoes.Infrastructure.Vendor.Persistence/Migrations/Example.cs")]
     [InlineData(
-        "src/HotJoes.Infrastructure.Persistence/" +
+        "src/HotJoes.Infrastructure.Vendor.Persistence/" +
         "VendorRegistrationDesignTimeDbContextFactory.cs")]
     [InlineData(
         "src/HotJoes.Infrastructure.ComplianceConsumer/Migrations/Example.cs")]

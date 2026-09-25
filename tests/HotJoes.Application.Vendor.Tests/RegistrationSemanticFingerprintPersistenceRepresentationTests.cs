@@ -15,9 +15,9 @@ public sealed class RegistrationSemanticFingerprintPersistenceRepresentationTest
         RegistrationSemanticFingerprint result =
             RegistrationSemanticFingerprint.Create(command, addressValues);
 
-        Assert.Equal(1, result.Version);
+        Assert.Equal(2, result.Version);
         Assert.Equal(
-            "06136046449514b1f748178ae7b2a5f2ad6ebed357a6549d15efcfc60fd351be",
+            "1568fe9c0d99143244b8db607832a75a800e0f759274481bb57a5d61b4a3c628",
             result.Sha256Digest);
         Assert.Matches("^[0-9a-f]{64}$", result.Sha256Digest);
     }
@@ -103,8 +103,9 @@ public sealed class RegistrationSemanticFingerprintPersistenceRepresentationTest
             LegalOperatorType.LimitedCompany,
             companyRegistrationNumber,
             TradingLocation.Stall,
-            new TimeOnly(23, 0),
-            new TimeOnly(5, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(23, 0),
+                new TimeOnly(5, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Joseph Bloggs",

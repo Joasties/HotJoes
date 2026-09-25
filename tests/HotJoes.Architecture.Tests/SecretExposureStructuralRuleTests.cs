@@ -36,6 +36,44 @@ public sealed class SecretExposureStructuralRuleTests
         AssertViolation(violations);
     }
 
+    [Fact]
+    public void AI_SEC_001_DependencyNameInPackageLock_IsNotASecretValue()
+    {
+        ArchitectureSourceCatalog sources = Sources(
+            new SourceFileDescriptor(
+                "src/HotJoes.Web.Vendor/package-lock.json",
+                """
+                {
+                  "dependencies": {
+                    "@inquirer/password": "^5.1.1"
+                  }
+                }
+                """));
+
+        IReadOnlyList<ArchitectureViolation> violations =
+            SecretExposureStructuralRuleSet.Evaluate(sources);
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
+    public void AI_SEC_001_CredentialBearingUriInPackageLock_IsStillDetected()
+    {
+        ArchitectureSourceCatalog sources = Sources(
+            new SourceFileDescriptor(
+                "src/HotJoes.Web.Vendor/package-lock.json",
+                """
+                {
+                  "resolved": "https://build-user:synthetic-canary@packages.example/module.tgz"
+                }
+                """));
+
+        IReadOnlyList<ArchitectureViolation> violations =
+            SecretExposureStructuralRuleSet.Evaluate(sources);
+
+        AssertViolation(violations);
+    }
+
     [Theory]
     [InlineData("DatabasePassword")]
     [InlineData("DatabaseConnectionString")]

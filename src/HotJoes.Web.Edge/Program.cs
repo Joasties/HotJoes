@@ -11,6 +11,9 @@ public sealed partial class Program
 
         WebApplication app = builder.Build();
 
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+
         app.Use(async (context, next) =>
         {
             context.Request.Headers.Remove("Forwarded");
@@ -58,6 +61,10 @@ public sealed partial class Program
         });
 
         app.MapReverseProxy();
+        app.MapFallbackToFile("/", "index.html");
+        app.MapFallbackToFile(
+            "/registration/{*path:nonfile}",
+            "index.html");
         app.Run();
     }
 

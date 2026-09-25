@@ -1,0 +1,49 @@
+<section class="step" aria-labelledby="location-title">
+  <p class="step-number">Step 1 of 5</p>
+  <h1 id="location-title" class="visually-hidden">
+    Choose your trading location
+  </h1>
+
+  <div class="journey-information">
+    <button
+      type="button"
+      aria-describedby="journey-explanation"
+      aria-label="About Vendor Registration"
+    >
+      i
+    </button>
+    <div id="journey-explanation" class="information-overlay" role="tooltip">
+      <strong>Vendor Registration</strong>
+      <span
+        >What best describes your trading location? This helps us tailor your
+        registration experience to your type of business.</span
+      >
+    </div>
+  </div>
+
+  <fieldset>
+    <legend class="visually-hidden">Trading location</legend>
+    <div class="cards">
+      @for (option of options; track option.value) {
+      <label class="card" [class.selected]="selected === option.value">
+        <input
+          type="radio"
+          name="trading-location"
+          [value]="option.value"
+          [checked]="selected === option.value"
+          (change)="choose(option.value)"
+        />
+        <span
+          class="photo photo-{{ option.value.toLowerCase() }}"
+          aria-hidden="true"
+        ></span>
+        <span class="card-overlay">
+          <span class="title">{{ option.title }}</span>
+          <span class="symbol" aria-hidden="true">{{ option.symbol }}</span>
+          <span class="description">{{ option.description }}</span>
+        </span>
+      </label>
+      }
+    </div>
+  </fieldset>
+</section>

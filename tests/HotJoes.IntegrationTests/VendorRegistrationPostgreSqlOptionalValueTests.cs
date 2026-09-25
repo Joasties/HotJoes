@@ -1,5 +1,5 @@
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
@@ -108,6 +108,7 @@ public sealed class VendorRegistrationPostgreSqlOptionalValueTests
         return await context
             .Set<VendorRegistrationRecord>()
             .AsNoTracking()
+            .Include(record => record.WeeklyOpeningHours)
             .SingleAsync(record => record.VendorId == vendor.Id.Value);
     }
 
@@ -147,7 +148,7 @@ public sealed class VendorRegistrationPostgreSqlOptionalValueTests
             primaryTradingAuthority,
             new TradingCharacteristics(
                 tradingLocation,
-                new OpeningHours(new TimeOnly(8, 30), new TimeOnly(22, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(8, 30), new TimeOnly(22, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
 

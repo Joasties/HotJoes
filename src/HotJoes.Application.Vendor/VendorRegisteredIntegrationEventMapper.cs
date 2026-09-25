@@ -35,9 +35,14 @@ public sealed class VendorRegisteredIntegrationEventMapper
                 MapLegalOperatorType(information.LegalOperatorType),
                 new VendorRegisteredTradingCharacteristics(
                     MapTradingLocation(trading.TradingLocation),
-                    new VendorRegisteredOpeningHours(
-                        trading.OpeningHours.StartTime,
-                        trading.OpeningHours.EndTime),
+                    new VendorRegisteredWeeklyOpeningHours(
+                        trading.WeeklyOpeningHours.Days.Select(day =>
+                            new VendorRegisteredDailyOpeningHours(
+                                MapTradingDay(day.Day),
+                                day.IsClosed,
+                                day.IsOpenAllDay,
+                                day.StartTime,
+                                day.EndTime)).ToArray()),
                     trading.ServiceIncludesHotFood,
                     trading.AlcoholService),
                 new VendorRegisteredBusinessAddress(
@@ -102,4 +107,16 @@ public sealed class VendorRegisteredIntegrationEventMapper
             _ => throw new ArgumentOutOfRangeException(nameof(tradingLocation))
         };
     }
+
+    private static string MapTradingDay(TradingDay day) => day switch
+    {
+        TradingDay.Monday => "monday",
+        TradingDay.Tuesday => "tuesday",
+        TradingDay.Wednesday => "wednesday",
+        TradingDay.Thursday => "thursday",
+        TradingDay.Friday => "friday",
+        TradingDay.Saturday => "saturday",
+        TradingDay.Sunday => "sunday",
+        _ => throw new ArgumentOutOfRangeException(nameof(day))
+    };
 }

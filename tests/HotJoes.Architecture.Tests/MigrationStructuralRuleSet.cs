@@ -9,7 +9,7 @@ public static class MigrationStructuralRuleSet
 
     private static readonly string[] ApprovedDesignTimePaths =
     [
-        "src/HotJoes.Infrastructure.Persistence/" +
+        "src/HotJoes.Infrastructure.Vendor.Persistence/" +
         "VendorRegistrationDesignTimeDbContextFactory.cs",
         "src/HotJoes.Infrastructure.ComplianceConsumer/" +
         "ComplianceReceiptDesignTimeDbContextFactory.cs"

@@ -50,7 +50,7 @@ public sealed class DomainApplicationStructuralRuleTests
                 "HotJoes.Domain.Vendor.VendorRegistered",
                 "HotJoes.Domain.Vendor",
                 referencedTypeAssemblies:
-                ["HotJoes.Infrastructure.Persistence"]));
+                ["HotJoes.Infrastructure.Vendor.Persistence"]));
 
         AssertViolation(
             "AI-DE-001",
@@ -129,7 +129,7 @@ public sealed class DomainApplicationStructuralRuleTests
                 "HotJoes.Application.Vendor.RegisterVendorService",
                 "HotJoes.Application.Vendor",
                 referencedTypeAssemblies:
-                ["HotJoes.Infrastructure.Persistence"]));
+                ["HotJoes.Infrastructure.Vendor.Persistence"]));
 
         AssertViolation(
             "AI-APP-002",

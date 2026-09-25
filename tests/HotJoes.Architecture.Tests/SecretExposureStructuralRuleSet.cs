@@ -78,6 +78,9 @@ public static class SecretExposureStructuralRuleSet
     {
         if (!file.RelativePath.EndsWith(
                 ".json",
+                StringComparison.OrdinalIgnoreCase) ||
+            file.RelativePath.EndsWith(
+                "/package-lock.json",
                 StringComparison.OrdinalIgnoreCase))
         {
             return;

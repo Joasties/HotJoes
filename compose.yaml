@@ -41,6 +41,7 @@ services:
     environment:
       ConnectionStrings__VendorDatabase: Host=postgres;Database=hotjoes_vendor;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
       ConnectionStrings__ComplianceDatabase: Host=postgres;Database=hotjoes_compliance;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      ConnectionStrings__CommunityDatabase: Host=postgres;Database=hotjoes_community;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
     depends_on:
       postgres: { condition: service_healthy }
 
@@ -54,6 +55,7 @@ services:
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__VendorDatabase: Host=postgres;Database=hotjoes_vendor;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      ConnectionStrings__CommunityDatabase: Host=postgres;Database=hotjoes_community;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
     depends_on:
       database-migrations: { condition: service_completed_successfully }
     healthcheck:
@@ -125,13 +127,74 @@ services:
       timeout: 2s
       retries: 30
 
-  web-edge:
+  community-consumer:
     <<: *dotnet-service
     build:
       context: .
       args:
-        PROJECT: src/HotJoes.Web.Edge/HotJoes.Web.Edge.csproj
-        ENTRYPOINT_DLL: HotJoes.Web.Edge.dll
+        PROJECT: src/HotJoes.Worker.CommunityConsumer/HotJoes.Worker.CommunityConsumer.csproj
+        ENTRYPOINT_DLL: HotJoes.Worker.CommunityConsumer.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      HotJoes__CommunityConsumer__CommunityDatabase: Host=postgres;Database=hotjoes_community;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      HotJoes__CommunityConsumer__RabbitMq: amqp://guest:guest@rabbitmq:5672
+      HotJoes__CommunityConsumer__PrimaryExchangeName: hotjoes.community.participation
+      HotJoes__CommunityConsumer__PrimaryExchangeType: direct
+      HotJoes__CommunityConsumer__PrimaryQueueName: hotjoes.community.consumer
+      HotJoes__CommunityConsumer__PrimaryRoutingKey: community.participation.recorded
+      HotJoes__CommunityConsumer__RetryExchangeName: hotjoes.community.retry
+      HotJoes__CommunityConsumer__RetryQueueName: hotjoes.community.retry
+      HotJoes__CommunityConsumer__RetryRoutingKey: community.participation.recorded.retry
+      HotJoes__CommunityConsumer__DeadLetterExchangeName: hotjoes.community.deadletter
+      HotJoes__CommunityConsumer__DeadLetterQueueName: hotjoes.community.deadletter
+      HotJoes__CommunityConsumer__DeadLetterRoutingKey: community.participation.recorded.deadletter
+      HotJoes__CommunityConsumer__PollIntervalMilliseconds: 250
+      HotJoes__CommunityConsumer__RetryDelaySeconds: 1
+      HotJoes__CommunityConsumer__MaximumAutomaticAttempts: 3
+    depends_on:
+      database-migrations: { condition: service_completed_successfully }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  community-relay:
+    <<: *dotnet-service
+    build:
+      context: .
+      args:
+        PROJECT: src/HotJoes.Worker.CommunityRelay/HotJoes.Worker.CommunityRelay.csproj
+        ENTRYPOINT_DLL: HotJoes.Worker.CommunityRelay.dll
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      HotJoes__CommunityRelay__CommunityDatabase: Host=postgres;Database=hotjoes_community;Username=hotjoes;Password=${HOTJOES_POSTGRES_PASSWORD}
+      HotJoes__CommunityRelay__RabbitMq: amqp://guest:guest@rabbitmq:5672
+      HotJoes__CommunityRelay__ExchangeName: hotjoes.community.participation
+      HotJoes__CommunityRelay__ExchangeType: direct
+      HotJoes__CommunityRelay__QueueName: hotjoes.community.consumer
+      HotJoes__CommunityRelay__RoutingKey: community.participation.recorded
+      HotJoes__CommunityRelay__PollIntervalMilliseconds: 250
+      HotJoes__CommunityRelay__LeaseDurationSeconds: 30
+      HotJoes__CommunityRelay__BatchSize: 10
+      HotJoes__CommunityRelay__RetryInitialDelaySeconds: 1
+      HotJoes__CommunityRelay__RetryMaximumDelaySeconds: 10
+      HotJoes__CommunityRelay__AutomaticAttemptLimit: 3
+    depends_on:
+      database-migrations: { condition: service_completed_successfully }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  web-edge:
+    <<: *dotnet-service
+    build:
+      context: .
+      dockerfile: src/HotJoes.Web.Edge/Dockerfile
     environment:
       ASPNETCORE_URLS: http://+:8080
       Edge__VendorApiBaseAddress: http://vendor-api:8080

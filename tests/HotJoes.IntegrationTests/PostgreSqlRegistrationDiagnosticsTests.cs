@@ -1,7 +1,7 @@
 using System.Diagnostics.Metrics;
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
@@ -12,7 +12,7 @@ namespace HotJoes.IntegrationTests;
 public sealed class PostgreSqlRegistrationDiagnosticsTests
 {
     private const string MeterName =
-        "HotJoes.Infrastructure.Persistence";
+        "HotJoes.Infrastructure.Vendor.Persistence";
     private const string IdempotencyInstrument =
         "hotjoes.vendor.registration.idempotency";
     private const string PersistenceInstrument =
@@ -247,8 +247,9 @@ public sealed class PostgreSqlRegistrationDiagnosticsTests
             LegalOperatorType.SoleTrader,
             companyRegistrationNumber: null,
             TradingLocation.Kitchen,
-            new TimeOnly(9, 0),
-            new TimeOnly(17, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(9, 0),
+                new TimeOnly(17, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Alex Morgan",
@@ -300,9 +301,7 @@ public sealed class PostgreSqlRegistrationDiagnosticsTests
             addressValues.PrimaryTradingAuthority,
             new TradingCharacteristics(
                 command.TradingLocation,
-                new OpeningHours(
-                    command.OpeningHoursStartTime,
-                    command.OpeningHoursEndTime),
+                WeeklyOpeningHoursTestData.ToDomain(command.WeeklyOpeningHours),
                 command.ServiceIncludesHotFood,
                 command.AlcoholService));
 

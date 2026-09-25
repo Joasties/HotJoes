@@ -1,6 +1,6 @@
 using System.Text;
 using HotJoes.Application.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 
 namespace HotJoes.IntegrationTests;
 
@@ -38,9 +38,14 @@ public sealed class VendorRegisteredIntegrationEventSerializationTests
             + "\"legalOperatorType\":\"limitedCompany\","
             + "\"tradingCharacteristics\":{"
             + "\"tradingLocation\":\"stall\","
-            + "\"openingHours\":{"
-            + "\"startTime\":\"09:00:00\","
-            + "\"endTime\":\"17:00:00\"},"
+            + "\"weeklyOpeningHours\":{\"days\":["
+            + "{\"day\":\"monday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"tuesday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"wednesday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"thursday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"friday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"saturday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"},"
+            + "{\"day\":\"sunday\",\"isClosed\":false,\"isOpenAllDay\":false,\"startTime\":\"09:00:00\",\"endTime\":\"17:00:00\"}]},"
             + "\"serviceIncludesHotFood\":true,"
             + "\"alcoholService\":false},"
             + "\"businessAddress\":{"
@@ -120,9 +125,24 @@ public sealed class VendorRegisteredIntegrationEventSerializationTests
                 "limitedCompany",
                 new VendorRegisteredTradingCharacteristics(
                     "stall",
-                    new VendorRegisteredOpeningHours(
-                        new TimeOnly(9, 0),
-                        new TimeOnly(17, 0)),
+                    new VendorRegisteredWeeklyOpeningHours(
+                        new[]
+                        {
+                            "monday",
+                            "tuesday",
+                            "wednesday",
+                            "thursday",
+                            "friday",
+                            "saturday",
+                            "sunday"
+                        }.Select(day =>
+                            new VendorRegisteredDailyOpeningHours(
+                                day,
+                                IsClosed: false,
+                                IsOpenAllDay: false,
+                                new TimeOnly(9, 0),
+                                new TimeOnly(17, 0)))
+                        .ToArray()),
                     ServiceIncludesHotFood: true,
                     AlcoholService: false),
                 businessAddress,

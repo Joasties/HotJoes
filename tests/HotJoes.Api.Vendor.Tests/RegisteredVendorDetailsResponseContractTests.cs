@@ -32,12 +32,13 @@ public sealed class RegisteredVendorDetailsResponseContractTests
 
         JsonElement trading = root.GetProperty("tradingCharacteristics");
         Assert.Equal("kitchen", trading.GetProperty("tradingLocation").GetString());
-        Assert.Equal(
-            "17:00:00",
-            trading.GetProperty("openingHours").GetProperty("startTime").GetString());
-        Assert.Equal(
-            "02:00:00",
-            trading.GetProperty("openingHours").GetProperty("endTime").GetString());
+        JsonElement days = trading
+            .GetProperty("weeklyOpeningHours")
+            .GetProperty("days");
+        Assert.Equal(7, days.GetArrayLength());
+        Assert.Equal("monday", days[0].GetProperty("day").GetString());
+        Assert.Equal("17:00:00", days[0].GetProperty("startTime").GetString());
+        Assert.Equal("02:00:00", days[0].GetProperty("endTime").GetString());
 
         JsonElement address = root.GetProperty("businessAddressSnapshot");
         Assert.Equal("10 Example Street", address.GetProperty("addressLine1").GetString());
@@ -84,9 +85,11 @@ public sealed class RegisteredVendorDetailsResponseContractTests
             "Hot Joe's Kitchen",
             new RegisteredVendorTradingCharacteristics(
                 TradingLocation.Kitchen,
-                new RegisteredVendorOpeningHours(
-                    new TimeOnly(17, 0),
-                    new TimeOnly(2, 0)),
+                new RegisteredVendorWeeklyOpeningHours(
+                    Enum.GetValues<TradingDay>().Select(day =>
+                        new RegisteredVendorDailyOpeningHours(
+                            day, false, false,
+                            new TimeOnly(17, 0), new TimeOnly(2, 0))).ToArray()),
                 true,
                 false),
             "Jordan Smith",

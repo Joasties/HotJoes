@@ -1,5 +1,5 @@
 using System.Data.Common;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotJoes.IntegrationTests;
@@ -269,8 +269,9 @@ public sealed class VendorRegistrationPostgreSqlEnforcementTests
             FoodRegistrationAuthority = "Greenwich Borough Council",
             PrimaryTradingAuthority = null,
             TradingLocation = "kitchen",
-            OpeningHoursStart = new TimeOnly(8, 0),
-            OpeningHoursEnd = new TimeOnly(22, 0),
+            WeeklyOpeningHours = WeeklyOpeningHoursTestData.Records(
+                new TimeOnly(8, 0),
+                new TimeOnly(22, 0)),
             ServiceIncludesHotFood = true,
             AlcoholService = false,
             Website = null,

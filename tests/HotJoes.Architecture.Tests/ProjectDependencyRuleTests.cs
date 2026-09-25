@@ -8,15 +8,23 @@ public sealed class ProjectDependencyRuleTests
     [
         "HotJoes.Api.Vendor",
         "HotJoes.Application.Address",
+        "HotJoes.Application.Community",
+        "HotJoes.Application.Compliance",
         "HotJoes.Application.Vendor",
         "HotJoes.Database.Migrations",
         "HotJoes.Domain.Vendor",
+        "HotJoes.Infrastructure.Community.Persistence",
+        "HotJoes.Infrastructure.CommunityConsumer",
+        "HotJoes.Infrastructure.CommunityRelay",
         "HotJoes.Infrastructure.ComplianceConsumer",
         "HotJoes.Infrastructure.Health",
-        "HotJoes.Infrastructure.Persistence",
+        "HotJoes.Infrastructure.Vendor.Persistence",
         "HotJoes.Infrastructure.Vendor.Address",
+        "HotJoes.Infrastructure.Vendor.Compliance",
         "HotJoes.Infrastructure.VendorRelay",
         "HotJoes.Web.Edge",
+        "HotJoes.Worker.CommunityConsumer",
+        "HotJoes.Worker.CommunityRelay",
         "HotJoes.Worker.ComplianceConsumer",
         "HotJoes.Worker.VendorRelay"
     ];
@@ -55,7 +63,7 @@ public sealed class ProjectDependencyRuleTests
             Node(
                 "HotJoes.Domain.Vendor",
                 projectReferences:
-                ["HotJoes.Infrastructure.Persistence"]));
+                ["HotJoes.Infrastructure.Vendor.Persistence"]));
 
         AssertViolation(
             "AI-DE-001",

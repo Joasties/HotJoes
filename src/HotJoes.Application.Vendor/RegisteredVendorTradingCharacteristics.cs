@@ -6,21 +6,21 @@ public sealed class RegisteredVendorTradingCharacteristics
 {
     public RegisteredVendorTradingCharacteristics(
         TradingLocation tradingLocation,
-        RegisteredVendorOpeningHours openingHours,
+        RegisteredVendorWeeklyOpeningHours weeklyOpeningHours,
         bool serviceIncludesHotFood,
         bool alcoholService)
     {
-        ArgumentNullException.ThrowIfNull(openingHours);
+        ArgumentNullException.ThrowIfNull(weeklyOpeningHours);
 
         TradingLocation = tradingLocation;
-        OpeningHours = openingHours;
+        WeeklyOpeningHours = weeklyOpeningHours;
         ServiceIncludesHotFood = serviceIncludesHotFood;
         AlcoholService = alcoholService;
     }
 
     public TradingLocation TradingLocation { get; }
 
-    public RegisteredVendorOpeningHours OpeningHours { get; }
+    public RegisteredVendorWeeklyOpeningHours WeeklyOpeningHours { get; }
 
     public bool ServiceIncludesHotFood { get; }
 

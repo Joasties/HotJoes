@@ -83,7 +83,7 @@ public sealed class VendorRegistrationInvariantTests
             primaryTradingAuthority,
             new TradingCharacteristics(
                 tradingLocation,
-                new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
     }

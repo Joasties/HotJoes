@@ -13,9 +13,16 @@ public static class VendorApiTestData
           "companyRegistrationNumber": "AB123456",
           "tradingCharacteristics": {
             "tradingLocation": "kitchen",
-            "openingHours": {
-              "startTime": "17:00:00",
-              "endTime": "02:00:00"
+            "weeklyOpeningHours": {
+              "days": [
+                { "day": "monday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "tuesday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "wednesday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "thursday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "friday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "saturday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "sunday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" }
+              ]
             },
             "serviceIncludesHotFood": true,
             "alcoholService": false
@@ -49,9 +56,7 @@ public static class VendorApiTestData
             "Hot Joe's Kitchen",
             new RegisteredVendorTradingCharacteristics(
                 TradingLocation.Kitchen,
-                new RegisteredVendorOpeningHours(
-                    new TimeOnly(17, 0),
-                    new TimeOnly(2, 0)),
+                CreateRegisteredWeeklyOpeningHours(),
                 true,
                 false),
             "Jordan Smith",
@@ -71,4 +76,10 @@ public static class VendorApiTestData
             null,
             null);
     }
+
+    public static RegisteredVendorWeeklyOpeningHours CreateRegisteredWeeklyOpeningHours() =>
+        new(Enum.GetValues<TradingDay>().Select(day =>
+            new RegisteredVendorDailyOpeningHours(
+                day, false, false, new TimeOnly(17, 0), new TimeOnly(2, 0)))
+            .ToArray());
 }

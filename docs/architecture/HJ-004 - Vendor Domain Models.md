@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-004 |
 | **Document Title** | Vendor Domain Models |
-| **Version** | 2.8 |
+| **Version** | 3.1 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 25 August 2026 |
+| **Last Updated** | 22 September 2026 |
 
 ## Revision History
 
@@ -28,6 +28,9 @@
 | 2.6 | 22 August 2026 | Applied CR-063. Replaced the deferred VendorRegistered published-contract wording with the approved CON-019/CON-020 pre-outbox translation and versioned v1 contract. |
 | 2.7 | 23 August 2026 | Applied CR-TBD-HJ004. Defined the approved concrete VendorRegistered v1 JSON member structure and deterministic wire representations without coupling the published contract to Vendor Domain types. |
 | 2.8 | 25 August 2026 | Aligned the `EmailAddress` and `TelephoneNumber` Value Object invariants with the approved CON-026 validation and canonicalisation profiles. |
+| 2.9 | 14 September 2026 | Approved by CR-073. Replace the single Opening Hours interval with one WeeklyOpeningHours value object containing exactly one DailyOpeningHours entry for every day Monday through Sunday, including explicit Closed and Open All Day states. |
+| 3.0 | 19 September 2026 | Propagated approved CON-047 by distinguishing the transient pre-registration Compliance Determination from post-registration Compliance Requirements and excluding applicability policy and determination state from the Vendor Domain. |
+| 3.1 | 22 September 2026 | Propagated approved CON-046 by adding the separate Community bounded-context model, Join Community boundary, immutable Community Participation record and minimal Vendor verification relationship while preserving exclusion from the Vendor aggregate. |
 
 ## Related Documents
 
@@ -36,8 +39,14 @@
 | HJ-001 | HotJoes Project Vision | Approved |
 | HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
+| HJ-010 | Current Application Architectural Concerns | Approved v2.19 |
+| HJ-012 | Established Application Architecture Patterns | Approved v2.14 |
 | CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved |
 | CR-034 | Remove Delivery-Slice Scope from Enduring Vendor Architecture Artefacts | Approved |
+| CR-073 | Define Weekly Opening Hours in the Vendor Domain Model | Approved |
+| ADR-002 | Business Capabilities and Bounded Contexts | Accepted v1.2 |
+| ADR-003 | Event-Driven Collaboration | Accepted v1.4 |
+| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted v1.6 |
 
 #
 # 1. Vendor Domain Analysis
@@ -179,6 +188,7 @@ The Vendor Domain and any caller shall not supply, modify, normalise, derive or 
 The Vendor Domain owns only its relationship to the Address and its immutable historical snapshot. It does not own address validation or third-party address-provider integration.
 ### Vendor Compliance Domain
 Owns:
+pre-registration Required Licence Type applicability policy and Compliance Determination meaning;
 compliance requirements;
 regulatory evidence;
 evidence submissions;
@@ -188,6 +198,19 @@ trading-licence status;
 compliance review outcomes;
 expiry and renewal of regulatory evidence.
 The Vendor domain consumes explicit compliance outcomes. It does not become the compliance rules engine.
+
+### Community Domain
+Owns:
+Community Participation;
+Contact Preference;
+the Join Community operation and outcomes;
+Community-owned persistence and replay boundary;
+the CommunityParticipationRecorded Integration Event contract;
+Community consumer receipt and deterministic stub-processing behaviour.
+
+The Community record references exactly one successfully registered Vendor through VendorId. Vendor remains authoritative for successful registration and Primary Contact information. Community verifies Vendor existence through a minimal Vendor-owned capability and neither exposes nor copies the Vendor aggregate, Registered Vendor Details or Primary Contact information.
+
+Community Participation and Contact Preference are not Vendor aggregate attributes, Vendor Registration information, Registration Session state, Communication Consent, recipient resolution or communication delivery authority. Community persistence may share the Epic 1 PostgreSQL runtime physically, but its schema, repository and transaction boundary remain Community-owned.
 ### Menu Domain
 Owns:
 menus;
@@ -218,7 +241,48 @@ platform restrictions.
 The Vendor aggregate does not directly reference or own entities from those domains.
 
 ### Registration Session Boundary
-The Registration Session is a client- or BFF-owned interaction construct outside every Vendor service boundary. The Vendor Domain neither owns nor manages Registration Sessions. The authoritative definition is maintained in **HJ-003 §3.5**.
+The Registration Session is a client- or BFF-owned interaction construct outside every Vendor service boundary. It may retain the transient pre-registration Compliance Determination, Rule Set Version and controlling-input fingerprint needed for Step 4 review. The Vendor Domain neither owns nor manages Registration Sessions or those derived values. The authoritative definition is maintained in **HJ-003 §3.5**.
+
+### Post-registration Community Boundary
+
+After definitive Vendor Registration success, the Web client may invoke the separate Community-owned `JoinCommunity` operation with the committed VendorId and one Contact Preference. The operation is not part of RegisterVendor, does not reopen or extend the Registration Session and does not modify the Vendor aggregate.
+
+Community Application verifies the VendorId through a minimal Vendor-owned successful-registration capability. That capability returns only whether the Vendor is eligible for Community participation and exposes no aggregate, Registered Vendor Details or Primary Contact information.
+
+The first successful request atomically creates one immutable Community Participation record and one Community outbox item. Equivalent replay returns the original committed result; a different Contact Preference returns a controlled conflict. VendorId is unique in the Community store, and concurrent requests produce exactly one participation and at most one logical CommunityParticipationRecorded event.
+
+The Community Participation record contains CommunityParticipationId, VendorId, Contact Preference, JoinedAt and required technical concurrency metadata. It contains no Primary Contact details. Amendment, withdrawal, consent and delivery are outside Epic 1.
+
+```mermaid
+classDiagram
+    direction LR
+    class VendorVerificationCapability {
+        +VerifySuccessfullyRegisteredVendor(VendorId)
+    }
+    class JoinCommunity {
+        +VendorId
+        +ContactPreference
+    }
+    class CommunityParticipation {
+        +CommunityParticipationId
+        +VendorId
+        +ContactPreference
+        +JoinedAt
+    }
+    class CommunityParticipationRecorded {
+        +EventId
+        +CommunityParticipationId
+        +VendorId
+        +JoinedAt
+        +ContactPreference
+    }
+
+    JoinCommunity --> VendorVerificationCapability : verifies Vendor reference
+    JoinCommunity --> CommunityParticipation : first success creates
+    CommunityParticipation --> CommunityParticipationRecorded : first commit publishes
+```
+
+The model deliberately contains no Primary Contact, Communication Consent, communication recipient or delivery state.
 
 ## 1.6 Ubiquitous Language
 ### Vendor
@@ -231,7 +295,7 @@ It captures the Vendor’s Registered Information, including Trading Characteris
 The characteristics of a Vendor’s trading operation that are used to determine Compliance Requirements.
 Trading Characteristics are composed of:
 Trading Location
-Opening Hours
+Weekly Opening Hours
 Service Includes Hot Food
 Alcohol Service
 ### Trading Location
@@ -242,12 +306,32 @@ The controlled business classification of the location from which a Vendor condu
 | Restaurant | Restaurant, Café, Takeaway or Food Market Hall. A customer-facing permanent premises. |
 | Stall | Mobile Food Unit or Market Stall. |
 | Kitchen | Dark Kitchen, Ghost Kitchen or Home Kitchen. A non-customer-facing food preparation venue that trades exclusively online. |
-### Opening Hours
-Opening Hours are represented by:
-Start Time
-End Time
-Opening Hours may legitimately span midnight.
-Validation must not require Start Time to be earlier than End Time.
+### Weekly Opening Hours
+Weekly Opening Hours describe the Vendor's normal operating schedule for a complete week.
+
+Weekly Opening Hours contain exactly seven Daily Opening Hours entries: one for each Trading Day from Monday through Sunday. Every Trading Day must occur exactly once. The collection has deterministic Monday-to-Sunday ordering.
+
+Each Daily Opening Hours entry contains:
+
+- Trading Day;
+- Is Closed;
+- Is Open All Day;
+- optional Start Time; and
+- optional End Time.
+
+Each entry has exactly one valid state:
+
+| State | Is Closed | Is Open All Day | Start Time | End Time |
+|---|---:|---:|---|---|
+| Closed | Yes | No | Absent | Absent |
+| Open All Day | No | Yes | Absent | Absent |
+| Timed interval | No | No | Present | Present |
+
+Is Closed and Is Open All Day must not both be true. A timed interval must contain both times and the times must differ. Equal Start Time and End Time are rejected rather than interpreted as 24-hour opening; the validation outcome shall tell the user to select Open All Day. An End Time earlier than Start Time represents legitimate overnight operation and remains valid.
+
+Epic 1 supports one interval per Trading Day. Split shifts, exceptional or holiday hours and cross-day overlap analysis are outside scope.
+
+Everyday is a client interaction shortcut, not a Vendor Domain state. A client using it must submit the equivalent complete seven-day schedule. Retrieval returns the authoritative Weekly Opening Hours value, from which a client may infer an Everyday presentation when all seven entries are identical.
 ### Service Includes Hot Food
 Defines whether the Vendor supplies food or drink heated above ambient room temperature.
 This contributes to Compliance Requirement generation.
@@ -491,7 +575,7 @@ It determines legal identity, legal registration requirements and mandatory regi
 ### TradingCharacteristics
 Composite value object containing:
 TradingLocation
-OpeningHours
+WeeklyOpeningHours
 ServiceIncludesHotFood
 AlcoholService
 ### TradingLocation
@@ -499,16 +583,19 @@ Enumeration or Reference Data with values:
 Restaurant
 Stall
 Kitchen
-### OpeningHours
-Contains:
-StartTime
-EndTime
-Opening Hours may legitimately span midnight. Validation must not require StartTime to be earlier than EndTime.
+### WeeklyOpeningHours
+Immutable value object containing exactly seven uniquely identified `DailyOpeningHours` entries in Monday-to-Sunday order.
+
+### DailyOpeningHours
+Immutable value object containing `TradingDay`, `IsClosed`, `IsOpenAllDay`, optional `StartTime` and optional `EndTime`. Its state combinations and time invariants are defined in §1.6. A timed interval is implied when both state flags are false; no separate `OpenDuringInterval` state is modelled.
+
+### TradingDay
+Controlled values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday and Sunday.
 ### ServiceIncludesHotFood
 Boolean defining whether the Vendor supplies food or drink heated above ambient room temperature.
 ### AlcoholService
 Boolean defining whether the Vendor supplies alcohol.
-Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable are used to derive Compliance Requirements.
+Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable may be supplied by Vendor Application to the Compliance-owned pre-registration determination port. The Vendor Domain does not apply the policy, retain its result or derive Compliance Requirements.
 ### VendorName
 Validated legal or trading name.
 ### CompanyRegistrationNumber
@@ -1076,7 +1163,7 @@ classDiagram
     class TradingCharacteristics {
         <<Value Object>>
         +TradingLocation TradingLocation
-        +OpeningHours OpeningHours
+        +WeeklyOpeningHours WeeklyOpeningHours
         +bool ServiceIncludesHotFood
         +bool AlcoholService
     }
@@ -1088,10 +1175,29 @@ classDiagram
         Kitchen
     }
 
-    class OpeningHours {
+    class WeeklyOpeningHours {
         <<Value Object>>
-        +TimeOnly StartTime
-        +TimeOnly EndTime
+        +IReadOnlyList~DailyOpeningHours~ Days
+    }
+
+    class DailyOpeningHours {
+        <<Value Object>>
+        +TradingDay Day
+        +bool IsClosed
+        +bool IsOpenAllDay
+        +TimeOnly? StartTime
+        +TimeOnly? EndTime
+    }
+
+    class TradingDay {
+        <<Enumeration or Reference Data>>
+        Monday
+        Tuesday
+        Wednesday
+        Thursday
+        Friday
+        Saturday
+        Sunday
     }
 
     class VendorName {
@@ -1284,7 +1390,9 @@ classDiagram
     Vendor *-- LegalOperatorType
     Vendor *-- TradingCharacteristics
     TradingCharacteristics *-- TradingLocation
-    TradingCharacteristics *-- OpeningHours
+    TradingCharacteristics "1" *-- "1" WeeklyOpeningHours
+    WeeklyOpeningHours "1" *-- "7" DailyOpeningHours
+    DailyOpeningHours "1" *-- "1" TradingDay
     Vendor *-- VendorName
     Vendor o-- CompanyRegistrationNumber
     Vendor *-- PrimaryContact
@@ -1504,14 +1612,17 @@ It uses explicit contracts from contributing bounded contexts and is not owned b
 All transitions to Deactivated require a structured business reason and decision metadata.
 ## Decision 15: Trading Characteristics are distinct from Legal Operator Type
 Legal Operator Type describes legal identity and registration obligations; Trading Characteristics describe the Vendor’s trading operation.
-## Decision 16: Compliance Requirements are generated
-The Pending Activation Process requests requirements through an abstraction using Trading Characteristics, Legal Operator Type, the approved Business Address, Food Registration Authority and Primary Trading Authority where applicable rather than relying on a hard-coded set. Regulatory decision logic remains outside the Vendor Domain.
+## Decision 16: Pre-registration determination and post-registration requirements are separate
+Before registration submission, Vendor Application may request a complete immutable Compliance Determination through a consumed Compliance port using the approved registration facts and authoritative Address information. The result remains transient Registration Session state and is excluded from the Vendor aggregate, RegisterVendor, persistence, semantic fingerprint, retrieval and VendorRegistered. After successful registration, the Pending Activation Process independently requests lifecycle-bearing Compliance Requirements through the approved Compliance boundary using authoritative registered facts and the then-active policy. Regulatory decision logic remains outside the Vendor Domain.
 ## Decision 17: Activation Policy evaluates Compliance Requirements
 VendorActivationPolicy evaluates generated Compliance Requirements rather than containing knowledge of individual licences or UK licensing legislation.
 ## Decision 18: Compliance evidence remains outside the Vendor aggregate
 The Vendor aggregate contains TradingCharacteristics but does not contain compliance evidence or compliance documents.
 ## Decision 19: Registered Vendor retrieval uses a purpose-specific representation
 Retrieve Registered Vendor loads the persisted Vendor aggregate by VendorId as the authoritative read source and maps its state into Registered Vendor Details. The aggregate is not exposed as the service response, and the query introduces no dedicated read-model infrastructure or cross-domain collaboration.
+
+## Decision 20: Community Participation remains outside the Vendor aggregate
+Community owns affirmative participation, Contact Preference, persistence, replay and its Integration Event. Vendor owns successful-registration authority and exposes only a minimal verification capability. Join Community occurs after definitive registration success, references VendorId and never copies Primary Contact information or modifies Vendor state.
 
 # 17. Remaining Review Questions
 The following require future business decisions but do not block Vendor Registration:

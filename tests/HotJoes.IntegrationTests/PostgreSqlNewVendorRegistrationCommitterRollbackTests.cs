@@ -1,6 +1,6 @@
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
@@ -125,8 +125,9 @@ public sealed class PostgreSqlNewVendorRegistrationCommitterRollbackTests
             LegalOperatorType.SoleTrader,
             companyRegistrationNumber: null,
             TradingLocation.Kitchen,
-            new TimeOnly(17, 0),
-            new TimeOnly(2, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(17, 0),
+                new TimeOnly(2, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Jamie Taylor",
@@ -176,9 +177,7 @@ public sealed class PostgreSqlNewVendorRegistrationCommitterRollbackTests
             addressValues.PrimaryTradingAuthority,
             new TradingCharacteristics(
                 command.TradingLocation,
-                new OpeningHours(
-                    command.OpeningHoursStartTime,
-                    command.OpeningHoursEndTime),
+                WeeklyOpeningHoursTestData.ToDomain(command.WeeklyOpeningHours),
                 command.ServiceIncludesHotFood,
                 command.AlcoholService));
 
@@ -226,8 +225,9 @@ public sealed class PostgreSqlNewVendorRegistrationCommitterRollbackTests
             FoodRegistrationAuthority = "Greenwich Borough Council",
             PrimaryTradingAuthority = null,
             TradingLocation = "kitchen",
-            OpeningHoursStart = new TimeOnly(8, 0),
-            OpeningHoursEnd = new TimeOnly(22, 0),
+            WeeklyOpeningHours = WeeklyOpeningHoursTestData.Records(
+                new TimeOnly(8, 0),
+                new TimeOnly(22, 0)),
             ServiceIncludesHotFood = true,
             AlcoholService = false,
             Website = null,

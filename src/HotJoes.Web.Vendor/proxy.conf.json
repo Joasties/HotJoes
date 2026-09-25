@@ -1,0 +1,22 @@
+{
+  "/address-search": {
+    "target": "http://host.docker.internal:8080",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/vendor-registration/required-licence-types": {
+    "target": "http://host.docker.internal:8080",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/community-participations": {
+    "target": "http://host.docker.internal:8080",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/vendors": {
+    "target": "http://host.docker.internal:8080",
+    "secure": false,
+    "changeOrigin": false
+  }
+}

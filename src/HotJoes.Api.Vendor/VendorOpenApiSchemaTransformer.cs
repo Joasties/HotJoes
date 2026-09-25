@@ -27,7 +27,17 @@ public sealed class VendorOpenApiSchemaTransformer
 
     private static void AddRequiredMembers(OpenApiSchema schema, Type type)
     {
-        string[] required = type == typeof(RegisterVendorRequest)
+        string[] required = type == typeof(DetermineRequiredLicenceTypesRequest)
+            ?
+            [
+                "legalOperatorType",
+                "tradingLocation",
+                "weeklyOpeningHours",
+                "serviceIncludesHotFood",
+                "alcoholService",
+                "addressResolutionReference"
+            ]
+            : type == typeof(RegisterVendorRequest)
             ?
             [
                 "tradingName",
@@ -42,12 +52,14 @@ public sealed class VendorOpenApiSchemaTransformer
                 ?
                 [
                     "tradingLocation",
-                    "openingHours",
+                    "weeklyOpeningHours",
                     "serviceIncludesHotFood",
                     "alcoholService"
                 ]
-                : type == typeof(RegisterVendorOpeningHoursRequest)
-                    ? ["startTime", "endTime"]
+                : type == typeof(RegisterVendorWeeklyOpeningHoursRequest)
+                    ? ["days"]
+                    : type == typeof(RegisterVendorDailyOpeningHoursRequest)
+                    ? ["day", "isClosed", "isOpenAllDay", "startTime", "endTime"]
                     : type == typeof(RegisterVendorPrimaryContactRequest)
                         ? ["contactName", "contactEmail", "contactTelephone"]
                         : type == typeof(RegisterVendorRegistrationDeclarationsRequest)
@@ -73,9 +85,29 @@ public sealed class VendorOpenApiSchemaTransformer
 
     private static string[] ResponseRequiredMembers(Type type)
     {
+        if (type == typeof(AddressSearchResponse))
+        {
+            return ["results"];
+        }
+
+        if (type == typeof(AddressSearchResultResponse))
+        {
+            return ["addressResolutionReference", "displayLines"];
+        }
+
         if (type == typeof(RegisterVendorResponse))
         {
             return ["vendorId", "vendorState"];
+        }
+
+        if (type == typeof(DetermineRequiredLicenceTypesResponse))
+        {
+            return ["ruleSetVersion", "items"];
+        }
+
+        if (type == typeof(RequiredLicenceTypeResponse))
+        {
+            return ["requiredLicenceType", "isRequired"];
         }
 
         if (type == typeof(RegisteredVendorDetailsResponse))
@@ -106,15 +138,20 @@ public sealed class VendorOpenApiSchemaTransformer
             return
             [
                 "tradingLocation",
-                "openingHours",
+                "weeklyOpeningHours",
                 "serviceIncludesHotFood",
                 "alcoholService"
             ];
         }
 
-        if (type == typeof(RegisteredVendorOpeningHoursResponse))
+        if (type == typeof(RegisteredVendorWeeklyOpeningHoursResponse))
         {
-            return ["startTime", "endTime"];
+            return ["days"];
+        }
+
+        if (type == typeof(RegisteredVendorDailyOpeningHoursResponse))
+        {
+            return ["day", "isClosed", "isOpenAllDay", "startTime", "endTime"];
         }
 
         if (type == typeof(RegisteredVendorPrimaryContactResponse))
@@ -160,7 +197,8 @@ public sealed class VendorOpenApiSchemaTransformer
 
         Type? declaringType = property.DeclaringType;
 
-        if (declaringType == typeof(RegisterVendorRequest)
+        if ((declaringType == typeof(RegisterVendorRequest)
+                || declaringType == typeof(DetermineRequiredLicenceTypesRequest))
             && property.Name == nameof(RegisterVendorRequest.LegalOperatorType))
         {
             SetEnum(
@@ -178,11 +216,22 @@ public sealed class VendorOpenApiSchemaTransformer
         {
             SetEnum(schema, "restaurant", "stall", "kitchen");
         }
-        else if ((declaringType == typeof(RegisterVendorOpeningHoursRequest)
-                    || declaringType == typeof(RegisteredVendorOpeningHoursResponse))
+        else if (declaringType == typeof(DetermineRequiredLicenceTypesRequest)
+                 && property.Name == "TradingLocation")
+        {
+            SetEnum(schema, "restaurant", "stall", "kitchen");
+        }
+        else if ((declaringType == typeof(RegisterVendorDailyOpeningHoursRequest)
+                    || declaringType == typeof(RegisteredVendorDailyOpeningHoursResponse))
                  && property.Name is "StartTime" or "EndTime")
         {
             schema.Pattern = TimePattern;
+        }
+        else if ((declaringType == typeof(RegisterVendorDailyOpeningHoursRequest)
+                    || declaringType == typeof(RegisteredVendorDailyOpeningHoursResponse))
+                 && property.Name == "Day")
+        {
+            SetEnum(schema, "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
         }
         else if ((declaringType == typeof(RegisterVendorResponse)
                     || declaringType == typeof(RegisteredVendorDetailsResponse))
@@ -226,6 +275,17 @@ public sealed class VendorOpenApiSchemaTransformer
                 "limitedLiabilityPartnership",
                 "charitableCommunityGroup",
                 "charitableIncorporatedOrganisation");
+        }
+        else if (declaringType == typeof(RequiredLicenceTypeResponse)
+                 && property.Name == "RequiredLicenceType")
+        {
+            SetEnum(
+                schema,
+                "foodBusinessRegistration",
+                "streetTradingLicence",
+                "lateNightRefreshmentLicence",
+                "premisesLicence",
+                "personalLicenceHolder");
         }
     }
 

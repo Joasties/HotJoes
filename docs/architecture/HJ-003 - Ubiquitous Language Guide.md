@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | HJ-003 |
 | **Document Title** | Ubiquitous Language Guide |
-| **Version** | 2.3 |
+| **Version** | 2.6 |
 | **Status** | Approved |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 17 August 2026 |
+| **Last Updated** | 22 September 2026 |
 
 ## Revision History
 
@@ -23,6 +23,9 @@
 | 2.1 | 27 July 2026 | Applied CR-020 and CR-023 to clarify Legal Operator terminology, place Registration Session outside the Vendor service boundary and establish the submitted Register Vendor request as authoritative. |
 | 2.2 | 8 August 2026 | Applied CR-026 to define registered Vendor retrieval for Epic 1 and aligned the lifecycle term Vendor State with HJ-004. |
 | 2.3 | 17 August 2026 | Applied CR-048. Defined Address Resolution Reference, complete Address result, Business Address Snapshot structure and Address failure terms for CON-006–CON-010. |
+| 2.4 | 14 September 2026 | Applied CR-073. Replaced the former single Opening Hours interval with Weekly Opening Hours, Daily Opening Hours and Trading Day terminology, including Closed, Open All Day and timed-interval daily states. |
+| 2.5 | 19 September 2026 | Propagated approved CON-047 terminology for Required Licence Type, Compliance Determination and Compliance Determination Item, and distinguished transient pre-registration determination from lifecycle-bearing Compliance Requirements and future Licence Details. |
+| 2.6 | 22 September 2026 | Propagated approved CON-046 terminology for Community Participation, Contact Preference, Join Community and Community Participation Recorded, including their separation from Vendor Registration, Primary Contact, Communication Consent and message delivery. |
 
 ## Related Documents
 
@@ -30,8 +33,15 @@
 |-------------|-------|--------|
 | HJ-001 | HotJoes Project Vision | Approved |
 | HJ-002 | Architectural Principles | Approved |
-| HJ-004 | Vendor Domain Models | Approved |
+| HJ-004 | Vendor Domain Models | Approved v3.1 |
+| HJ-010 | Current Application Architectural Concerns | Approved v2.19 |
+| HJ-012 | Established Application Architecture Patterns | Approved v2.14 |
 | CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved |
+| CR-073 | Define Weekly Opening Hours in the Vendor Domain Model | Approved |
+| ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted v1.2 |
+| ADR-002 | Business Capabilities and Bounded Contexts | Accepted v1.2 |
+| ADR-003 | Event-Driven Collaboration | Accepted v1.4 |
+| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted v1.6 |
 
 # 1. Purpose
 
@@ -114,7 +124,7 @@ Trading Characteristics describe the characteristics of a Vendor's trading opera
 Trading Characteristics consist of:
 
 - Trading Location
-- Opening Hours
+- Weekly Opening Hours
 - Service Includes Hot Food
 - Alcohol Service
 
@@ -130,20 +140,27 @@ Trading Location is a controlled business classification of the location from wh
 | Stall | Mobile Food Unit or Market Stall. |
 | Kitchen | Dark Kitchen, Ghost Kitchen or Home Kitchen. A non-customer-facing food preparation venue that trades exclusively online. |
 
-### 3.4.2 Opening Hours
+### 3.4.2 Weekly Opening Hours
 
-Opening Hours are represented by:
+Weekly Opening Hours are the Vendor's complete registered operating schedule. They contain exactly one Daily Opening Hours entry for every Trading Day from Monday through Sunday.
 
-- Start Time
-- End Time
+A Trading Day is one of Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday. Each Trading Day occurs exactly once and the canonical order is Monday through Sunday.
 
-Opening Hours may legitimately span midnight. Validation must not require Start Time to be earlier than End Time.
+Daily Opening Hours describe one Trading Day in exactly one of three states:
+
+- Closed: Closed is true, Open All Day is false, and Start Time and End Time are absent.
+- Open All Day: Closed is false, Open All Day is true, and Start Time and End Time are absent.
+- Timed Interval: Closed and Open All Day are false, and both Start Time and End Time are present and unequal.
+
+A timed interval may legitimately span midnight; End Time may therefore be earlier than Start Time. Equal Start Time and End Time are invalid and Open All Day must be used when the Vendor trades throughout that Trading Day.
+
+"Everyday" is a presentation shortcut for entering or displaying seven identical Daily Opening Hours entries. It is not a separate registered state.
 
 ### 3.4.3 Service Includes Hot Food
 
 Indicates whether the Vendor supplies food or drink heated above ambient room temperature.
 
-This information is used together with Opening Hours to determine applicable Compliance Requirements.
+This information is used together with Weekly Opening Hours to determine applicable Compliance Requirements.
 
 ### 3.4.4 Alcohol Service
 
@@ -156,6 +173,8 @@ This information is used to determine applicable Compliance Requirements.
 A Registration Session is a transient, client- or BFF-owned interaction working set used to collect registration information before a Vendor exists.
 
 It is not known to the Vendor Domain, is not part of any Vendor service boundary, produces no domain events, cannot be resumed, and is discarded by its owner following abandonment or successful submission.
+
+Before submission, the Registration Session may retain a transient Compliance Determination, its Rule Set Version and a controlling-input fingerprint solely to support Step 4 review. These values are derived state rather than client-authored registration information. They are invalidated when a controlling input changes and create no Vendor or Compliance Domain state.
 
 Once a **Register Vendor** command is submitted, the Registration Session has fulfilled its purpose and no longer participates in the registration workflow.
 
@@ -327,23 +346,61 @@ Primary Trading Authority:
 - is derived through the Address Domain
 - is used to determine applicable Compliance Requirements
 
-## 3.20 Vendor Administrator
+## 3.20 Required Licence Type
+
+A controlled type whose applicability is indicated by a Compliance Determination before Vendor Registration submission. Epic 1 controls Food Business Registration, Street Trading Licence, Late Night Refreshment Licence, Premises Licence and Personal Licence Holder in that canonical order. A Required Licence Type is an indication of future Compliance work; it is not Licence Details, evidence, a Compliance Requirement or proof that a licence exists or is valid.
+
+## 3.21 Compliance Determination
+
+A complete, immutable and side-effect-free pre-registration result produced by the Compliance-owned applicability policy. It contains the active Rule Set Version and exactly one Compliance Determination Item for every controlled Required Licence Type. It is transient Registration Session state, not Vendor state or Compliance Requirement state.
+
+## 3.22 Compliance Determination Item
+
+One immutable entry within a Compliance Determination. It identifies one controlled Required Licence Type and states whether that type is required through IsRequired.
+
+## 3.23 Vendor Administrator
 
 A **Vendor Administrator** is the trusted Epic 1 administrative actor that may retrieve an existing Vendor directly using its VendorId.
 
 Authentication and authorisation of the Vendor Administrator are outside the scope of Epic 1. The term does not imply an Identity Domain dependency within Epic 1.
 
-## 3.21 Retrieve Registered Vendor
+## 3.24 Retrieve Registered Vendor
 
 **Retrieve Registered Vendor** is a read-only Vendor query that retrieves an existing Vendor using its VendorId and returns the Vendor details established through Vendor Registration.
 
 The query does not modify Vendor state and produces no Domain Event or Integration Event.
 
-## 3.22 Registered Vendor Details
+## 3.25 Registered Vendor Details
 
 **Registered Vendor Details** is the read representation returned by Retrieve Registered Vendor.
 
 It is derived from persisted Vendor state and contains the Vendor information established through successful Vendor Registration. It is a service/query representation and is not the Vendor aggregate itself.
+
+## 3.26 Community Participation
+
+**Community Participation** is the explicit affirmative recorded choice of a successfully registered Vendor to participate in the HotJoes community.
+
+Community Participation is owned by the Community bounded context, relates to exactly one registered Vendor through `VendorId`, and is created only by the authoritative Join Community operation after Vendor Registration success. It is not Vendor state, Vendor Registration information, Registration Session state, Primary Contact information, Communication Consent, a subscription, lawful basis, delivery instruction or evidence that a communication was delivered.
+
+Absence of a Community Participation record means that the Vendor has not joined. It does not record refusal or a negative participation state.
+
+## 3.27 Contact Preference
+
+**Contact Preference** is the preferred channel selected for possible future community-related contact with the Vendor's Primary Contact. The complete Epic 1 set is Email, SMS and WhatsApp.
+
+Contact Preference is Community-owned personal-data-related metadata. It identifies a channel only and contains no contact address or telephone number. It neither copies nor redefines the Vendor-owned Primary Contact and does not authorise communication.
+
+## 3.28 Join Community
+
+**Join Community** is the Community Application operation that records affirmative Community Participation for one successfully registered Vendor with one Contact Preference.
+
+Its request contains exactly `VendorId` and Contact Preference. Participation is implied by invoking the operation; no participation Boolean, Primary Contact details, Communication Consent or delivery instruction is supplied.
+
+## 3.29 Community Participation Recorded
+
+**Community Participation Recorded** is the completed Community business fact created by the first successful Join Community operation. It is represented externally by the Community-owned `CommunityParticipationRecorded` Integration Event.
+
+Equivalent replay returns the original committed participation and creates no additional fact or event. Community consumer receipt is processing evidence only and is not another participation record.
 
 # 4. Business Concepts
 
@@ -404,6 +461,12 @@ Examples include:
 - Administrative review
 - Automatic deactivation
 
+## 4.9 Community
+
+The business capability that owns Community Participation and Contact Preference after successful Vendor Registration.
+
+Community verifies successful Vendor existence through a minimal Vendor-owned capability, but does not acquire Vendor identity or Primary Contact ownership. Amendment, withdrawal, Communication Consent, recipient resolution and communication delivery are separate future capabilities.
+
 # 5. Events
 
 These represent significant business occurrences.
@@ -420,6 +483,7 @@ Examples include:
 - Contact Details Updated
 - Activation Requirements Satisfied
 - Vendor Deactivated
+- Community Participation Recorded
 
 Registration Session is not a business concept and therefore does not generate domain events.
 
@@ -438,6 +502,7 @@ Examples include:
 - Change Trading Name
 - Update Contact Details
 - Set Trading Preference
+- Join Community
 
 Registration Session is an application concern rather than a business command.
 
@@ -468,9 +533,16 @@ Command names should always be expressed as imperative verbs.
 | Registration Session | Transient interaction working set owned by the client application or a BFF and existing outside every Vendor service boundary; it is not known to the Vendor Domain, and the submitted Register Vendor request becomes authoritative once registration is submitted |
 | Food Registration Authority | Competent local authority responsible for Food Business Registration for the Vendor's trading premises |
 | Primary Trading Authority | Local authority responsible for the Vendor's declared primary trading area; required only for Trading Location = Stall |
+| Required Licence Type | Controlled type whose pre-registration applicability is stated by a Compliance Determination; not Licence Details, evidence or a Compliance Requirement |
+| Compliance Determination | Complete immutable pre-registration result containing the active Rule Set Version and one ordered item for every controlled Required Licence Type |
+| Compliance Determination Item | One Required Licence Type and its explicit IsRequired result within a Compliance Determination |
 | Vendor Administrator | Trusted Epic 1 administrative actor that may retrieve an existing Vendor directly using its VendorId; authentication and authorisation are outside the Epic 1 scope |
 | Retrieve Registered Vendor | Read-only Vendor query that retrieves one existing Vendor by VendorId and returns Registered Vendor Details without changing state or producing events |
 | Registered Vendor Details | Purpose-specific service/query representation derived from persisted Vendor state and containing the information established through successful Vendor Registration; not the Vendor aggregate |
+| Community Participation | Explicit affirmative Community-owned record that a successfully registered Vendor has joined the HotJoes community; absence means not joined and is not a recorded refusal |
+| Contact Preference | Community-owned preferred channel for possible future community-related contact; Email, SMS or WhatsApp in Epic 1; not Communication Consent or delivery authority |
+| Join Community | Community Application operation accepting exactly VendorId and Contact Preference and implying affirmative participation |
+| Community Participation Recorded | Completed Community fact produced by the first successful Join Community operation and published through its own versioned Integration Event |
 | Activation Requirement | Business requirement that must be satisfied before activation |
 | Activation Policy | Policy determining when activation is permitted |
 | Pending Activation Closure Policy | Policy governing prolonged Pending Activation |

@@ -3,11 +3,11 @@
 | **Document ID** | ADR-002 |
 |-----------------|---------|
 | **Document Title** | Business Capabilities and Bounded Contexts |
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 23 July 2026 |
+| **Last Updated** | 21 September 2026 |
 
 ---
 
@@ -17,6 +17,7 @@
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 23 July 2026 | Expanded to define bounded context ownership, authoritative data ownership and approved cross-domain data sharing patterns. |
+| 1.2 | 21 September 2026 | Applied CR-078. Added the Community bounded context, Community Participation and Contact Preference ownership, and the minimal Vendor verification relationship approved through CON-046. |
 
 ---
 
@@ -26,10 +27,13 @@
 |-------------|-------|--------|
 | ADR-000 | Architectural Decision Register | Accepted |
 | ADR-001 | Domain-Driven Design as the Primary Architectural Style | Accepted |
+| CR-078 | Amend ADR-002 for the Community Bounded Context | Approved |
 | HJ-001 | Project Vision | Approved |
 | HJ-002 | Architectural Principles | Approved |
 | HJ-003 | Ubiquitous Language Guide | Approved |
 | HJ-004 | Vendor Domain Models | Approved |
+| HJ-010 | Current Application Architectural Concerns | Approved |
+| HJ-012 | Established Application Architecture Patterns | Approved |
 
 ---
 
@@ -45,6 +49,8 @@ The architecture therefore requires a clear definition of:
 - which domain owns each business concept;
 - which domain is authoritative for each piece of business data; and
 - how information may legitimately be shared across bounded context boundaries.
+
+CON-046 introduces Community Participation and Contact Preference after successful Vendor Registration. These concepts require an explicit owner while preserving Vendor authority for successful registration and Primary Contact information and avoiding any implication of Communication Consent or delivery authority.
 
 ---
 
@@ -76,6 +82,18 @@ The choice of pattern shall be driven by business requirements, consistency requ
 
 No consuming bounded context shall become authoritative for information owned by another bounded context.
 
+## 2.1 Community Bounded Context
+
+Community Participation is the explicit affirmative recorded choice of a successfully registered Vendor to participate in the HotJoes community. Contact Preference is the Vendor's selected preferred channel—Email, SMS or WhatsApp—for possible future community-related contact with its Primary Contact.
+
+Community Participation and Contact Preference are owned by the dedicated **Community bounded context** and its Application capability. They are not attributes of the Vendor aggregate, Vendor Registration, Registration Session or Vendor-owned Primary Contact.
+
+The Community record relates to exactly one successfully registered Vendor by reference to `VendorId`. Vendor remains authoritative for whether the Vendor was successfully registered and for its Primary Contact information. Before creating Community state, Community Application verifies the `VendorId` through a minimal Vendor-owned verification capability. That boundary returns only the information needed to establish successful registration; it does not expose the Vendor aggregate, Registered Vendor Details or Primary Contact information.
+
+Community does not redefine the Primary Contact, copy Primary Contact details into Community-owned identity, or modify Vendor state. Physical co-location within an API host or PostgreSQL runtime does not transfer logical ownership between Vendor and Community.
+
+Contact Preference expresses channel preference only. It is not Communication Consent, a subscription, a lawful basis for processing, an instruction to send a message or evidence that any communication was delivered. Communication Consent, recipient resolution and communication delivery remain separate future capabilities.
+
 ---
 
 # 3. Consequences
@@ -88,6 +106,8 @@ No consuming bounded context shall become authoritative for information owned by
 - Different information sharing patterns can be selected according to business need rather than applying a single solution everywhere.
 - Historical business facts can be preserved without compromising ownership boundaries.
 - The architecture remains scalable as new bounded contexts are introduced.
+- Community can evolve independently without extending the Vendor aggregate or copying Primary Contact information.
+- Contact Preference remains clearly separated from consent and delivery authority.
 
 ### Negative
 
@@ -95,6 +115,7 @@ No consuming bounded context shall become authoritative for information owned by
 - Information duplication is intentional in some cases and must be clearly justified.
 - Eventual consistency becomes a natural consequence of independent domain ownership.
 - Developers must understand both ownership and consistency implications when introducing new integrations.
+- Community creation depends on a minimal synchronous Vendor verification boundary.
 
 ---
 
@@ -110,7 +131,11 @@ Rejected because a single shared model creates unnecessary coupling between busi
 
 ## Synchronous Cross-Domain Queries
 
-Rejected as the default integration mechanism because it introduces runtime coupling between domains, reduces resilience and unnecessarily constrains deployment independence. Synchronous collaboration may still be appropriate where business requirements justify it.
+Rejected as the default integration mechanism because it introduces runtime coupling between domains, reduces resilience and unnecessarily constrains deployment independence. Synchronous collaboration may still be appropriate where business requirements justify it, including the minimal successful-Vendor verification required before Community Participation creation.
+
+## Vendor-Owned Community Preference
+
+Rejected because Community Participation is a separate post-registration lifecycle and Contact Preference is not registered or managed Vendor information. Placing either in Vendor would transfer Community ownership into the Vendor aggregate and conflate channel preference with Primary Contact data.
 
 ---
 
@@ -122,6 +147,8 @@ This decision directly supports:
 - ADR-005 — Registered Information vs Vendor Managed Information
 - ADR-006 — Address Domain Ownership and Business Address Snapshots
 - ADR-007 — Vendor Compliance as a Separate Bounded Context
+- ADR-008 — Idempotent Operations and Reliable Event Publication
+- ADR-013 — Epic 1 Runtime and Deployment Composition
 
 ---
 
@@ -131,6 +158,9 @@ This decision directly supports:
 - Vaughn Vernon — *Implementing Domain-Driven Design*
 - Vaughn Vernon — *Domain-Driven Design Distilled*
 - Martin Fowler — *Bounded Context*
+- CR-078 — Amend ADR-002 for the Community Bounded Context
 - HJ-002 — Architectural Principles
 - HJ-003 — Ubiquitous Language Guide
 - HJ-004 — Vendor Domain Models
+- HJ-010 — Current Application Architectural Concerns
+- HJ-012 — Established Application Architecture Patterns

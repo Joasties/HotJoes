@@ -32,10 +32,10 @@ public sealed class RegisteredVendorDetailsMapperTests
             details.TradingCharacteristics.TradingLocation);
         Assert.Equal(
             new TimeOnly(9, 30),
-            details.TradingCharacteristics.OpeningHours.StartTime);
+            details.TradingCharacteristics.WeeklyOpeningHours.Days[0].StartTime);
         Assert.Equal(
             new TimeOnly(18, 45),
-            details.TradingCharacteristics.OpeningHours.EndTime);
+            details.TradingCharacteristics.WeeklyOpeningHours.Days[0].EndTime);
         Assert.True(
             details.TradingCharacteristics.ServiceIncludesHotFood);
         Assert.True(details.TradingCharacteristics.AlcoholService);
@@ -97,7 +97,7 @@ public sealed class RegisteredVendorDetailsMapperTests
         [
             typeof(RegisteredVendorDetails),
             typeof(RegisteredVendorTradingCharacteristics),
-            typeof(RegisteredVendorOpeningHours),
+            typeof(RegisteredVendorWeeklyOpeningHours),
             typeof(RegisteredVendorBusinessAddress)
         ];
 
@@ -142,7 +142,7 @@ public sealed class RegisteredVendorDetailsMapperTests
             typeof(VendorRegistrationInformation),
             typeof(BusinessAddressSnapshot),
             typeof(TradingCharacteristics),
-            typeof(OpeningHours),
+            typeof(WeeklyOpeningHours),
             typeof(PrimaryContact),
             typeof(VendorRegistered)
         ];
@@ -190,8 +190,7 @@ public sealed class RegisteredVendorDetailsMapperTests
             new PrimaryTradingAuthority("Greenwich Borough Council"),
             new TradingCharacteristics(
                 TradingLocation.Stall,
-                new OpeningHours(
-                    new TimeOnly(9, 30),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(9, 30),
                     new TimeOnly(18, 45)),
                 serviceIncludesHotFood: true,
                 alcoholService: true));
@@ -230,8 +229,7 @@ public sealed class RegisteredVendorDetailsMapperTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(
-                    new TimeOnly(17, 0),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0),
                     new TimeOnly(2, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));

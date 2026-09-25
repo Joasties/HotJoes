@@ -1,0 +1,65 @@
+<section class="confirmation" aria-labelledby="confirmation-title">
+  <header class="submitted">
+    <span class="success-mark" aria-hidden="true">✓</span>
+    <div>
+      <h1 id="confirmation-title">Registration submitted!</h1>
+      <strong>Welcome to HotJoes, {{ tradingName }}!</strong>
+      <p>Your vendor registration has been received and is now in Pending Activation.<br />We’ll be in touch with next steps shortly.</p>
+    </div>
+  </header>
+  <div class="community">
+    <div class="community-copy">
+      <h2><span class="people" aria-hidden="true">♧</span>Be part of HotJoes</h2>
+      <strong>HotJoes is built around the people who use it.</strong>
+      <p>Join the community and we’ll keep you informed about how the platform works,<br />the issues we’re tackling, and how you can help shape what happens next.</p>
+      <div class="first-message">
+        <span class="mail" aria-hidden="true">✉</span>
+        <div>
+          <strong>Your first message will include:</strong>
+          <ul>
+            <li>A detailed guide to HotJoes and how the platform works</li>
+            <li>How vendors can influence decisions</li>
+            <li>Community forums and meetings</li>
+            <li>A monthly newsletter with updates and feedback from hot topics</li>
+            <li>Access to Ask Joe – your AI help for all things HotJoes</li>
+          </ul>
+        </div>
+      </div>
+      <form [formGroup]="form">
+        <fieldset class="preferences">
+          <legend>
+            <span aria-hidden="true">☷</span>
+            <strong>Contact preference</strong>
+            <small>How would you like us to contact you? (You can change this later in your account.)</small>
+          </legend>
+          <label><input type="radio" formControlName="contactPreference" value="email" />Email</label>
+          <label><input type="radio" formControlName="contactPreference" value="sms" />SMS</label>
+          <label><input type="radio" formControlName="contactPreference" value="whatsApp" />WhatsApp</label>
+        </fieldset>
+        <label class="involved">
+          <input type="checkbox" formControlName="keepInvolved" />
+          <span>
+            <strong>Keep me involved</strong>
+            <small>I’d like to receive the community guide, updates and invitations to participate.</small>
+          </span>
+        </label>
+        <p class="privacy"><b aria-hidden="true">i</b>You can unsubscribe at any time. We only send relevant information and we never share your details.</p>
+      </form>
+      @if (submissionError) {
+        <p class="submission-error" role="alert">{{ submissionError }}</p>
+      }
+    </div>
+    <aside class="fair-say" aria-label="A fair say builds a stronger community. Transparency is king.">
+      <span class="megaphone" aria-hidden="true">◁)))</span>
+      <strong>A fair say<br />builds a<br />stronger<br />community!</strong>
+      <hr />
+      <b>Transparency<br />is king.</b>
+    </aside>
+  </div>
+  <footer>
+    <button class="not-now" type="button" [disabled]="submitting" (click)="notNow()">Not now</button>
+    <button class="join" type="button" [disabled]="!canJoin" (click)="joinCommunity()">
+      {{ submitting ? "Joining…" : "Join the community" }}
+    </button>
+  </footer>
+</section>

@@ -8,7 +8,7 @@ namespace HotJoes.Web.Edge.Tests;
 public sealed class EdgeRoutePolicyTests
 {
     [Fact]
-    public async Task AI_GW_001_OnlyApprovedVendorRoutesAreConfigured()
+    public async Task AI_GW_001_And_006_OnlyApprovedRoutesAreConfigured()
     {
         ServiceCollection services = new();
         services.AddLogging();
@@ -21,6 +21,17 @@ public sealed class EdgeRoutePolicyTests
 
         Assert.Collection(
             config.Routes.OrderBy(route => route.RouteId),
+            route => AssertRoute(route, "address-search", "/address-search", "GET"),
+            route => AssertRoute(
+                route,
+                "community-participations",
+                "/community-participations",
+                "POST"),
+            route => AssertRoute(
+                route,
+                "determine-required-licence-types",
+                "/vendor-registration/required-licence-types",
+                "POST"),
             route => AssertRoute(route, "register-vendor", "/vendors", "POST"),
             route => AssertRoute(
                 route,
@@ -73,5 +84,6 @@ public sealed class EdgeRoutePolicyTests
         IReadOnlyDictionary<string, string> transform =
             Assert.Single(route.Transforms!);
         Assert.Equal("Off", transform["X-Forwarded"]);
+        Assert.Null(route.RateLimiterPolicy);
     }
 }

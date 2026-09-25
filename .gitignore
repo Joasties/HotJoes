@@ -31,3 +31,12 @@ publish/
 
 # Windows
 Thumbs.db
+
+# JavaScript and Angular dependencies/build output
+**/node_modules/
+**/.angular/
+**/dist/
+
+# Playwright output
+**/playwright-report/
+**/test-results/

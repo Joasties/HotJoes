@@ -1,0 +1,38 @@
+<svg class="icon-definitions" aria-hidden="true"><defs>
+  <symbol id="icon-person" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></symbol>
+  <symbol id="icon-phone" viewBox="0 0 24 24"><path d="M7 3 4 5c0 8 7 15 15 15l2-3-5-3-2 2c-3-1-5-3-6-6l2-2-3-5Z"/></symbol>
+  <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="icon-shop" viewBox="0 0 24 24"><path d="M4 10v11h16V10M3 10l2-6h14l2 6M8 4l-1 6m5-6v6m4-6 1 6M3 10c0 2 4 2 4 0 0 2 5 2 5 0 0 2 5 2 5 0 0 2 4 2 4 0M9 21v-6h6v6"/></symbol>
+  <symbol id="icon-building" viewBox="0 0 24 24"><path d="M5 21V3h11v18M16 9h4v12M8 7h2m2 0h2M8 11h2m2 0h2M8 15h2m2 0h2M3 21h18"/></symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></symbol>
+</defs></svg>
+
+<section class="step" aria-labelledby="business-title">
+  <p class="step-number">Step 3 of 5</p>
+  <h1 id="business-title" class="visually-hidden">Your contact and business details</h1>
+  <div class="journey-information"><button type="button" aria-describedby="business-explanation" aria-label="About Contact and Business Details"></button><div id="business-explanation" class="information-overlay" role="tooltip"><strong>Contact and Business Details</strong><span>Tell us who to contact, the registered identity of your business and where it operates.</span></div></div>
+
+  <form [formGroup]="form" (ngSubmit)="continue()" novalidate>
+    <div class="details-panel">
+      <h2><span class="heading-icon"><svg><use href="#icon-person"/></svg></span>Primary Contact</h2>
+      <div class="field"><label for="contact-name">Contact name</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-person"/></svg></span><input id="contact-name" formControlName="contactName" autocomplete="name" /></span>@if (showError('contactName')) {<p class="error">Enter the primary contact name.</p>}</div>
+      <div class="field"><label for="contact-telephone">Telephone number</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-phone"/></svg></span><input id="contact-telephone" formControlName="contactTelephone" autocomplete="tel" /></span>@if (showError('contactTelephone')) {<p class="error">Enter a valid UK telephone number.</p>}</div>
+      <div class="field"><label for="contact-email">Email address</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-mail"/></svg></span><input id="contact-email" type="email" formControlName="contactEmail" autocomplete="email" /></span>@if (showError('contactEmail')) {<p class="error">Enter a valid email address.</p>}</div>
+
+      <h2><span class="heading-icon"><svg><use href="#icon-shop"/></svg></span>Vendor Name</h2>
+      <div class="field"><label for="trading-name">Trading name</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-shop"/></svg></span><input id="trading-name" formControlName="tradingName" maxlength="160" autocomplete="organization" /></span>@if (showError('tradingName')) {<p class="error">Enter a trading name of no more than 160 characters.</p>}</div>
+      <div class="field"><label for="legal-name">Legal operator name</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-person"/></svg></span><input id="legal-name" formControlName="legalOperatorName" maxlength="160" autocomplete="organization" /></span>@if (showError('legalOperatorName')) {<p class="error">Enter the legal operator name.</p>}</div>
+      @if (requiresCompanyNumber) {<div class="field company-number-field"><label for="company-number">Company registration number</label><span class="company-number-entry"><span class="input-group"><span class="input-icon"><svg><use href="#icon-building"/></svg></span><input id="company-number" formControlName="companyRegistrationNumber" maxlength="8" aria-describedby="company-number-hint" autocomplete="off" /></span><span id="company-number-hint" class="hint">For example, SC123456 or 12345678.</span></span>@if (showError('companyRegistrationNumber')) {<p class="error">Enter a valid UK company registration number.</p>}</div>}
+      <div class="actions"><button class="back" type="button" (click)="back()"><span aria-hidden="true">←</span> Back</button><button type="submit">Continue <span aria-hidden="true">→</span></button></div>
+    </div>
+
+    <div class="address-panel">
+      <h2><span class="heading-icon"><svg><use href="#icon-search"/></svg></span>Business Address Search</h2>
+      <div class="search"><label class="visually-hidden" for="address-query">Search for the business address</label><span class="input-icon"><svg><use href="#icon-search"/></svg></span><input id="address-query" formControlName="addressQuery" placeholder="Start typing an address or postcode" maxlength="200" autocomplete="off" (input)="searchAddress()" /><button type="button" aria-label="Clear address search" (click)="clearAddress()">×</button></div>
+      @if (addressResults.length) {<ul class="results">@for (address of addressResults; track address.reference) {<li><button type="button" (click)="selectAddress(address)">{{ address.lines.join(', ') }}</button></li>}</ul>}
+      @if (addressSearchFailed) {<p class="error" role="alert">Address search is temporarily unavailable. Please try again.</p>}
+      <div class="selected-address" aria-live="polite">@if (selectedAddress) {@for (line of selectedAddress.lines; track line) {<span>{{ line }}</span>}} @else {<span class="address-prompt">Search for and select the business address.</span>}</div>
+      @if (addressTouched && !selectedAddress) {<p class="error">Select a business address before continuing.</p>}
+    </div>
+  </form>
+</section>

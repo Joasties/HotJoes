@@ -1,6 +1,6 @@
 using System.Text;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using HotJoes.Infrastructure.VendorRelay;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
@@ -355,7 +355,7 @@ public sealed class PostgreSqlRabbitMqOutboxRelayTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(new TimeOnly(9, 0), new TimeOnly(17, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(9, 0), new TimeOnly(17, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
 

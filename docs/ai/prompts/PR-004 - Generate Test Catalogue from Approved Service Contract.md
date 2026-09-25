@@ -90,52 +90,56 @@ The Test Catalogue must make omissions visible. Every normative rule in HJ-106 P
 
 # Scope
 
-Derive tests for the following approved Vendor business operations:
+Derive tests for the following approved Epic 1 business operations represented by the service contract:
 
+- `DetermineRequiredLicenceTypes`
 - `RegisterVendor`
 - `RetrieveRegisteredVendor`
+- `JoinCommunity`
 
-Treat RegisterVendor as the primary business operation and derive RetrieveRegisteredVendor tests only where explicitly defined by the approved service contract.
+Treat RegisterVendor as the primary Vendor creation operation. Treat DetermineRequiredLicenceTypes as the separate synchronous, side-effect-free pre-registration operation defined by the approved service contract. Derive RetrieveRegisteredVendor tests only where explicitly defined by the approved service contract. Treat JoinCommunity as a separate post-registration Community Application operation; its inclusion does not make Community Participation or Contact Preference part of Vendor Registration or Vendor state.
 
 At a minimum cover:
 
-1. Successful Vendor Registration.
-2. Request completeness.
-3. Required fields.
-4. Optional fields.
-5. Conditional fields.
-6. Controlled values.
-7. Validation rules.
-8. Canonicalisation rules.
-9. Registration Declaration acceptance.
-10. Registration Declaration transience.
-11. Address Domain collaboration.
-12. Address trust-boundary enforcement.
-13. Derived Address information.
-14. Vendor aggregate creation invariants.
-15. Initial Vendor lifecycle state.
-16. Initial Trading Preference.
-17. Registered Information persistence.
-18. Vendor Managed Information persistence.
-19. Domain Event behaviour.
-20. Integration Event behaviour.
-21. Minimum Integration Event business content.
-22. Atomic Vendor and publication-work recording.
-23. Idempotent successful replay.
-24. Concurrent duplicate submission.
-25. Business failure behaviour.
-26. Prohibited outcomes.
-27. Scope exclusions.
-28. Registered Vendor retrieval.
-29. Retrieval side-effect invariants.
-30. Registered Vendor Details representation.
-31. Retrieval scope exclusions.
-32. Traceability completeness.
+1. Required Licence Types Determination.
+2. Join Community.
+3. Successful Vendor Registration.
+4. Request completeness.
+5. Required fields.
+6. Optional fields.
+7. Conditional fields.
+8. Controlled values.
+9. Validation rules.
+10. Canonicalisation rules.
+11. Registration Declaration acceptance.
+12. Registration Declaration transience.
+13. Address Domain collaboration.
+14. Address trust-boundary enforcement.
+15. Derived Address information.
+16. Vendor aggregate creation invariants.
+17. Initial Vendor lifecycle state.
+18. Initial Trading Preference.
+19. Registered Information persistence.
+20. Vendor Managed Information persistence.
+21. Domain Event behaviour.
+22. Integration Event behaviour.
+23. Minimum Integration Event business content.
+24. Atomic Vendor and publication-work recording.
+25. Idempotent successful replay.
+26. Concurrent duplicate submission.
+27. Business failure behaviour.
+28. Prohibited outcomes.
+29. Scope exclusions.
+30. Registered Vendor retrieval.
+31. Retrieval side-effect invariants.
+32. Registered Vendor Details representation.
+33. Retrieval scope exclusions.
+34. Traceability completeness.
 
 Do not infer tests for operations that HJ-106 explicitly excludes.
 
-Derive tests only for RegisterVendor and RetrieveRegisteredVendor.
-Do not invent additional Vendor queries or search capabilities.
+Derive tests only for DetermineRequiredLicenceTypes, RegisterVendor, RetrieveRegisteredVendor and JoinCommunity.
+Do not invent additional Vendor queries, Community amendment or withdrawal operations, communication consent or message-delivery capabilities.
 
 ---
 
@@ -159,6 +163,7 @@ Use:
 - HJ-105 for processing order, outcomes, failures and collaboration behaviour;
 - ADR-004 for Registration Session ownership and the Vendor lifecycle boundary;
 - ADR-006 for Address ownership and snapshot authority;
+- ADR-007 for Compliance ownership and the separation of pre-registration determination from post-registration Compliance Requirement processing;
 - ADR-008 for idempotency and reliable-publication principles;
 - HJ-006 for approved test levels, naming, automation and quality standards.
 
@@ -253,6 +258,9 @@ Do **not**:
 - generate implementation code;
 - prescribe test frameworks unsupported by the artefacts;
 - weaken prohibited outcomes into optional assertions.
+- treat Community Participation or Contact Preference as Vendor aggregate or Vendor Registration information;
+- expose Primary Contact information to Community; or
+- invent Community amendment, withdrawal, deletion, expiry, communication consent, recipient resolution or message delivery.
 
 Preserve:
 
@@ -277,6 +285,29 @@ Preserve:
 - the persisted Vendor aggregate as the authoritative retrieval source;
 - the Registered Vendor Details representation;
 - absence of cross-domain collaboration during retrieval.
+
+Also preserve for `DetermineRequiredLicenceTypes`:
+
+- Compliance ownership of applicability policy, result meaning, canonical ordering and the active Rule Set Version;
+- Vendor Application ownership of validation, authoritative Address resolution and orchestration only;
+- the complete five-item Compliance Determination;
+- transient Registration Session retention, controlling-input invalidation and fresh pre-submission refresh;
+- renewed review when the item set or Rule Set Version changes;
+- direct RegisterVendor independence from determination state and Compliance availability; and
+- absence of Vendor, Compliance Requirement, Licence Details, persistence, event, outbox and external-regulatory-call side effects.
+
+Also preserve for `JoinCommunity`:
+
+- Community ownership of the operation, immutable record, persistence and Integration Event;
+- the exact VendorId and Contact Preference request, with affirmative participation implied by invocation;
+- Email, SMS and WhatsApp as the complete Epic 1 Contact Preference set;
+- minimal Vendor-owned verification of successful registration without exposing Vendor or Primary Contact information;
+- one Community Participation and at most one logical event per Vendor;
+- original-result replay for the same preference and controlled conflict for a different preference;
+- atomic Community persistence and immutable outbox recording;
+- durable idempotent Community stub receipt using EventId;
+- no communication-delivery effect; and
+- absence of amendment, withdrawal, deletion, expiry, Communication Consent, recipient resolution and message delivery.
 
 ---
 
@@ -369,6 +400,93 @@ A test is incomplete if it verifies only an error response but fails to verify p
 ---
 
 # Required Coverage
+
+## Required Licence Types Determination
+
+Verify that `DetermineRequiredLicenceTypes`:
+
+- accepts the complete controlling input set: Legal Operator Type, Trading Location, Weekly Opening Hours, Service Includes Hot Food, Alcohol Service and the selected Address Resolution Reference;
+- validates every independently detectable controlling-input error before collaboration;
+- resolves authoritative Address information through the Address boundary;
+- prevents caller-authored Address, jurisdiction or competent-authority values from becoming authoritative Compliance input;
+- permits Vendor Application to orchestrate validation, Address resolution and Compliance collaboration without owning or reproducing licence-applicability rules;
+- obtains the complete Compliance Determination from the Compliance-owned versioned deterministic policy;
+- returns the active Rule Set Version;
+- returns exactly one ordered item for each of Food Business Registration, Street Trading Licence, Late Night Refreshment Licence, Premises Licence and Personal Licence Holder;
+- returns explicit `IsRequired` values, canonical ordering and no duplicate licence types;
+- always marks Food Business Registration as required;
+- marks Street Trading Licence as required for `Stall`, using authoritative competent-authority context;
+- marks Late Night Refreshment Licence as required when hot-food service overlaps any portion of 23:00 inclusive to 05:00 exclusive;
+- covers the 23:00 and 05:00 boundaries, Closed and Open All Day days, same-day intervals and overnight intervals;
+- marks Premises Licence and Personal Licence Holder as required when Alcohol Service is selected;
+- fails closed when the determination cannot be supported authoritatively;
+- is synchronous, deterministic, side-effect-free and non-persistent;
+- creates no Vendor, Compliance Requirement, Licence Details, Domain Event, Integration Event, durable publication work or external regulatory call.
+
+Verify the Registration Session lifecycle associated with the result:
+
+- retains the determination, applied Rule Set Version and controlling-input fingerprint only as transient derived state;
+- invalidates the retained determination whenever any controlling input changes;
+- obtains a fresh determination immediately before Web submission;
+- requires renewed user review when the determined item set or Rule Set Version changes;
+- prevents that Web submission attempt and retains the draft when refresh fails;
+- does not include the determination in `RegisterVendor`;
+- does not require direct `RegisterVendor` callers to obtain or submit a determination;
+- does not recalculate the determination inside Vendor Application during registration;
+- does not persist, fingerprint, retrieve or publish the determination as Vendor lifecycle state.
+
+Derive explicit controlled-failure coverage for:
+
+- `DeterminationRequestValidationFailure`;
+- `InvalidReference`;
+- `InvalidAddressResult`;
+- `UnsupportedDetermination`; and
+- `ComplianceDeterminationTemporarilyUnavailable`.
+
+For every determination failure, verify the controlled outcome, retry guidance where defined, retained Registration Session draft where applicable and every prohibited side effect.
+
+## Join Community
+
+Verify that `JoinCommunity`:
+
+- accepts exactly one successfully registered VendorId and one Contact Preference;
+- accepts Email, SMS and WhatsApp as the complete Epic 1 Contact Preference set;
+- implies affirmative Community Participation through invocation and accepts no client-controlled participation Boolean;
+- contains no Primary Contact information, Communication Consent, recipient resolution or delivery instruction;
+- is owned by Community Application, including its result, immutable record, persistence and event;
+- verifies successful registration through the minimal Vendor-owned verification boundary;
+- receives no Vendor aggregate, Registered Vendor Details or Primary Contact information from verification;
+- creates one immutable Community Participation containing CommunityParticipationId, VendorId, Contact Preference and original JoinedAt;
+- atomically records the participation and one immutable outbox message in the Community-owned transaction;
+- enforces unique VendorId as the replay and conflict boundary;
+- returns `CommunityParticipationAlreadyRecorded` with the original result for an equivalent request without another effect;
+- returns `CommunityParticipationConflict` for an existing Vendor with a different preference without amendment or another effect;
+- resolves concurrent first requests to exactly one participation record and at most one logical Integration Event;
+- returns the complete closed outcome set defined by HJ-106;
+- creates one `CommunityParticipationRecorded` Integration Event v1 only for first successful commit, with envelope members `eventId`, fixed `eventType`, fixed `eventVersion`, `occurredAt` and `payload`;
+- contains exactly `communityParticipationId`, `vendorId`, `joinedAt` and `contactPreference` in the event payload, using the approved UUID, UTC timestamp and lower-camel-case Contact Preference representations;
+- preserves the exact immutable serialized event across publication retries;
+- processes the event through the independently executable Community-owned deterministic stub;
+- records durable consumer processing evidence using EventId as the idempotency key;
+- suppresses equivalent redelivery and treats EventId reuse with different immutable content as an integrity failure;
+- sends no Email, SMS, WhatsApp or other communication; and
+- retains the authoritative record and original result for at least as long as the associated Vendor exists without introducing amendment, withdrawal, deletion or expiry.
+
+Derive explicit controlled-failure coverage for:
+
+- `RequestValidationFailure` for invalid VendorId or Contact Preference;
+- `VendorNotFound`;
+- `CommunityParticipationConflict`;
+- `VendorVerificationUnavailable`; and
+- `CommunityPersistenceUnavailable`.
+
+For every Join Community failure, verify the controlled outcome, retry guidance where defined and the absence of Community Participation, outbox work and Integration Events. Verify that retry after an uncertain response converges through the approved equivalent-replay guarantee.
+
+Verify the post-registration client boundary represented by the service contract:
+
+- no Community request is made when the Vendor chooses not to join;
+- absence is not stored as a negative participation record; and
+- no later navigation is interpreted as Community amendment or withdrawal.
 
 ## Successful Registration
 
@@ -498,7 +616,7 @@ CON-017 and HJ-012 may be referenced to show that Transactional Outbox is approv
 
 ## Business Failures
 
-HJ-106 Part A, Section 4.11.
+Use the controlled failures defined for all four approved operations in HJ-106 Part A, including RegisterVendor failures in Section 4.11, DetermineRequiredLicenceTypes failures in Section 4.13.7 and JoinCommunity outcomes in Section 4.14.4.
 
 For each failure verify:
 
@@ -618,43 +736,49 @@ Provide a table containing:
 - Coverage Status;
 - Open Dependencies.
 
+Include `DetermineRequiredLicenceTypes`, `JoinCommunity`, `RegisterVendor` and `RetrieveRegisteredVendor` explicitly in the coverage accounting.
+
 ## 5. Test Catalogue
 
 Organise the catalogue into the following subsections.
 
-### 5.1 Successful Registration
+### 5.1 Required Licence Types Determination
 
-### 5.2 Request Completeness and Required Information
+### 5.2 Join Community
 
-### 5.3 Legal Operator Rules
+### 5.3 Successful Registration
 
-### 5.4 Trading Characteristics
+### 5.4 Request Completeness and Required Information
 
-### 5.5 Contact Information
+### 5.5 Legal Operator Rules
 
-### 5.6 Vendor Managed Information
+### 5.6 Trading Characteristics
 
-### 5.7 Registration Declarations
+### 5.7 Contact Information
 
-### 5.8 Address Collaboration and Derived Information
+### 5.8 Vendor Managed Information
 
-### 5.9 Aggregate Creation Invariants
+### 5.9 Registration Declarations
 
-### 5.10 Vendor Lifecycle and Initial State
+### 5.10 Address Collaboration and Derived Information
 
-### 5.11 Domain Event Behaviour
+### 5.11 Aggregate Creation Invariants
 
-### 5.12 Integration Event Behaviour
+### 5.12 Vendor Lifecycle and Initial State
 
-### 5.13 Idempotency and Concurrency
+### 5.13 Domain Event Behaviour
 
-### 5.14 Persistence and Reliable Publication
+### 5.14 Integration Event Behaviour
 
-### 5.15 Registered Vendor Retrieval
+### 5.15 Idempotency and Concurrency
 
-### 5.16 Business Failures
+### 5.16 Persistence and Reliable Publication
 
-### 5.17 Scope Exclusions and Prohibited Behaviour
+### 5.17 Registered Vendor Retrieval
+
+### 5.18 Business Failures
+
+### 5.19 Scope Exclusions and Prohibited Behaviour
 
 For every test obligation provide a table row or structured entry containing:
 
@@ -690,6 +814,31 @@ Separate:
 - header tests;
 - replay-response tests.
 
+For `POST /vendor-registration/required-licence-types`, derive normative API Contract coverage for:
+
+- the complete request shape and controlled values;
+- prohibition of extra caller-authored Address or authority fields;
+- the `200` response envelope containing the active Rule Set Version and the complete, canonically ordered five-item determination with explicit `IsRequired` values;
+- the standard error envelope and approved HTTP status mapping for `DeterminationRequestValidationFailure`, `InvalidReference`, `InvalidAddressResult`, `UnsupportedDetermination` and `ComplianceDeterminationTemporarilyUnavailable`;
+- the operation's side-effect-free POST semantics; and
+- the absence of Vendor creation, persistence, events and publication work.
+
+Treat these obligations as normative because the applicable HJ-106 Part B contract and CON-047 concern are Approved. Do not relabel them as pending technical conventions.
+
+For `POST /community-participations`, derive normative API Contract coverage for:
+
+- the exact lower-camel-case `vendorId` and `contactPreference` request;
+- controlled wire values `email`, `sms` and `whatsApp`;
+- compatible unknown-member handling and controlled missing, null or invalid required-member validation;
+- exclusion of a participation Boolean and contact destination;
+- the original `201 Created` representation for both first success and equivalent replay;
+- stable `Location: /community-participations/{communityParticipationId}` behaviour;
+- the standard safe error envelope and approved `400`, `404`, `409` and `503` mappings;
+- absence of automatic API retry; and
+- absence of HTTP-owned Community behaviour, Vendor verification, persistence, event construction or broker interaction.
+
+Treat these obligations as normative because HJ-106 v2.2 Part B, CON-046 and the applicable HJ-010/HJ-012 technical baseline are Approved. Do not reinterpret the HTTP representation as Community Domain behaviour.
+
 Do not treat API technical obligations as transport-independent business requirements. Where their governing concerns are Approved, treat them as normative API Contract requirements.
 
 ## 7. Blocked and Deferred Tests
@@ -719,6 +868,8 @@ Provide a table containing:
 
 Every normative HJ-106 Part A requirement must appear.
 
+Trace all four approved operations explicitly, including every normative `DetermineRequiredLicenceTypes` and `JoinCommunity` requirement.
+
 ## 9. Completeness Analysis
 
 Identify:
@@ -737,6 +888,8 @@ Do not claim that HJ-107 completeness depends on a particular HJ-013 version or 
 
 Do **not** silently resolve gaps.
 
+Report completeness separately for `DetermineRequiredLicenceTypes`, `JoinCommunity`, `RegisterVendor` and `RetrieveRegisteredVendor`.
+
 ## 10. Assumptions and Open Questions
 
 Classify each item as:
@@ -748,6 +901,10 @@ Classify each item as:
 - Ambiguity;
 - Missing Information;
 - Artefact Conflict.
+
+Include any determination-specific dependency, ambiguity or missing information without weakening the approved fail-closed behaviour.
+
+Include any Community-specific dependency, ambiguity or missing information without introducing amendment, withdrawal, consent or delivery behaviour.
 
 ## 11. Review Checklist
 
@@ -771,10 +928,13 @@ Confirm that the Test Catalogue:
 - treats HJ-012 as approved architecture rather than a source of new service behaviour;
 - treats Identity as outside Epic 1 unless an approved source establishes an in-scope dependency;
 - covers every normative statement in HJ-106 Part A;
+- accounts explicitly for all four approved operations in the Coverage Summary, traceability, completeness analysis and reconciliation;
 - preserves bounded-context ownership;
 - uses ubiquitous language consistently;
 - covers every HJ-104 field rule;
 - covers every HJ-004 creation invariant;
+- covers every HJ-106 DetermineRequiredLicenceTypes requirement;
+- covers every HJ-106 JoinCommunity requirement;
 - covers every HJ-106 RegisterVendor requirement;
 - covers every HJ-106 RetrieveRegisteredVendor requirement;
 - covers every HJ-106 business failure;
@@ -809,6 +969,8 @@ Report completion totals for:
 
 No `AI-*` identifier shall appear in this reconciliation.
 
+Reconcile all genuinely new `VR-DETERMINATION-*` and `VR-COMMUNITY-*` obligations while preserving every semantically unchanged existing `VR-*` identifier.
+
 ---
 
 # Test ID Convention
@@ -821,6 +983,8 @@ VR-<AREA>-<NNN>
 
 Suggested area codes:
 
+- `DETERMINATION`
+- `COMMUNITY`
 - `SUCCESS`
 - `REQ`
 - `LEGAL`
@@ -924,7 +1088,7 @@ Requirements:
 # Review Standard
 
 The completed document should be sufficiently detailed to become the baseline for:
-Both RegisterVendor and RetrieveRegisteredVendor shall be treated as approved business operations for Epic 1. The resulting Test Catalogue shall derive complete test obligations for both operations while preserving the approved service boundaries and ownership rules.
+DetermineRequiredLicenceTypes, JoinCommunity, RegisterVendor and RetrieveRegisteredVendor shall be treated as approved business operations for Epic 1. The resulting Test Catalogue shall derive complete test obligations for all four operations while preserving the approved service boundaries and ownership rules.
 
 - Test Architecture Review;
 - Domain Test Design;

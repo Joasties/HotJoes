@@ -8,8 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../HotJoes.Infrastructure.Community.Persistence/HotJoes.Infrastructure.Community.Persistence.csproj" />
+    <ProjectReference Include="../HotJoes.Infrastructure.CommunityConsumer/HotJoes.Infrastructure.CommunityConsumer.csproj" />
     <ProjectReference Include="../HotJoes.Infrastructure.ComplianceConsumer/HotJoes.Infrastructure.ComplianceConsumer.csproj" />
-    <ProjectReference Include="../HotJoes.Infrastructure.Persistence/HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="../HotJoes.Infrastructure.Vendor.Persistence/HotJoes.Infrastructure.Vendor.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

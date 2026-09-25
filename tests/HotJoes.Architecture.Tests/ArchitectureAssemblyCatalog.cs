@@ -21,17 +21,23 @@ public sealed class ArchitectureAssemblyCatalog
             typeof(HotJoes.Api.Vendor.VendorApiErrorMapper).Assembly,
             typeof(HotJoes.Application.Address.IAddressResolutionService)
                 .Assembly,
+            typeof(HotJoes.Application.Compliance
+                .IComplianceDeterminationService).Assembly,
+            typeof(HotJoes.Application.Community.JoinCommunityService)
+                .Assembly,
             typeof(HotJoes.Application.Vendor.RegisterVendorService)
                 .Assembly,
             typeof(HotJoes.Domain.Vendor.Vendor).Assembly,
             typeof(HotJoes.Infrastructure.ComplianceConsumer
                 .ComplianceDeliveryProcessor).Assembly,
             typeof(HotJoes.Infrastructure.Health
-                .Epic1HealthEvaluator).Assembly,
-            typeof(HotJoes.Infrastructure.Persistence
+                .OperationalHealthEvaluator).Assembly,
+            typeof(HotJoes.Infrastructure.Vendor.Persistence
                 .PostgreSqlVendorRepository).Assembly,
             typeof(HotJoes.Infrastructure.Vendor.Address
                 .AddressResolutionAdapter).Assembly,
+            typeof(HotJoes.Infrastructure.Vendor.Compliance
+                .ComplianceDeterminationAdapter).Assembly,
             typeof(HotJoes.Infrastructure.VendorRelay
                 .VendorOutboxRelayRunner).Assembly
         ];

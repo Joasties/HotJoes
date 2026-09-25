@@ -4,18 +4,19 @@ public sealed record TradingCharacteristics
 {
     public TradingCharacteristics(
         TradingLocation tradingLocation,
-        OpeningHours openingHours,
+        WeeklyOpeningHours weeklyOpeningHours,
         bool serviceIncludesHotFood,
         bool alcoholService)
     {
         TradingLocation = tradingLocation;
-        OpeningHours = openingHours;
+        ArgumentNullException.ThrowIfNull(weeklyOpeningHours);
+        WeeklyOpeningHours = weeklyOpeningHours;
         ServiceIncludesHotFood = serviceIncludesHotFood;
         AlcoholService = alcoholService;
     }
 
     public TradingLocation TradingLocation { get; }
-    public OpeningHours OpeningHours { get; }
+    public WeeklyOpeningHours WeeklyOpeningHours { get; }
     public bool ServiceIncludesHotFood { get; }
     public bool AlcoholService { get; }
 }

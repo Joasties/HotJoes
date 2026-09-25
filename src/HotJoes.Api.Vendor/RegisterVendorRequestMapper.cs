@@ -15,8 +15,8 @@ public sealed class RegisterVendorRequestMapper
             ?? throw new ArgumentException(
                 "Trading characteristics must be structurally valid before mapping.",
                 nameof(request));
-        RegisterVendorOpeningHoursRequest openingHours =
-            trading.OpeningHours
+        RegisterVendorWeeklyOpeningHoursRequest openingHours =
+            trading.WeeklyOpeningHours
             ?? throw new ArgumentException(
                 "Opening hours must be structurally valid before mapping.",
                 nameof(request));
@@ -37,8 +37,8 @@ public sealed class RegisterVendorRequestMapper
             ParseEnum<LegalOperatorType>(request.LegalOperatorType),
             request.CompanyRegistrationNumber,
             ParseEnum<TradingLocation>(trading.TradingLocation),
-            ParseTime(openingHours.StartTime),
-            ParseTime(openingHours.EndTime),
+            new RegisterVendorWeeklyOpeningHours(
+                openingHours.Days!.Select(MapDay)),
             RequireBoolean(trading.ServiceIncludesHotFood),
             RequireBoolean(trading.AlcoholService),
             contact.ContactName!,
@@ -52,6 +52,15 @@ public sealed class RegisterVendorRequestMapper
             RequireBoolean(declarations.AcceptHotJoesPlatformTerms));
     }
 
+    private static RegisterVendorDailyOpeningHours MapDay(
+        RegisterVendorDailyOpeningHoursRequest day) =>
+        new(
+            ParseEnum<TradingDay>(day.Day),
+            RequireBoolean(day.IsClosed),
+            RequireBoolean(day.IsOpenAllDay),
+            ParseOptionalTime(day.StartTime),
+            ParseOptionalTime(day.EndTime));
+
     private static TEnum ParseEnum<TEnum>(string? value)
         where TEnum : struct, Enum
     {
@@ -64,8 +73,13 @@ public sealed class RegisterVendorRequestMapper
         return result;
     }
 
-    private static TimeOnly ParseTime(string? value)
+    private static TimeOnly? ParseOptionalTime(string? value)
     {
+        if (value is null)
+        {
+            return null;
+        }
+
         if (!TimeOnly.TryParseExact(
                 value,
                 "HH:mm:ss",

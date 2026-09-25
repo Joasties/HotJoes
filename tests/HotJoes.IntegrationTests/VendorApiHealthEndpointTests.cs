@@ -33,6 +33,9 @@ public sealed class VendorApiHealthEndpointTests
             builder.UseSetting(
                 "ConnectionStrings:VendorDatabase",
                 "Host=127.0.0.1;Port=1;Database=hotjoes;Username=test;Password=test;Timeout=1");
+            builder.UseSetting(
+                "ConnectionStrings:CommunityDatabase",
+                "Host=127.0.0.1;Port=1;Database=hotjoes_community;Username=test;Password=test;Timeout=1");
         }
     }
 }

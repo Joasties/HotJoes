@@ -5,6 +5,48 @@ namespace HotJoes.Api.Vendor;
 
 public sealed class VendorApiErrorMapper
 {
+    public VendorApiErrorMapping Map(
+        DetermineRequiredLicenceTypesResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        return result switch
+        {
+            DetermineRequiredLicenceTypesResult
+                .DeterminationRequestValidationFailure failure =>
+                DeterminationValidationFailure(failure),
+            DetermineRequiredLicenceTypesResult.InvalidReference => Create(
+                StatusCodes.Status400BadRequest,
+                "invalidAddressReference",
+                "The Address reference is invalid or unknown."),
+            DetermineRequiredLicenceTypesResult.InvalidAddressResult => Create(
+                StatusCodes.Status400BadRequest,
+                "invalidAddressResult",
+                "The selected Address result is not valid for Compliance determination."),
+            DetermineRequiredLicenceTypesResult.UnsupportedDetermination => Create(
+                StatusCodes.Status409Conflict,
+                "complianceDeterminationUnsupported",
+                "The supplied information is outside the supported Compliance determination coverage."),
+            DetermineRequiredLicenceTypesResult
+                .AddressServiceTemporarilyUnavailable => Create(
+                StatusCodes.Status503ServiceUnavailable,
+                "addressServiceTemporarilyUnavailable",
+                "The Address service is temporarily unavailable. The request may be retried."),
+            DetermineRequiredLicenceTypesResult
+                .ComplianceDeterminationTemporarilyUnavailable => Create(
+                StatusCodes.Status503ServiceUnavailable,
+                "complianceDeterminationTemporarilyUnavailable",
+                "Compliance determination is temporarily unavailable. The request may be retried."),
+            DetermineRequiredLicenceTypesResult.Success => throw new ArgumentException(
+                "Successful determination results are not error mappings.",
+                nameof(result)),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(result),
+                result.GetType().FullName,
+                "The determination result is not an approved controlled failure.")
+        };
+    }
+
     public VendorApiErrorMapping Map(RegisterVendorResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -90,6 +132,57 @@ public sealed class VendorApiErrorMapper
                 Array.AsReadOnly(errors)));
     }
 
+    private static VendorApiErrorMapping DeterminationValidationFailure(
+        DetermineRequiredLicenceTypesResult
+            .DeterminationRequestValidationFailure failure)
+    {
+        VendorApiValidationErrorResponse[] errors = failure.Errors
+            .Select(MapDeterminationValidationError)
+            .ToArray();
+
+        return new VendorApiErrorMapping(
+            StatusCodes.Status400BadRequest,
+            new VendorApiErrorResponse(
+                "determinationValidationFailed",
+                "Required Licence Types could not be determined because supplied information is invalid.",
+                Array.AsReadOnly(errors)));
+    }
+
+    private static VendorApiValidationErrorResponse
+        MapDeterminationValidationError(RegistrationValidationError error)
+    {
+        return new VendorApiValidationErrorResponse(
+            MapDeterminationField(error.Field),
+            MapCode(error.Code),
+            error.Message);
+    }
+
+    private static string MapDeterminationField(string field)
+    {
+        return field switch
+        {
+            nameof(DetermineRequiredLicenceTypesRequest.LegalOperatorType) =>
+                "legalOperatorType",
+            nameof(DetermineRequiredLicenceTypesRequest.TradingLocation) =>
+                "tradingLocation",
+            nameof(DetermineRequiredLicenceTypesRequest.WeeklyOpeningHours) =>
+                "weeklyOpeningHours.days",
+            nameof(DetermineRequiredLicenceTypesRequest.ServiceIncludesHotFood) =>
+                "serviceIncludesHotFood",
+            nameof(DetermineRequiredLicenceTypesRequest.AlcoholService) =>
+                "alcoholService",
+            nameof(DetermineRequiredLicenceTypesRequest.AddressResolutionReference) =>
+                "addressResolutionReference",
+            _ when field.StartsWith("weeklyOpeningHours.", StringComparison.Ordinal) =>
+                field,
+            _ when char.IsLower(field[0]) => field,
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(field),
+                field,
+                "The determination validation field has no approved API JSON path.")
+        };
+    }
+
     private static VendorApiValidationErrorResponse Map(
         RegistrationValidationError error)
     {
@@ -126,10 +219,8 @@ public sealed class VendorApiErrorMapper
                 "companyRegistrationNumber",
             nameof(RegisterVendorCommand.TradingLocation) =>
                 "tradingCharacteristics.tradingLocation",
-            nameof(RegisterVendorCommand.OpeningHoursStartTime) =>
-                "tradingCharacteristics.openingHours.startTime",
-            nameof(RegisterVendorCommand.OpeningHoursEndTime) =>
-                "tradingCharacteristics.openingHours.endTime",
+            nameof(RegisterVendorCommand.WeeklyOpeningHours) =>
+                "tradingCharacteristics.weeklyOpeningHours.days",
             nameof(RegisterVendorCommand.ServiceIncludesHotFood) =>
                 "tradingCharacteristics.serviceIncludesHotFood",
             nameof(RegisterVendorCommand.AlcoholService) =>
@@ -152,6 +243,10 @@ public sealed class VendorApiErrorMapper
                 "registrationDeclarations.informationAccurate",
             nameof(RegisterVendorCommand.AcceptHotJoesPlatformTerms) =>
                 "registrationDeclarations.acceptHotJoesPlatformTerms",
+            _ when field.StartsWith(
+                $"{nameof(RegisterVendorCommand.WeeklyOpeningHours)}.",
+                StringComparison.Ordinal) =>
+                "tradingCharacteristics.weeklyOpeningHours.days",
             _ => throw new ArgumentOutOfRangeException(
                 nameof(field),
                 field,

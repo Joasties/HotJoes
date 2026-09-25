@@ -52,10 +52,10 @@ public sealed class VendorRegisteredIntegrationEventMapperTests
         Assert.Equal("stall", result.Payload.TradingCharacteristics.TradingLocation);
         Assert.Equal(
             new TimeOnly(9, 0),
-            result.Payload.TradingCharacteristics.OpeningHours.StartTime);
+            result.Payload.TradingCharacteristics.WeeklyOpeningHours.Days[0].StartTime);
         Assert.Equal(
             new TimeOnly(17, 0),
-            result.Payload.TradingCharacteristics.OpeningHours.EndTime);
+            result.Payload.TradingCharacteristics.WeeklyOpeningHours.Days[0].EndTime);
         Assert.True(result.Payload.TradingCharacteristics.ServiceIncludesHotFood);
         Assert.False(result.Payload.TradingCharacteristics.AlcoholService);
 
@@ -139,7 +139,7 @@ public sealed class VendorRegisteredIntegrationEventMapperTests
             primaryTradingAuthority,
             new TradingCharacteristics(
                 tradingLocation,
-                new OpeningHours(new TimeOnly(9, 0), new TimeOnly(17, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(9, 0), new TimeOnly(17, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
 

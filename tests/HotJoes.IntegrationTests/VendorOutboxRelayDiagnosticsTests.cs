@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 using System.Text;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using HotJoes.Infrastructure.VendorRelay;
 using Microsoft.Extensions.Logging;
 

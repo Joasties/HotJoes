@@ -18,8 +18,7 @@ public sealed class RegisterVendorCommandTests
             legalOperatorType: LegalOperatorType.LimitedCompany,
             companyRegistrationNumber: "12345678",
             tradingLocation: TradingLocation.Stall,
-            openingHoursStartTime: openingHoursStartTime,
-            openingHoursEndTime: openingHoursEndTime,
+            weeklyOpeningHours: RegisterVendorWeeklyOpeningHours.EveryDay(openingHoursStartTime, openingHoursEndTime),
             serviceIncludesHotFood: true,
             alcoholService: false,
             contactName: "Joseph Bloggs",
@@ -37,8 +36,11 @@ public sealed class RegisterVendorCommandTests
         Assert.Equal(LegalOperatorType.LimitedCompany, command.LegalOperatorType);
         Assert.Equal("12345678", command.CompanyRegistrationNumber);
         Assert.Equal(TradingLocation.Stall, command.TradingLocation);
-        Assert.Equal(openingHoursStartTime, command.OpeningHoursStartTime);
-        Assert.Equal(openingHoursEndTime, command.OpeningHoursEndTime);
+        Assert.All(command.WeeklyOpeningHours.Days, day =>
+        {
+            Assert.Equal(openingHoursStartTime, day.StartTime);
+            Assert.Equal(openingHoursEndTime, day.EndTime);
+        });
         Assert.True(command.ServiceIncludesHotFood);
         Assert.False(command.AlcoholService);
         Assert.Equal("Joseph Bloggs", command.ContactName);
@@ -73,12 +75,11 @@ public sealed class RegisterVendorCommandTests
             "InformationAccurate",
             "LegalOperatorName",
             "LegalOperatorType",
-            "OpeningHoursEndTime",
-            "OpeningHoursStartTime",
             "ServiceIncludesHotFood",
             "TradingLocation",
             "TradingName",
-            "Website"
+            "Website",
+            "WeeklyOpeningHours"
         };
 
         var commandType = typeof(RegisterVendorCommand);

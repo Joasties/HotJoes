@@ -1,6 +1,7 @@
 namespace HotJoes.Application.Address;
 
-public sealed class StubAddressApplication : IAddressResolutionService
+public sealed class StubAddressApplication
+    : IAddressResolutionService, IAddressSearchService
 {
     private readonly Dictionary<string, BoundResolution> _boundResults =
         new(StringComparer.Ordinal);
@@ -87,6 +88,46 @@ public sealed class StubAddressApplication : IAddressResolutionService
                 "The configured Address Resolution scenario is unsupported.")
         };
     }
+
+    public IReadOnlyList<AddressSearchCandidate> Search(
+        string query,
+        TradingLocation tradingLocation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+
+        string term = query.Trim();
+        return _boundResults
+            .Where(pair =>
+                pair.Value is ValidBoundResolution valid
+                && valid.TradingLocation == tradingLocation
+                && DisplayLines(valid.Result).Any(line =>
+                    line.Contains(term, StringComparison.OrdinalIgnoreCase)))
+            .Select(pair =>
+            {
+                var valid = (ValidBoundResolution)pair.Value;
+                return new AddressSearchCandidate(
+                    pair.Key,
+                    DisplayLines(valid.Result));
+            })
+            .OrderBy(candidate => candidate.DisplayLines[0], StringComparer.Ordinal)
+            .ThenBy(candidate => candidate.AddressResolutionReference, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static IReadOnlyList<string> DisplayLines(CompleteAddressResult result) =>
+        new[]
+        {
+            result.AddressLine1,
+            result.AddressLine2,
+            result.AddressLine3,
+            result.AddressLine4,
+            result.PostTown,
+            result.Postcode,
+            result.County
+        }
+        .Where(line => !string.IsNullOrWhiteSpace(line))
+        .Select(line => line!)
+        .ToArray();
 
     private static string CreateReference()
     {

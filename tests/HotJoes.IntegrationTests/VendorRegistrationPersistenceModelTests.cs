@@ -1,4 +1,4 @@
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -36,8 +36,6 @@ public sealed class VendorRegistrationPersistenceModelTests
             "legal_operator_type",
             "normalized_legal_operator_name",
             "normalized_trading_name",
-            "opening_hours_end",
-            "opening_hours_start",
             "post_town",
             "postcode",
             "primary_trading_authority",
@@ -124,18 +122,6 @@ public sealed class VendorRegistrationPersistenceModelTests
         AssertColumn(
             entity,
             table,
-            "opening_hours_start",
-            "time without time zone",
-            nullable: false);
-        AssertColumn(
-            entity,
-            table,
-            "opening_hours_end",
-            "time without time zone",
-            nullable: false);
-        AssertColumn(
-            entity,
-            table,
             "registered_at_utc",
             "timestamp with time zone",
             nullable: false);
@@ -172,6 +158,43 @@ public sealed class VendorRegistrationPersistenceModelTests
             "ck_vendor_registrations_trading_location",
             "ck_vendor_registrations_trading_preference",
             "ck_vendor_registrations_vendor_state");
+    }
+
+    [Fact]
+    public void Model_VendorOpeningHours_MapsSevenDayStateAndCompositeIdentity()
+    {
+        using VendorRegistrationDbContext context = CreateContext();
+        IEntityType entity = FindEntity(GetModel(context), "vendor_opening_hours");
+        StoreObjectIdentifier table = StoreObjectIdentifier.Table(
+            "vendor_opening_hours",
+            null);
+
+        AssertPrimaryKey(entity, table, "vendor_id", "day");
+        AssertColumns(
+            entity,
+            table,
+            "day",
+            "end_time",
+            "is_closed",
+            "is_open_all_day",
+            "start_time",
+            "vendor_id");
+        AssertColumn(entity, table, "vendor_id", "uuid", nullable: false);
+        AssertColumn(
+            entity,
+            table,
+            "day",
+            "character varying(9)",
+            nullable: false,
+            maximumLength: 9);
+        AssertColumn(entity, table, "is_closed", "boolean", nullable: false);
+        AssertColumn(entity, table, "is_open_all_day", "boolean", nullable: false);
+        AssertColumn(entity, table, "start_time", "time without time zone", nullable: true);
+        AssertColumn(entity, table, "end_time", "time without time zone", nullable: true);
+        AssertCheckConstraints(
+            entity,
+            "ck_vendor_opening_hours_day",
+            "ck_vendor_opening_hours_state");
     }
 
     [Fact]

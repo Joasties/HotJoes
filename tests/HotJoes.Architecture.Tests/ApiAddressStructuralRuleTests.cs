@@ -20,7 +20,7 @@ public sealed class ApiAddressStructuralRuleTests
     [InlineData("VendorRegistrationDbContext")]
     [InlineData("IOutboxRelayStore")]
     [InlineData("RabbitMqComplianceRecoveryPublisher")]
-    [InlineData("HotJoes.Infrastructure.Persistence")]
+    [InlineData("HotJoes.Infrastructure.Vendor.Persistence")]
     public void AI_API_001_EndpointImplementationCollaborator_IsDetected(
         string prohibitedCollaborator)
     {

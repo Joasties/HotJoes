@@ -85,8 +85,9 @@ public sealed class NewVendorRegistrationProcessorTests
             LegalOperatorType.LimitedCompany,
             "12345678",
             TradingLocation.Stall,
-            new TimeOnly(9, 0),
-            new TimeOnly(17, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(9, 0),
+                new TimeOnly(17, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Joseph Bloggs",

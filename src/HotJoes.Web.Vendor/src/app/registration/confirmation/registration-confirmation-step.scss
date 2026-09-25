@@ -1,0 +1,44 @@
+:host { color:#fff; display:grid; min-height:calc(100vh - 6rem); place-items:center; }
+.confirmation { background:rgba(7,7,7,.95); border:1px solid #ff8200; border-radius:1rem; box-shadow:0 1rem 4rem #000c; box-sizing:border-box; max-width:48rem; padding:1.55rem 1.8rem 1.6rem; position:relative; width:min(48rem,calc(100vw - 2rem)); }
+.submitted { align-items:start; border-bottom:1px solid #9b6627; display:grid; gap:1.15rem; grid-template-columns:auto 1fr; padding:.25rem 0 1rem; }
+.success-mark { border:2px solid #ff8200; border-radius:50%; color:#ff8200; display:grid; font-size:2rem; height:4rem; place-items:center; width:4rem; }
+h1 { font-size:2rem; line-height:1; margin:.55rem 0 .35rem; }
+.submitted strong { font-size:1.08rem; }
+.submitted p,.community-copy>p { color:#d2ccc3; line-height:1.35; margin:.55rem 0 0; }
+.community { display:grid; gap:1.25rem; grid-template-columns:minmax(0,1fr) 8.2rem; padding-top:1rem; }
+.community-copy h2 { align-items:center; display:flex; font-size:1.55rem; gap:.8rem; margin:0; }
+.people { color:#ff8200; font-size:3rem; line-height:.7; }
+.community-copy>strong { display:block; margin-left:5.2rem; }
+.community-copy>p { margin:.25rem 0 .75rem 5.2rem; }
+.first-message { border:1px solid #ff8200; border-radius:.7rem; display:grid; gap:.75rem; grid-template-columns:auto 1fr; padding:.75rem 1rem; }
+.mail { color:#ff8200; font-size:1.7rem; }
+ul { display:grid; gap:.25rem; list-style:none; margin:.45rem 0 0; padding:0; }
+li::before { background:#ff8200; border-radius:.2rem; color:#17100a; content:"✓"; display:inline-grid; font-weight:900; height:1.15rem; margin-right:.55rem; place-items:center; width:1.15rem; }
+.first-message li { font-size:.82rem; line-height:1.25; }
+form { margin-top:.7rem; }
+fieldset { border:0; margin:0; padding:0; }
+.preferences { align-items:end; display:flex; gap:1rem; }
+legend { display:grid; float:left; grid-template-columns:auto 1fr; margin-right:1.2rem; }
+legend>span { color:#ff8200; font-size:1.6rem; grid-row:1 / span 2; margin-right:.7rem; }
+legend small { color:#d2ccc3; font-size:.72rem; }
+.preferences label { align-items:center; display:flex; gap:.4rem; }
+input { accent-color:#ff8200; height:1.35rem; margin:0; width:1.35rem; }
+.involved { align-items:start; display:flex; gap:.8rem; margin-top:1rem; }
+.involved span { display:grid; gap:.15rem; }
+.involved small { color:#d2ccc3; }
+.privacy { color:#bfb8af; font-size:1rem; font-weight:700; line-height:1.3; margin:.55rem 0 0 3.1rem; }
+.privacy b { border:1px solid #ff8200; border-radius:50%; color:#ff8200; display:inline-grid; height:1.1rem; margin-right:.6rem; place-items:center; width:1.1rem; }
+.submission-error { color:#ffb36b; font-weight:700; margin:.75rem 0 0; }
+.fair-say { align-self:center; color:#ff8200; display:grid; justify-items:center; text-align:center; transform:rotate(-4deg); }
+.megaphone { font-size:2.1rem; }
+.fair-say strong { font-family:"Comic Sans MS",cursive; font-size:1.25rem; line-height:1.2; }
+.fair-say hr { border:0; border-top:3px solid #ff8200; transform:rotate(-12deg); width:5rem; }
+.fair-say b { font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; transform:rotate(4deg); }
+footer { display:grid; gap:1.5rem; grid-template-columns:1fr 1fr; margin-top:1.2rem; }
+footer button { border:1px solid #ff8200; border-radius:.55rem; font:inherit; font-size:1.05rem; font-weight:800; min-height:3rem; }
+footer button:disabled { cursor:not-allowed; opacity:.45; }
+.not-now { background:#090807; color:#fff; }
+.join { background:#ff8a00; color:#17100a; }
+button:focus-visible,input:focus-visible { outline:3px solid #55dff2; outline-offset:3px; }
+@media (max-width:46rem) { :host{padding-block:1rem}.community{grid-template-columns:1fr}.fair-say{display:none}.community-copy>strong,.community-copy>p{margin-left:0}.preferences{align-items:start;flex-wrap:wrap}legend{float:none;flex-basis:100%} }
+@media (max-width:32rem) { .confirmation{padding:1.2rem}.submitted{grid-template-columns:1fr}.success-mark{height:3rem;width:3rem}footer{grid-template-columns:1fr} }

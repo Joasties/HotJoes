@@ -9,7 +9,8 @@ public sealed class VendorValueObjectImmutabilityTests
     [Theory]
     [InlineData("VendorId")]
     [InlineData("TradingCharacteristics")]
-    [InlineData("OpeningHours")]
+    [InlineData("WeeklyOpeningHours")]
+    [InlineData("DailyOpeningHours")]
     [InlineData("VendorName")]
     [InlineData("CompanyRegistrationNumber")]
     [InlineData("PrimaryContact")]
@@ -57,7 +58,8 @@ public sealed class VendorValueObjectImmutabilityTests
         {
             "VendorId" => typeof(VendorId),
             "TradingCharacteristics" => typeof(TradingCharacteristics),
-            "OpeningHours" => typeof(OpeningHours),
+            "WeeklyOpeningHours" => typeof(WeeklyOpeningHours),
+            "DailyOpeningHours" => typeof(DailyOpeningHours),
             "VendorName" => typeof(VendorName),
             "CompanyRegistrationNumber" => typeof(CompanyRegistrationNumber),
             "PrimaryContact" => typeof(PrimaryContact),

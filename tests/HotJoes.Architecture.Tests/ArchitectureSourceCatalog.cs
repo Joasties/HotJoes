@@ -95,7 +95,9 @@ public sealed class ArchitectureSourceCatalog
     private static bool IsBuildArtifact(string relativePath)
     {
         return relativePath.Contains("/bin/", StringComparison.Ordinal) ||
-            relativePath.Contains("/obj/", StringComparison.Ordinal);
+            relativePath.Contains("/obj/", StringComparison.Ordinal) ||
+            relativePath.Contains("/node_modules/", StringComparison.Ordinal) ||
+            relativePath.Contains("/dist/", StringComparison.Ordinal);
     }
 
     private static bool IsGovernedSource(string relativePath)

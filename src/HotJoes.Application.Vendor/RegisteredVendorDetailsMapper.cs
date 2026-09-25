@@ -27,9 +27,15 @@ public sealed class RegisteredVendorDetailsMapper
             information.TradingName.Value,
             new RegisteredVendorTradingCharacteristics(
                 characteristics.TradingLocation,
-                new RegisteredVendorOpeningHours(
-                    characteristics.OpeningHours.StartTime,
-                    characteristics.OpeningHours.EndTime),
+                new RegisteredVendorWeeklyOpeningHours(
+                    characteristics.WeeklyOpeningHours.Days
+                        .Select(day => new RegisteredVendorDailyOpeningHours(
+                            day.Day,
+                            day.IsClosed,
+                            day.IsOpenAllDay,
+                            day.StartTime,
+                            day.EndTime))
+                        .ToArray()),
                 characteristics.ServiceIncludesHotFood,
                 characteristics.AlcoholService),
             information.PrimaryContact.ContactName,

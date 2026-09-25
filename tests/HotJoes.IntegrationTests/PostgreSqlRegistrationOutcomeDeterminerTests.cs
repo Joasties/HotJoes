@@ -1,6 +1,6 @@
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotJoes.IntegrationTests;
@@ -92,7 +92,7 @@ public sealed class PostgreSqlRegistrationOutcomeDeterminerTests
         await SeedRegistrationAsync(
             Guid.Parse("77800733-76c3-4b5c-a506-7c378b2c9990"),
             inputs,
-            fingerprintVersion: 2,
+            fingerprintVersion: 1,
             fingerprintBytes: Convert.FromHexString(
                 inputs.Fingerprint.Sha256Digest),
             currentVendorState: "pendingActivation");
@@ -177,8 +177,9 @@ public sealed class PostgreSqlRegistrationOutcomeDeterminerTests
             LegalOperatorType.SoleTrader,
             companyRegistrationNumber: null,
             TradingLocation.Kitchen,
-            new TimeOnly(17, 0),
-            new TimeOnly(2, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(17, 0),
+                new TimeOnly(2, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Jamie Taylor",
@@ -250,8 +251,9 @@ public sealed class PostgreSqlRegistrationOutcomeDeterminerTests
             FoodRegistrationAuthority = "Greenwich Borough Council",
             PrimaryTradingAuthority = null,
             TradingLocation = "kitchen",
-            OpeningHoursStart = inputs.Command.OpeningHoursStartTime,
-            OpeningHoursEnd = inputs.Command.OpeningHoursEndTime,
+            WeeklyOpeningHours = WeeklyOpeningHoursTestData.Records(
+                WeeklyOpeningHoursTestData.ToDomain(
+                    inputs.Command.WeeklyOpeningHours)),
             ServiceIncludesHotFood = inputs.Command.ServiceIncludesHotFood,
             AlcoholService = inputs.Command.AlcoholService,
             Website = null,

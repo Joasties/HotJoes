@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using HotJoes.Infrastructure.ComplianceConsumer;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Community.Persistence;
+using HotJoes.Infrastructure.CommunityConsumer;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -9,10 +11,14 @@ namespace HotJoes.IntegrationTests;
 [Collection(MigrationPostgreSqlCollection.Name)]
 public sealed class OneShotMigrationOperationTests
 {
+    private const string CommunitySchema = "community";
+    private const string MigrationsHistoryTable = "__EFMigrationsHistory";
     private const string VendorConnectionStringKey =
         "ConnectionStrings__VendorDatabase";
     private const string ComplianceConnectionStringKey =
         "ConnectionStrings__ComplianceDatabase";
+    private const string CommunityConnectionStringKey =
+        "ConnectionStrings__CommunityDatabase";
     private static readonly TimeSpan ExecutionTimeout =
         TimeSpan.FromSeconds(90);
 
@@ -25,14 +31,16 @@ public sealed class OneShotMigrationOperationTests
     }
 
     [Fact]
-    public async Task AI_RUNTIME_005_Operation_MigratesBothSchemas_AndIsIdempotent()
+    public async Task AI_RUNTIME_005_Operation_MigratesAllOwnedSchemas_AndIsIdempotent()
     {
         await ResetPublicSchemaAsync();
 
         int firstExitCode = await RunMigrationOperationAsync(
             _fixture.ConnectionString,
+            _fixture.ConnectionString,
             _fixture.ConnectionString);
         int secondExitCode = await RunMigrationOperationAsync(
+            _fixture.ConnectionString,
             _fixture.ConnectionString,
             _fixture.ConnectionString);
 
@@ -43,11 +51,19 @@ public sealed class OneShotMigrationOperationTests
             CreateVendorContext();
         await using ComplianceReceiptDbContext complianceContext =
             CreateComplianceContext();
+        await using CommunityPersistenceDbContext communityContext =
+            CreateCommunityContext();
+        await using CommunityReceiptDbContext communityReceiptContext =
+            CreateCommunityReceiptContext();
 
         Assert.Empty(
             await vendorContext.Database.GetPendingMigrationsAsync());
         Assert.Empty(
             await complianceContext.Database.GetPendingMigrationsAsync());
+        Assert.Empty(
+            await communityContext.Database.GetPendingMigrationsAsync());
+        Assert.Empty(
+            await communityReceiptContext.Database.GetPendingMigrationsAsync());
     }
 
     [Fact]
@@ -64,7 +80,8 @@ public sealed class OneShotMigrationOperationTests
 
         int exitCode = await RunMigrationOperationAsync(
             _fixture.ConnectionString,
-            unavailableDatabase);
+            unavailableDatabase,
+            _fixture.ConnectionString);
 
         Assert.NotEqual(0, exitCode);
     }
@@ -84,7 +101,9 @@ public sealed class OneShotMigrationOperationTests
 
         await using NpgsqlCommand command = connection.CreateCommand();
         command.CommandText =
-            "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;";
+            "DROP SCHEMA IF EXISTS public CASCADE; " +
+            "DROP SCHEMA IF EXISTS community CASCADE; " +
+            "CREATE SCHEMA public;";
         await command.ExecuteNonQueryAsync();
     }
 
@@ -108,9 +127,38 @@ public sealed class OneShotMigrationOperationTests
         return new ComplianceReceiptDbContext(options);
     }
 
+    private CommunityPersistenceDbContext CreateCommunityContext()
+    {
+        DbContextOptions<CommunityPersistenceDbContext> options =
+            new DbContextOptionsBuilder<CommunityPersistenceDbContext>()
+                .UseNpgsql(
+                    _fixture.ConnectionString,
+                    npgsql => npgsql.MigrationsHistoryTable(
+                        MigrationsHistoryTable,
+                        CommunitySchema))
+                .Options;
+
+        return new CommunityPersistenceDbContext(options);
+    }
+
+    private CommunityReceiptDbContext CreateCommunityReceiptContext()
+    {
+        DbContextOptions<CommunityReceiptDbContext> options =
+            new DbContextOptionsBuilder<CommunityReceiptDbContext>()
+                .UseNpgsql(
+                    _fixture.ConnectionString,
+                    npgsql => npgsql.MigrationsHistoryTable(
+                        MigrationsHistoryTable,
+                        CommunitySchema))
+                .Options;
+
+        return new CommunityReceiptDbContext(options);
+    }
+
     private static async Task<int> RunMigrationOperationAsync(
         string vendorConnectionString,
-        string complianceConnectionString)
+        string complianceConnectionString,
+        string communityConnectionString)
     {
         string repositoryRoot = FindRepositoryRoot();
         string projectPath = Path.Combine(
@@ -134,6 +182,8 @@ public sealed class OneShotMigrationOperationTests
             vendorConnectionString;
         startInfo.Environment[ComplianceConnectionStringKey] =
             complianceConnectionString;
+        startInfo.Environment[CommunityConnectionStringKey] =
+            communityConnectionString;
 
         using Process process = Process.Start(startInfo)
             ?? throw new InvalidOperationException(

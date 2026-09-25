@@ -27,28 +27,20 @@ public static class EdgeConfiguration
 
         RouteConfig[] routes =
         [
-            new RouteConfig
-            {
-                RouteId = "register-vendor",
-                ClusterId = "vendor-api",
-                Match = new RouteMatch
-                {
-                    Path = "/vendors",
-                    Methods = [HttpMethods.Post]
-                },
-                Transforms = ForwardingHeaderTransforms()
-            },
-            new RouteConfig
-            {
-                RouteId = "retrieve-registered-vendor",
-                ClusterId = "vendor-api",
-                Match = new RouteMatch
-                {
-                    Path = "/vendors/{vendorId}",
-                    Methods = [HttpMethods.Get]
-                },
-                Transforms = ForwardingHeaderTransforms()
-            }
+            Route("address-search", "/address-search", HttpMethods.Get),
+            Route(
+                "community-participations",
+                "/community-participations",
+                HttpMethods.Post),
+            Route(
+                "determine-required-licence-types",
+                "/vendor-registration/required-licence-types",
+                HttpMethods.Post),
+            Route("register-vendor", "/vendors", HttpMethods.Post),
+            Route(
+                "retrieve-registered-vendor",
+                "/vendors/{vendorId}",
+                HttpMethods.Get)
         ];
 
         ClusterConfig[] clusters =
@@ -71,6 +63,22 @@ public static class EdgeConfiguration
         });
         return services;
     }
+
+    private static RouteConfig Route(
+        string routeId,
+        string path,
+        string method) =>
+        new()
+        {
+            RouteId = routeId,
+            ClusterId = "vendor-api",
+            Match = new RouteMatch
+            {
+                Path = path,
+                Methods = [method]
+            },
+            Transforms = ForwardingHeaderTransforms()
+        };
 
     private static IReadOnlyList<IReadOnlyDictionary<string, string>>
         ForwardingHeaderTransforms() =>

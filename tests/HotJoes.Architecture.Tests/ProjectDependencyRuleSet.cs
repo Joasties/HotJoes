@@ -10,39 +10,67 @@ public static class ProjectDependencyRuleSet
                 "AI-API-001",
                 [
                     "HotJoes.Application.Address",
+                    "HotJoes.Application.Community",
+                    "HotJoes.Application.Compliance",
                     "HotJoes.Application.Vendor",
                     "HotJoes.Domain.Vendor",
                     "HotJoes.Infrastructure.Health",
-                    "HotJoes.Infrastructure.Persistence",
-                    "HotJoes.Infrastructure.Vendor.Address"
+                    "HotJoes.Infrastructure.Community.Persistence",
+                    "HotJoes.Infrastructure.Vendor.Persistence",
+                    "HotJoes.Infrastructure.Vendor.Address",
+                    "HotJoes.Infrastructure.Vendor.Compliance"
                 ]),
             ["HotJoes.Application.Address"] = new("AI-APP-002", []),
+            ["HotJoes.Application.Compliance"] = new("AI-COMP-001", []),
+            ["HotJoes.Application.Community"] = new(
+                "AI-COMMUNITY-001",
+                []),
             ["HotJoes.Application.Vendor"] = new(
                 "AI-APP-002",
                 ["HotJoes.Domain.Vendor"]),
             ["HotJoes.Database.Migrations"] = new(
                 "AI-ARCH-001",
                 [
+                    "HotJoes.Infrastructure.Community.Persistence",
+                    "HotJoes.Infrastructure.CommunityConsumer",
                     "HotJoes.Infrastructure.ComplianceConsumer",
-                    "HotJoes.Infrastructure.Persistence"
+                    "HotJoes.Infrastructure.Vendor.Persistence"
                 ]),
             ["HotJoes.Domain.Vendor"] = new("AI-DE-001", []),
+            ["HotJoes.Infrastructure.Community.Persistence"] = new(
+                "AI-COMMUNITY-001",
+                ["HotJoes.Application.Community"]),
+            ["HotJoes.Infrastructure.CommunityConsumer"] = new(
+                "AI-COMMUNITY-001",
+                []),
+            ["HotJoes.Infrastructure.CommunityRelay"] = new(
+                "AI-COMMUNITY-001",
+                ["HotJoes.Infrastructure.Community.Persistence"]),
             ["HotJoes.Infrastructure.ComplianceConsumer"] = new(
                 "AI-CONS-003",
                 []),
             ["HotJoes.Infrastructure.Health"] = new("AI-ARCH-001", []),
-            ["HotJoes.Infrastructure.Persistence"] = new(
+            ["HotJoes.Infrastructure.Vendor.Persistence"] = new(
                 "AI-REP-001",
-                ["HotJoes.Application.Vendor"]),
+                [
+                    "HotJoes.Application.Community",
+                    "HotJoes.Application.Vendor"
+                ]),
             ["HotJoes.Infrastructure.Vendor.Address"] = new(
                 "AI-ADDR-001",
                 [
                     "HotJoes.Application.Address",
                     "HotJoes.Application.Vendor"
                 ]),
+            ["HotJoes.Infrastructure.Vendor.Compliance"] = new(
+                "AI-COMP-001",
+                [
+                    "HotJoes.Application.Compliance",
+                    "HotJoes.Application.Vendor"
+                ]),
             ["HotJoes.Infrastructure.VendorRelay"] = new(
                 "AI-REP-001",
-                ["HotJoes.Infrastructure.Persistence"]),
+                ["HotJoes.Infrastructure.Vendor.Persistence"]),
             ["HotJoes.Web.Edge"] = new("AI-GW-005", []),
             ["HotJoes.Worker.ComplianceConsumer"] = new(
                 "AI-ARCH-001",
@@ -50,11 +78,24 @@ public static class ProjectDependencyRuleSet
                     "HotJoes.Infrastructure.ComplianceConsumer",
                     "HotJoes.Infrastructure.Health"
                 ]),
+            ["HotJoes.Worker.CommunityConsumer"] = new(
+                "AI-COMMUNITY-001",
+                [
+                    "HotJoes.Infrastructure.CommunityConsumer",
+                    "HotJoes.Infrastructure.Health"
+                ]),
+            ["HotJoes.Worker.CommunityRelay"] = new(
+                "AI-COMMUNITY-001",
+                [
+                    "HotJoes.Infrastructure.Community.Persistence",
+                    "HotJoes.Infrastructure.CommunityRelay",
+                    "HotJoes.Infrastructure.Health"
+                ]),
             ["HotJoes.Worker.VendorRelay"] = new(
                 "AI-ARCH-001",
                 [
                     "HotJoes.Infrastructure.Health",
-                    "HotJoes.Infrastructure.Persistence",
+                    "HotJoes.Infrastructure.Vendor.Persistence",
                     "HotJoes.Infrastructure.VendorRelay"
                 ])
         };

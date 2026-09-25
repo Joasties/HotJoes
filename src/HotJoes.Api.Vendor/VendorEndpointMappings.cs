@@ -15,12 +15,60 @@ public static class VendorEndpointMappings
             .Produces<VendorApiErrorResponse>(StatusCodes.Status409Conflict)
             .Produces<VendorApiErrorResponse>(StatusCodes.Status503ServiceUnavailable);
 
+        endpoints.MapPost(
+                "/vendor-registration/required-licence-types",
+                DetermineRequiredLicenceTypesAsync)
+            .Accepts<DetermineRequiredLicenceTypesRequest>("application/json")
+            .Produces<DetermineRequiredLicenceTypesResponse>(StatusCodes.Status200OK)
+            .Produces<VendorApiErrorResponse>(StatusCodes.Status400BadRequest)
+            .Produces<VendorApiErrorResponse>(StatusCodes.Status409Conflict)
+            .Produces<VendorApiErrorResponse>(StatusCodes.Status503ServiceUnavailable);
+
         endpoints.MapGet("/vendors/{vendorId}", RetrieveVendorAsync)
             .Produces<RegisteredVendorDetailsResponse>(StatusCodes.Status200OK)
             .Produces<VendorApiErrorResponse>(StatusCodes.Status400BadRequest)
             .Produces<VendorApiErrorResponse>(StatusCodes.Status404NotFound);
 
         return endpoints;
+    }
+
+    private static async Task<IResult> DetermineRequiredLicenceTypesAsync(
+        HttpContext context,
+        IDetermineRequiredLicenceTypesService service,
+        DetermineRequiredLicenceTypesRequestReader requestReader,
+        DetermineRequiredLicenceTypesRequestMapper requestMapper,
+        DetermineRequiredLicenceTypesResponseMapper responseMapper,
+        VendorApiErrorMapper errorMapper,
+        CancellationToken cancellationToken)
+    {
+        if (!context.Request.HasJsonContentType())
+        {
+            return Results.StatusCode(StatusCodes.Status415UnsupportedMediaType);
+        }
+
+        DetermineRequiredLicenceTypesRequest? request =
+            await requestReader.ReadAsync(
+                context.Request.Body,
+                cancellationToken);
+
+        if (request is null)
+        {
+            return Error(errorMapper.MalformedRequest());
+        }
+
+        DetermineRequiredLicenceTypesResult result = await service.DetermineAsync(
+            requestMapper.Map(request),
+            cancellationToken);
+
+        if (result is DetermineRequiredLicenceTypesResult.Success success)
+        {
+            return Results.Json(
+                responseMapper.Map(success.Determination),
+                VendorApiJsonOptions.Create(),
+                statusCode: StatusCodes.Status200OK);
+        }
+
+        return Error(errorMapper.Map(result));
     }
 
     private static async Task<IResult> RegisterVendorAsync(

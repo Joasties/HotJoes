@@ -1,6 +1,6 @@
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
@@ -121,8 +121,9 @@ public sealed class PostgreSqlNewVendorRegistrationCommitterTests
             LegalOperatorType.LimitedCompany,
             "SC123456",
             TradingLocation.Stall,
-            new TimeOnly(9, 0),
-            new TimeOnly(17, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(9, 0),
+                new TimeOnly(17, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Alex Morgan",
@@ -171,9 +172,7 @@ public sealed class PostgreSqlNewVendorRegistrationCommitterTests
             addressValues.PrimaryTradingAuthority,
             new TradingCharacteristics(
                 command.TradingLocation,
-                new OpeningHours(
-                    command.OpeningHoursStartTime,
-                    command.OpeningHoursEndTime),
+                WeeklyOpeningHoursTestData.ToDomain(command.WeeklyOpeningHours),
                 command.ServiceIncludesHotFood,
                 command.AlcoholService));
 

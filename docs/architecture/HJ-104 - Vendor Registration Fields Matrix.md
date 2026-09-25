@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-104 |
 | **Document Title** | Vendor Registration Fields Matrix |
-| **Version** | 3.6 |
+| **Version** | 3.9 |
 | **Status** | Approved |
 | **Classification** | Requirements |
 | **Owner** | Project Architecture |
-| **Last Updated** | 25 August 2026 |
+| **Last Updated** | 22 September 2026 |
 
 ## Revision History
 
@@ -24,6 +24,9 @@
 | 3.4 | 17 August 2026 | Applied CR-057. Aligned the Vendor Registration information contract with the positional Address-to-BusinessAddressSnapshot mapping defined by ADR-006 v1.3. |
 | 3.5 | 19 August 2026 | Applied CR-058. Defined the approved CON-013 composite Vendor uniqueness identity, semantic registration equivalence and equivalent-replay and conflict outcomes. |
 | 3.6 | 25 August 2026 | Defined the approved CON-026 Contact Email and Primary Contact Telephone validation and canonicalisation profiles and clarified authoritative Application validation allocation. |
+| 3.7 | 14 September 2026 | Applied CR-073. Replaced the single Opening Hours interval with the authoritative seven-day Weekly Opening Hours information contract and its Closed, Open All Day and timed-interval validation rules. |
+| 3.8 | 19 September 2026 | Propagated approved CON-047 by defining the pre-registration Compliance Determination input and result boundary while explicitly excluding it from the RegisterVendor information contract and Vendor information lifecycle. |
+| 3.9 | 22 September 2026 | Propagated approved CON-046 by defining the separate post-registration Join Community information contract, its Community ownership, validation and lifecycle, while explicitly excluding it from Vendor Registration and Vendor information. |
 
 ## 1. Purpose
 
@@ -50,6 +53,8 @@ This document intentionally excludes:
 - API contracts and implementation-specific validation (documented in the relevant service contracts and HJ-005)
 - Menu management, operational settings and compliance evidence
 
+It additionally defines the separate post-registration Community Participation information boundary solely to prevent its inputs and outputs from being misclassified as Vendor Registration information.
+
 ## 2. Registration Field Matrix
 
 | # | Field | Type | Required | Validation / Rules | Classification | Notes |
@@ -59,8 +64,8 @@ This document intentionally excludes:
 | 3 | Legal Operator Type | Lookup | Yes | Controlled list | Registered Information | Sole Trader, Ltd, LLP etc. See §5.1, §5.2. |
 | 4 | Company Registration Number | Text | Conditional | Mandatory where required by Legal Operator Type.<br>Must match UK Companies House registration number format: `^(?:[A-Za-z]{2})?\d{6,8}$`<br>Stored in canonical uppercase format.<br>Validation confirms format only. | Registered Information | Validation depends on Legal Operator Type. See §5.1, §5.2, §5.3. |
 | 5 | Trading Location | Lookup | Yes | Controlled list | Registered Information | Used to determine Compliance Requirements. See §5.1, §5.2. |
-| 6 | Opening Hours | Start Time / End Time | Yes | Opening Hours are represented by Start Time and End Time.<br>Validation shall not require Start Time to be earlier than End Time, allowing legitimate overnight trading periods (for example 23:00–05:00). | Registered Information | Used to determine Compliance Requirements. See §5.1, §5.2. |
-| 7 | Service Includes Hot Food | Boolean | Yes | — | Registered Information | Indicates whether the Vendor supplies food or drink heated above ambient room temperature.<br>Used together with Opening Hours to determine applicable Compliance Requirements. See §5.1. |
+| 6 | Weekly Opening Hours | Weekly schedule of Daily Opening Hours | Yes | Exactly seven entries, with each Trading Day Monday–Sunday present once. Each day is exactly Closed, Open All Day or a timed interval. Timed intervals require unequal Start Time and End Time and may span midnight. | Registered Information | Used to determine Compliance Requirements. “Everyday” is a presentation shortcut for seven identical entries, not a separate registered state. See §5.1, §5.2. |
+| 7 | Service Includes Hot Food | Boolean | Yes | — | Registered Information | Indicates whether the Vendor supplies food or drink heated above ambient room temperature.<br>Used together with Weekly Opening Hours to determine applicable Compliance Requirements. See §5.1. |
 | 8 | Alcohol Service | Boolean | Yes | — | Registered Information | Indicates whether the Vendor supplies alcohol.<br>Used to determine applicable Compliance Requirements. See §5.1. |
 | 9 | Contact Name | Text | Yes | 1–100 characters | Registered Information | Primary business contact. See §5.2. |
 | 10 | Contact Email | Email | Yes | Required ASCII email profile defined in §5.2; surrounding whitespace trimmed; domain stored lowercase while local-part case is preserved. | Registered Information | Structural validation only; allocation, deliverability and ownership verification are outside Epic 1. See §§5.2–5.3. |
@@ -137,6 +142,32 @@ The following information is intentionally excluded from Vendor Registration.
 | Bank Details | Payments |
 | Payment Provider Information | Payments |
 
+### 4.1 Transient Pre-registration Compliance Determination
+
+Required Licence Types are determined before progression beyond Step 4 through a separate Vendor Application operation. Its caller-supplied controlling inputs are Legal Operator Type, Trading Location, the complete Weekly Opening Hours value, Service Includes Hot Food, Alcohol Service and Address Resolution Reference. Vendor Application validates those inputs, resolves the reference through the Address boundary and supplies Compliance only with the corresponding approved Business Address, Food Registration Authority and conditional Primary Trading Authority.
+
+The result is a complete immutable Compliance Determination containing the active Rule Set Version and exactly one canonically ordered item for Food Business Registration, Street Trading Licence, Late Night Refreshment Licence, Premises Licence and Personal Licence Holder. Each item includes an explicit IsRequired value. The determination, its version, its items and the controlling-input fingerprint are transient Registration Session state. They are not Vendor Registration fields, Registered Information, Vendor Managed Information or Vendor Domain state.
+
+They are therefore excluded from RegisterVendor, semantic registration equivalence, persistence, registered-Vendor retrieval and VendorRegistered. Licence Details, evidence and documents also remain outside this contract.
+
+### 4.2 Post-registration Community Participation
+
+The following information belongs to the separate Community capability and is not Vendor Registration information, Registered Information, Vendor Managed Information, a Registration Declaration or Registration Session state.
+
+| Information | Type | Required for Join Community | Validation / Rules | Owner | Lifecycle |
+|---|---|---:|---|---|---|
+| VendorId | UUID | Yes | Must identify a successfully registered Vendor through the minimal Vendor-owned verification capability. It is a correlation identifier, not authentication, authorisation or proof that the caller controls the Vendor. | Vendor is authoritative for successful registration; Community stores the reference | Retained on the immutable Community Participation record |
+| Contact Preference | Controlled value | Yes | Exactly one of Email, SMS or WhatsApp. The HTTP values are `email`, `sms` and `whatsApp`. Email is the initially selected Web presentation option. | Community | Retained as personal-data-related metadata on the immutable Community Participation record |
+| Keep Me Involved | Web interaction choice | Required to enable Join Community | Initially unticked. Ticking enables Join Community; unticked plus Not Now performs no request. It is not sent as a participation Boolean because invocation implies affirmative participation. | Web client interaction only | Not persisted |
+
+The authoritative Join Community request contains exactly VendorId and Contact Preference. It contains no participation Boolean, Primary Contact information, Communication Consent, recipient resolution or delivery instruction.
+
+The first successful request creates one immutable Community Participation record containing server-generated CommunityParticipationId, VendorId, Contact Preference, JoinedAt and any required technical concurrency value. The same VendorId and preference returns the original committed success; the same VendorId with a different preference returns CommunityParticipationConflict. VendorId is unique in the Community store.
+
+The complete transport-independent outcomes are CommunityParticipationRecorded, CommunityParticipationAlreadyRecorded, RequestValidationFailure, VendorNotFound, CommunityParticipationConflict, VendorVerificationUnavailable and CommunityPersistenceUnavailable. Recorded and Already Recorded carry the original CommunityParticipationId, VendorId, Contact Preference and JoinedAt.
+
+Community Participation does not modify Vendor state and is excluded from RegisterVendor, semantic registration equivalence, Vendor persistence, registered-Vendor retrieval and VendorRegistered. Absence of a Community Participation record means not joined and is not stored as a negative choice. Amendment, withdrawal, Communication Consent, recipient resolution and communication delivery are outside Epic 1.
+
 ## 5. Business Rules
 
 Business rules governing Vendor Registration information are defined in this section. Rules are recorded exactly once. The Registration Field Matrix provides an executive summary and cross-references these sections via the Notes column.
@@ -156,11 +187,8 @@ Business rules governing Vendor Registration information are defined in this sec
 2. **Primary Trading Authority**
    Primary Trading Authority is required when Trading Location = Stall. It is not required for Restaurant or Kitchen.
 
-3. **Compliance Requirements determination**
-   Trading Characteristics (Trading Location, Opening Hours, Service Includes Hot Food, Alcohol Service) are used together to determine applicable Compliance Requirements.
-   - Service Includes Hot Food indicates whether the Vendor supplies food or drink heated above ambient room temperature.
-   - Alcohol Service indicates whether the Vendor supplies alcohol.
-   - Opening Hours (including legitimate overnight periods) contribute to the determination of Compliance Requirements.
+3. **Required Licence Types determination**
+   The separate pre-registration operation produces the complete Compliance Determination using Legal Operator Type, Trading Location, Weekly Opening Hours, Service Includes Hot Food, Alcohol Service and authoritative Address information. Food Business Registration is always required. Stall requires Street Trading Licence. Hot-food service overlapping any portion of 23:00 inclusive to 05:00 exclusive requires Late Night Refreshment Licence. Alcohol Service requires both Premises Licence and Personal Licence Holder. Closed never qualifies for the late-night rule; Open All Day qualifies; and timed intervals are evaluated for overlap across midnight. The result is transient and does not create Compliance Requirements.
 
 4. **Legal Operator Type dependencies**
    Legal Operator Type is selected from a controlled list and drives the conditional requirement for Company Registration Number.
@@ -178,7 +206,7 @@ Validation rules represent business constraints. Implementation-specific validat
 | Legal Operator Type | Must be a value from the controlled list |
 | Company Registration Number | Must match UK Companies House registration number format: `^(?:[A-Za-z]{2})?\d{6,8}$`. Validation confirms format only. |
 | Trading Location | Must be a value from the controlled list (Restaurant, Stall, Kitchen) |
-| Opening Hours | Represented by Start Time and End Time. Validation shall not require Start Time to be earlier than End Time, allowing legitimate overnight trading periods (for example 23:00–05:00). |
+| Weekly Opening Hours | Must contain exactly seven Daily Opening Hours entries, one for each unique Trading Day Monday–Sunday. Each entry must be exactly one valid state: Closed (`IsClosed = true`, `IsOpenAllDay = false`, both times absent); Open All Day (`IsClosed = false`, `IsOpenAllDay = true`, both times absent); or Timed Interval (both flags false, both times present and unequal). End Time may be earlier than Start Time for an overnight interval. Equal times are invalid; use Open All Day instead. |
 | Contact Name | 1–100 characters |
 | Contact Email | Surrounding whitespace is removed. The value shall contain exactly one `@`; the local part shall contain 1–64 characters; and the complete address shall contain at most 254 characters. The ASCII local part permits letters, digits and the characters `. ! # $ % & ' * + - / = ? ^ _ \` { \| } ~`; a dot shall not appear first, last or consecutively. The domain shall contain at least two dot-separated labels. Each label shall contain 1–63 ASCII letters, digits or hyphens and shall not begin or end with a hyphen. Display-name forms, comments, quoted local parts, domain literals and internationalized Unicode addresses are prohibited. This validates plausible structure only. |
 | Contact Telephone | Surrounding whitespace is removed. Raw input may contain decimal digits, spaces, hyphens and parentheses, plus one `+` only as the first non-whitespace character. Spaces, hyphens and parentheses are removed before validation; a leading `+` is retained. Bare `44` notation is prohibited. The normalized value shall match `^(?:(?:\+44\|0)7\d{9}\|(?:\+44\|0)(?:1\|2\|3\|5\|8\|9)\d{8,9})$`. Specialist, short-code and legacy ranges outside this profile are prohibited in Epic 1. This validates plausible UK structure only. |
@@ -200,6 +228,9 @@ Validation rules represent business constraints. Implementation-specific validat
 
 4. **Primary Contact Telephone**
    Accepted presentation characters are removed. A domestic normalized value is converted to canonical international form by removing its leading `0` and prepending `+44`; an accepted normalized `+44` value is retained. The canonical `+44` value is stored as Registered Information.
+
+5. **Weekly Opening Hours**
+   Daily entries are ordered canonically Monday through Sunday for downstream comparison and representation. “Everyday” input is expanded into seven identical daily entries before it enters the authoritative registration contract.
 
 ### 5.3.1 Validation Ownership and Ordering
 
@@ -245,6 +276,9 @@ The Canonical Address Identifier, Business Address Snapshot and applicable regul
 5. **Derived fields**
    Food Registration Authority and Primary Trading Authority (where applicable) are derived at registration and form part of Registered Information thereafter.
 
+6. **Community Participation and Contact Preference**
+   These are Community-owned post-registration information. The authoritative record is create-only and retained for at least as long as the associated Vendor exists. Epic 1 provides no expiry, deletion, amendment or withdrawal operation. Its absence represents no participation record rather than a persisted negative choice. Primary Contact details are never copied into Community persistence, events, logs or processing evidence.
+
 ### 5.6 Vendor Uniqueness and Registration Equivalence
 
 Epic 1 identifies an existing Vendor registration by the composite of:
@@ -255,12 +289,13 @@ Epic 1 identifies an existing Vendor registration by the composite of:
 
 The opaque Address Resolution reference is not part of this identity. The final composite identity can be established only after the Address Domain has resolved that reference and returned the Canonical Address Identifier.
 
-Semantic registration equivalence compares the complete materially relevant registration information after each value's approved canonicalisation. It excludes:
+Semantic registration equivalence compares the complete materially relevant registration information after each value's approved canonicalisation. Weekly Opening Hours are materially relevant and are compared as the complete canonical Monday-to-Sunday sequence, including every daily state, flag and applicable time. It excludes:
 
 - transient Registration Declarations;
 - the opaque Address Resolution reference;
 - server-generated values; and
-- technical metadata.
+- technical metadata; and
+- Compliance Determination, Rule Set Version, determination items, controlling-input fingerprint and Required Licence Types.
 
 A repeated `RegisterVendor` submission with the same composite identity and semantically equivalent registration information returns the original committed successful result without repeating any business effect. The same composite identity with materially different registration information returns `IdempotencyConflict`, does not update the existing Vendor and creates no new Vendor. Vendor updates require a separate future administration operation.
 
@@ -275,7 +310,10 @@ The concurrency technique, replay persistence and retention, transaction mechani
 | Address ownership, Canonical Address Identifier and Business Address Snapshot | ADR-006 / HJ-004 / HJ-105 |
 | Conditional registration rules and corresponding aggregate creation invariants | HJ-004 §8 |
 | Vendor uniqueness identity and semantic registration equivalence | HJ-010 CON-013 / HJ-012 CON-013 / HJ-105 §9 |
-| Compliance Requirements determination from Trading Characteristics | Compliance capability / related Architectural Decision Records |
+| Weekly Opening Hours structure and invariants | HJ-003 §3.4.2 / HJ-004 / CR-073 |
+| Required Licence Types determination input and transient-result boundary | HJ-010 CON-047 / HJ-012 CON-047 / ADR-007 |
+| Community Participation, Contact Preference and Join Community boundary | HJ-003 §§3.26–3.29 / HJ-004 §1.5 / HJ-010 CON-046 / HJ-012 CON-046 / ADR-002 v1.2 / ADR-008 v1.6 |
+| Post-registration Compliance Requirements | Compliance capability / ADR-007 |
 | Identity separation | Identity capability boundary (outside Vendor bounded context) |
 
 ## 6. Assumptions and Outstanding Decisions

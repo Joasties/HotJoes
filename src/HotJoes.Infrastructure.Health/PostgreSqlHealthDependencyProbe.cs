@@ -12,7 +12,8 @@ public sealed class PostgreSqlHealthDependencyProbe
         string connectionString)
     {
         if (dependency is not HealthDependency.VendorPostgreSql and
-            not HealthDependency.CompliancePostgreSql)
+            not HealthDependency.CompliancePostgreSql and
+            not HealthDependency.CommunityPostgreSql)
         {
             throw new ArgumentOutOfRangeException(nameof(dependency));
         }

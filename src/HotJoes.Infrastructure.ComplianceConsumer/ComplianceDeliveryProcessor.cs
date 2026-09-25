@@ -184,13 +184,83 @@ public sealed class ComplianceDeliveryProcessor
             HasNonEmptyString(trading, "tradingLocation") &&
             TryGetObject(
                 trading,
-                "openingHours",
+                "weeklyOpeningHours",
                 out JsonElement openingHours) &&
-            HasTime(openingHours, "startTime") &&
-            HasTime(openingHours, "endTime") &&
+            HasCompleteWeeklyOpeningHours(openingHours) &&
             HasBoolean(trading, "serviceIncludesHotFood") &&
             HasBoolean(trading, "alcoholService");
     }
+
+    private static bool HasCompleteWeeklyOpeningHours(JsonElement weekly)
+    {
+        if (!weekly.TryGetProperty("days", out JsonElement days) ||
+            days.ValueKind != JsonValueKind.Array ||
+            days.GetArrayLength() != 7)
+        {
+            return false;
+        }
+
+        string[] expected =
+        [
+            "monday", "tuesday", "wednesday", "thursday",
+            "friday", "saturday", "sunday"
+        ];
+        int index = 0;
+
+        foreach (JsonElement day in days.EnumerateArray())
+        {
+            if (!HasExactString(day, "day", expected[index++]) ||
+                !TryReadBoolean(day, "isClosed", out bool isClosed) ||
+                !TryReadBoolean(day, "isOpenAllDay", out bool isOpenAllDay) ||
+                !HasDailyTimeState(day, isClosed, isOpenAllDay))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HasDailyTimeState(
+        JsonElement day,
+        bool isClosed,
+        bool isOpenAllDay)
+    {
+        if (isClosed == isOpenAllDay)
+        {
+            if (isClosed)
+            {
+                return false;
+            }
+
+            return HasTime(day, "startTime") &&
+                HasTime(day, "endTime") &&
+                day.GetProperty("startTime").GetString() !=
+                    day.GetProperty("endTime").GetString();
+        }
+
+        return HasNull(day, "startTime") && HasNull(day, "endTime");
+    }
+
+    private static bool TryReadBoolean(
+        JsonElement parent,
+        string propertyName,
+        out bool value)
+    {
+        value = false;
+        if (!parent.TryGetProperty(propertyName, out JsonElement property) ||
+            property.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            return false;
+        }
+
+        value = property.GetBoolean();
+        return true;
+    }
+
+    private static bool HasNull(JsonElement parent, string propertyName) =>
+        parent.TryGetProperty(propertyName, out JsonElement property) &&
+        property.ValueKind == JsonValueKind.Null;
 
     private static bool HasRequiredBusinessAddress(JsonElement address)
     {

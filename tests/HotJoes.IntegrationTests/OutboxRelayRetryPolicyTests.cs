@@ -1,4 +1,4 @@
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 
 namespace HotJoes.IntegrationTests;
 

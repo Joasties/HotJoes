@@ -2,6 +2,6 @@ namespace HotJoes.Application.Vendor;
 
 public sealed record VendorRegisteredTradingCharacteristics(
     string TradingLocation,
-    VendorRegisteredOpeningHours OpeningHours,
+    VendorRegisteredWeeklyOpeningHours WeeklyOpeningHours,
     bool ServiceIncludesHotFood,
     bool AlcoholService);

@@ -1,11 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
@@ -13,20 +11,21 @@
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.11.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\HotJoes.Infrastructure.Health\HotJoes.Infrastructure.Health.csproj" />
     <ProjectReference Include="..\HotJoes.Application.Address\HotJoes.Application.Address.csproj" />
+    <ProjectReference Include="..\HotJoes.Application.Community\HotJoes.Application.Community.csproj" />
+    <ProjectReference Include="..\HotJoes.Application.Compliance\HotJoes.Application.Compliance.csproj" />
     <ProjectReference Include="..\HotJoes.Application.Vendor\HotJoes.Application.Vendor.csproj" />
     <ProjectReference Include="..\HotJoes.Domain.Vendor\HotJoes.Domain.Vendor.csproj" />
-    <ProjectReference Include="..\HotJoes.Infrastructure.Persistence\HotJoes.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="..\HotJoes.Infrastructure.Community.Persistence\HotJoes.Infrastructure.Community.Persistence.csproj" />
+    <ProjectReference Include="..\HotJoes.Infrastructure.Vendor.Persistence\HotJoes.Infrastructure.Vendor.Persistence.csproj" />
     <ProjectReference Include="..\HotJoes.Infrastructure.Vendor.Address\HotJoes.Infrastructure.Vendor.Address.csproj" />
+    <ProjectReference Include="..\HotJoes.Infrastructure.Vendor.Compliance\HotJoes.Infrastructure.Vendor.Compliance.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Update="AddressBootstrap\address-bootstrap-catalogue.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
 </Project>

@@ -134,8 +134,7 @@ public sealed class RetrieveRegisteredVendorServiceTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(
-                    new TimeOnly(17, 0),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0),
                     new TimeOnly(2, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));

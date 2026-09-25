@@ -196,8 +196,7 @@ public sealed class RegisterVendorCommandValidatorBusinessRuleTests
     {
         var validator = new RegisterVendorCommandValidator();
         RegisterVendorCommand command = CreateCommand(
-            openingHoursStartTime: new TimeOnly(23, 0),
-            openingHoursEndTime: new TimeOnly(5, 0),
+            weeklyOpeningHours: RegisterVendorWeeklyOpeningHours.EveryDay(new TimeOnly(23, 0), new TimeOnly(5, 0)),
             website: null,
             businessDescription: null);
 
@@ -205,8 +204,11 @@ public sealed class RegisterVendorCommandValidatorBusinessRuleTests
 
         var success = Assert.IsType<RegisterVendorCommandValidationResult.Success>(
             result);
-        Assert.Equal(new TimeOnly(23, 0), success.Command.OpeningHoursStartTime);
-        Assert.Equal(new TimeOnly(5, 0), success.Command.OpeningHoursEndTime);
+        Assert.All(success.Command.WeeklyOpeningHours.Days, day =>
+        {
+            Assert.Equal(new TimeOnly(23, 0), day.StartTime);
+            Assert.Equal(new TimeOnly(5, 0), day.EndTime);
+        });
         Assert.Null(success.Command.Website);
         Assert.Null(success.Command.BusinessDescription);
     }
@@ -257,8 +259,7 @@ public sealed class RegisterVendorCommandValidatorBusinessRuleTests
         LegalOperatorType legalOperatorType = LegalOperatorType.LimitedCompany,
         string? companyRegistrationNumber = "12345678",
         TradingLocation tradingLocation = TradingLocation.Stall,
-        TimeOnly? openingHoursStartTime = null,
-        TimeOnly? openingHoursEndTime = null,
+        RegisterVendorWeeklyOpeningHours? weeklyOpeningHours = null,
         string contactName = "Joseph Bloggs",
         string addressResolutionReference = "address-resolution-reference-001",
         string? website = "https://hotjoes.example",
@@ -273,8 +274,10 @@ public sealed class RegisterVendorCommandValidatorBusinessRuleTests
             legalOperatorType,
             companyRegistrationNumber,
             tradingLocation,
-            openingHoursStartTime ?? new TimeOnly(9, 0),
-            openingHoursEndTime ?? new TimeOnly(17, 0),
+            weeklyOpeningHours
+                ?? RegisterVendorWeeklyOpeningHours.EveryDay(
+                    new TimeOnly(9, 0),
+                    new TimeOnly(17, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             contactName: contactName,

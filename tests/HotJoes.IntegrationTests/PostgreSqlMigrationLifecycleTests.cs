@@ -1,5 +1,5 @@
 using HotJoes.Infrastructure.ComplianceConsumer;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -13,9 +13,9 @@ public sealed class PostgreSqlMigrationLifecycleTests
     private const string VendorBaselineMigration =
         "20260817000100_InitialVendorRegistrationSchema";
     private const string VendorPrecedingMigration =
-        "20260828000100_AddReliableOutboxRelayState";
-    private const string VendorCurrentMigration =
         "20260829000100_AddOutboxTraceContext";
+    private const string VendorCurrentMigration =
+        "20260917052004_AddWeeklyOpeningHours";
     private const string ComplianceCurrentMigration =
         "20260828000200_AddComplianceVendorRegisteredReceipts";
 
@@ -38,6 +38,7 @@ public sealed class PostgreSqlMigrationLifecycleTests
         Assert.Equal(
             [
                 VendorBaselineMigration,
+                "20260828000100_AddReliableOutboxRelayState",
                 VendorPrecedingMigration,
                 VendorCurrentMigration
             ],
@@ -106,12 +107,13 @@ public sealed class PostgreSqlMigrationLifecycleTests
         Assert.True(await ColumnExistsAsync(
             "vendor_registration_outbox",
             "claim_expires_at_utc"));
-        Assert.False(await ColumnExistsAsync(
+        Assert.True(await ColumnExistsAsync(
             "vendor_registration_outbox",
             "trace_parent"));
-        Assert.False(await ColumnExistsAsync(
+        Assert.True(await ColumnExistsAsync(
             "vendor_registration_outbox",
             "trace_state"));
+        Assert.False(await TableExistsAsync("vendor_opening_hours"));
         Assert.False(await TableExistsAsync(
             "compliance_vendor_registered_receipts"));
 
@@ -139,6 +141,7 @@ public sealed class PostgreSqlMigrationLifecycleTests
         Assert.True(await ColumnExistsAsync(
             "vendor_registration_outbox",
             "trace_state"));
+        Assert.True(await TableExistsAsync("vendor_opening_hours"));
         Assert.True(await IndexExistsAsync(
             "ix_vendor_registration_outbox_eligible"));
         Assert.True(await TableExistsAsync(

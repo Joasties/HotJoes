@@ -14,9 +14,16 @@ public sealed class RegisterVendorRequestContractTests
           "companyRegistrationNumber": "AB123456",
           "tradingCharacteristics": {
             "tradingLocation": "kitchen",
-            "openingHours": {
-              "startTime": "17:00:00",
-              "endTime": "02:00:00"
+            "weeklyOpeningHours": {
+              "days": [
+                { "day": "monday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "tuesday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "wednesday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "thursday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "friday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "saturday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" },
+                { "day": "sunday", "isClosed": false, "isOpenAllDay": false, "startTime": "17:00:00", "endTime": "02:00:00" }
+              ]
             },
             "serviceIncludesHotFood": false,
             "alcoholService": false
@@ -49,8 +56,11 @@ public sealed class RegisterVendorRequestContractTests
         Assert.Equal(LegalOperatorType.LimitedCompany, command.LegalOperatorType);
         Assert.Equal("AB123456", command.CompanyRegistrationNumber);
         Assert.Equal(TradingLocation.Kitchen, command.TradingLocation);
-        Assert.Equal(new TimeOnly(17, 0), command.OpeningHoursStartTime);
-        Assert.Equal(new TimeOnly(2, 0), command.OpeningHoursEndTime);
+        Assert.All(command.WeeklyOpeningHours.Days, day =>
+        {
+            Assert.Equal(new TimeOnly(17, 0), day.StartTime);
+            Assert.Equal(new TimeOnly(2, 0), day.EndTime);
+        });
         Assert.False(command.ServiceIncludesHotFood);
         Assert.False(command.AlcoholService);
         Assert.Equal("Jordan Smith", command.ContactName);

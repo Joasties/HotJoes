@@ -1,0 +1,56 @@
+<section class="step" aria-labelledby="operator-title">
+  <p class="step-number">Step 2 of 5</p>
+  <h1 id="operator-title" class="visually-hidden">
+    Choose how your business is legally set up
+  </h1>
+
+  <div class="journey-information">
+    <button
+      type="button"
+      aria-describedby="operator-explanation"
+      aria-label="About Legal Operator Type"
+    >
+      i
+    </button>
+    <div id="operator-explanation" class="information-overlay" role="tooltip">
+      <strong>Legal Operator Type</strong>
+      <span
+        >Choose the legal structure responsible for operating your business.
+        This determines which registration information we need.</span
+      >
+    </div>
+  </div>
+
+  <fieldset>
+    <legend class="visually-hidden">Legal operator type</legend>
+    <div class="cards">
+      @for (option of options; track option.value) {
+      <label class="card" [class.selected]="selected === option.value">
+        <input
+          type="radio"
+          name="legal-operator-type"
+          [value]="option.value"
+          [checked]="selected === option.value"
+          (change)="choose(option.value)"
+        />
+        <span
+          class="photo"
+          [style.background-image]="
+            'url(/images/legal-operator/' + option.image + ')'
+          "
+          aria-hidden="true"
+        ></span>
+        <span class="card-overlay">
+          <span class="title">{{ option.value }}</span>
+          <span class="description">{{ option.description }}</span>
+        </span>
+      </label>
+      }
+    </div>
+    <div class="operator-actions">
+      <button class="back" type="button" (click)="back()">
+        <span aria-hidden="true">←</span> Back
+      </button>
+    </div>
+  </fieldset>
+</section>

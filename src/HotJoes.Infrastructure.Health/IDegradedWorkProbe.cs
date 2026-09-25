@@ -2,7 +2,7 @@ namespace HotJoes.Infrastructure.Health;
 
 public interface IDegradedWorkProbe
 {
-    Epic1Component Component { get; }
+    OperationalComponent Component { get; }
 
     DegradedWorkKind Kind { get; }
 

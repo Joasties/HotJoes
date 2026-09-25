@@ -15,7 +15,14 @@ public sealed class VendorOpenApiDocumentTests
         JsonElement paths = document.RootElement.GetProperty("paths");
 
         Assert.Equal(
-            new[] { "/vendors", "/vendors/{vendorId}" },
+            new[]
+            {
+                "/address-search",
+                "/community-participations",
+                "/vendor-registration/required-licence-types",
+                "/vendors",
+                "/vendors/{vendorId}"
+            },
             paths.EnumerateObject()
                 .Select(path => path.Name)
                 .Order(StringComparer.Ordinal)
@@ -27,10 +34,112 @@ public sealed class VendorOpenApiDocumentTests
                 .Select(operation => operation.Name)
                 .ToArray());
         Assert.Equal(
+            new[] { "post" },
+            paths.GetProperty("/community-participations")
+                .EnumerateObject()
+                .Select(operation => operation.Name)
+                .ToArray());
+        Assert.Equal(
+            new[] { "get" },
+            paths.GetProperty("/address-search")
+                .EnumerateObject()
+                .Select(operation => operation.Name)
+                .ToArray());
+        Assert.Equal(
             new[] { "get" },
             paths.GetProperty("/vendors/{vendorId}")
                 .EnumerateObject()
                 .Select(operation => operation.Name)
+                .ToArray());
+        Assert.Equal(
+            new[] { "post" },
+            paths.GetProperty("/vendor-registration/required-licence-types")
+                .EnumerateObject()
+                .Select(operation => operation.Name)
+                .ToArray());
+    }
+
+    [Fact]
+    public async Task DetermineOperation_DescribesExactRequestSuccessAndFailures()
+    {
+        using JsonDocument document = await ReadDocument();
+        JsonElement root = document.RootElement;
+        JsonElement operation = OpenApiDocumentAssertions.Operation(
+            root,
+            "/vendor-registration/required-licence-types",
+            "post");
+        JsonElement request = OpenApiDocumentAssertions.RequestSchema(root, operation);
+
+        OpenApiDocumentAssertions.HasExactRequiredMembers(
+            request,
+            "legalOperatorType",
+            "tradingLocation",
+            "weeklyOpeningHours",
+            "serviceIncludesHotFood",
+            "alcoholService",
+            "addressResolutionReference");
+
+        JsonElement success = OpenApiDocumentAssertions.ResponseSchema(
+            root,
+            operation,
+            "200");
+        OpenApiDocumentAssertions.HasExactRequiredMembers(
+            success,
+            "ruleSetVersion",
+            "items");
+        JsonElement item = OpenApiDocumentAssertions.Resolve(
+            root,
+            OpenApiDocumentAssertions.PropertySchema(root, success, "items")
+                .GetProperty("items"));
+        OpenApiDocumentAssertions.HasExactRequiredMembers(
+            item,
+            "requiredLicenceType",
+            "isRequired");
+        OpenApiDocumentAssertions.HasEnum(
+            OpenApiDocumentAssertions.PropertySchema(
+                root,
+                item,
+                "requiredLicenceType"),
+            "foodBusinessRegistration",
+            "streetTradingLicence",
+            "lateNightRefreshmentLicence",
+            "premisesLicence",
+            "personalLicenceHolder");
+
+        AssertErrorSchema(root, operation, "400");
+        AssertErrorSchema(root, operation, "409");
+        AssertErrorSchema(root, operation, "503");
+        Assert.False(operation.GetProperty("responses").TryGetProperty("201", out _));
+    }
+
+    [Fact]
+    public async Task AddressSearchOperation_ExposesOnlySelectableDisplayContract()
+    {
+        using JsonDocument document = await ReadDocument();
+        JsonElement root = document.RootElement;
+        JsonElement operation = OpenApiDocumentAssertions.Operation(
+            root,
+            "/address-search",
+            "get");
+        JsonElement response = OpenApiDocumentAssertions.ResponseSchema(
+            root,
+            operation,
+            "200");
+        OpenApiDocumentAssertions.HasExactRequiredMembers(response, "results");
+        JsonElement result = OpenApiDocumentAssertions.Resolve(
+            root,
+            OpenApiDocumentAssertions.PropertySchema(root, response, "results")
+                .GetProperty("items"));
+        OpenApiDocumentAssertions.HasExactRequiredMembers(
+            result,
+            "addressResolutionReference",
+            "displayLines");
+        Assert.Equal(
+            new[] { "addressResolutionReference", "displayLines" },
+            result.GetProperty("properties")
+                .EnumerateObject()
+                .Select(property => property.Name)
+                .Order(StringComparer.Ordinal)
                 .ToArray());
     }
 
@@ -76,7 +185,7 @@ public sealed class VendorOpenApiDocumentTests
         OpenApiDocumentAssertions.HasExactRequiredMembers(
             trading,
             "tradingLocation",
-            "openingHours",
+            "weeklyOpeningHours",
             "serviceIncludesHotFood",
             "alcoholService");
         OpenApiDocumentAssertions.HasEnum(
@@ -91,17 +200,10 @@ public sealed class VendorOpenApiDocumentTests
         JsonElement hours = OpenApiDocumentAssertions.PropertySchema(
             root,
             trading,
-            "openingHours");
+            "weeklyOpeningHours");
         OpenApiDocumentAssertions.HasExactRequiredMembers(
             hours,
-            "startTime",
-            "endTime");
-        Assert.Equal(
-            TimePattern,
-            OpenApiDocumentAssertions.PropertySchema(
-                root,
-                hours,
-                "startTime").GetProperty("pattern").GetString());
+            "days");
 
         JsonElement contact = OpenApiDocumentAssertions.PropertySchema(
             root,

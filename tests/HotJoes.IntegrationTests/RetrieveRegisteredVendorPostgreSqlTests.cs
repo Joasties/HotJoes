@@ -1,7 +1,7 @@
 using System.Text;
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
@@ -177,10 +177,10 @@ public sealed class RetrieveRegisteredVendorPostgreSqlTests
             details.TradingCharacteristics.TradingLocation);
         Assert.Equal(
             new TimeOnly(10, 0),
-            details.TradingCharacteristics.OpeningHours.StartTime);
+            details.TradingCharacteristics.WeeklyOpeningHours.Days[0].StartTime);
         Assert.Equal(
             new TimeOnly(20, 0),
-            details.TradingCharacteristics.OpeningHours.EndTime);
+            details.TradingCharacteristics.WeeklyOpeningHours.Days[0].EndTime);
         Assert.True(details.TradingCharacteristics.ServiceIncludesHotFood);
         Assert.False(details.TradingCharacteristics.AlcoholService);
         Assert.Equal("Morgan Lee", details.ContactName);
@@ -237,8 +237,7 @@ public sealed class RetrieveRegisteredVendorPostgreSqlTests
             new PrimaryTradingAuthority("Greenwich Borough Council"),
             new TradingCharacteristics(
                 TradingLocation.Stall,
-                new OpeningHours(
-                    new TimeOnly(10, 0),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(10, 0),
                     new TimeOnly(20, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));

@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using HotJoes.Infrastructure.VendorRelay;
 
 namespace HotJoes.IntegrationTests;

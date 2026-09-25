@@ -18,7 +18,8 @@ public static class DomainApplicationStructuralRuleSet
         "HotJoes.Application.Vendor.VendorRegisteredIntegrationEventPayload",
         "HotJoes.Application.Vendor.VendorRegisteredBusinessAddress",
         "HotJoes.Application.Vendor.VendorRegisteredTradingCharacteristics",
-        "HotJoes.Application.Vendor.VendorRegisteredOpeningHours"
+        "HotJoes.Application.Vendor.VendorRegisteredWeeklyOpeningHours",
+        "HotJoes.Application.Vendor.VendorRegisteredDailyOpeningHours"
     ];
 
     private static readonly string[] ProhibitedComplianceNameFragments =

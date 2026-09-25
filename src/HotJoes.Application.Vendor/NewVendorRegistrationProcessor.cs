@@ -115,12 +115,22 @@ public sealed class NewVendorRegistrationProcessor : INewVendorRegistrationProce
             addressValues.PrimaryTradingAuthority,
             new TradingCharacteristics(
                 command.TradingLocation,
-                new OpeningHours(
-                    command.OpeningHoursStartTime,
-                    command.OpeningHoursEndTime),
+                CreateWeeklyOpeningHours(command.WeeklyOpeningHours),
                 command.ServiceIncludesHotFood,
                 command.AlcoholService));
     }
+
+    private static WeeklyOpeningHours CreateWeeklyOpeningHours(
+        RegisterVendorWeeklyOpeningHours weekly) =>
+        new(weekly.Days.Select(day => day switch
+        {
+            { IsClosed: true } => DailyOpeningHours.Closed(day.Day),
+            { IsOpenAllDay: true } => DailyOpeningHours.OpenAllDay(day.Day),
+            _ => DailyOpeningHours.OpenDuring(
+                day.Day,
+                day.StartTime!.Value,
+                day.EndTime!.Value)
+        }));
 
     private static CompanyRegistrationNumber? CreateCompanyRegistrationNumber(
         string? value)

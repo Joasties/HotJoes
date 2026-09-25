@@ -1,0 +1,85 @@
+:root {
+  color: #27231f;
+  background: #faf8f3;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #080706;
+  background-image: url("/images/HotJoes Background.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: fixed;
+}
+button,
+a {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+}
+a {
+  color: #812019;
+  margin-right: 1rem;
+}
+.journey-information { position: fixed; right: 2rem; top: max(1.5rem, calc((100vh - 56.25vw)/2 + 1.5rem)); z-index: 2; }
+body .journey-information > button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: transparent;
+  height: 3.25rem;
+  min-height: 0;
+  padding: 0;
+  width: 3.25rem;
+}
+.information-overlay { background: rgba(8,8,8,.97); border: 1px solid #ff8a00; border-radius: .8rem; color: #fff; display: grid; gap: .55rem; opacity: 0; padding: 1rem 1.15rem; pointer-events: none; position: absolute; right: 3.8rem; top: .25rem; transform: translateY(-.5rem); transition: opacity 160ms ease,transform 160ms ease; width: 18rem; }
+.information-overlay strong { color: #ff8a00; font-size: 1.15rem; }
+.journey-information:hover .information-overlay, .journey-information:focus-within .information-overlay { opacity: 1; transform: translateY(0); }
+.visually-hidden { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+@media (max-width: 48rem) { .journey-information { right: 1rem; } .information-overlay { right: 0; top: 4rem; width: min(18rem,calc(100vw - 3rem)); } }
+@media (prefers-reduced-motion: reduce) { .information-overlay { transition: none; } }
+.eyebrow {
+  color: #655d55;
+  font-weight: 700;
+}
+
+dialog {
+  background: rgba(8, 8, 8, .98);
+  border: 1px solid #ff8200;
+  border-radius: 1rem;
+  color: #fff;
+  max-width: min(42rem, calc(100vw - 2rem));
+  padding: 0;
+  width: 100%;
+}
+dialog::backdrop { background: rgba(0, 0, 0, .78); }
+.dialog-content { display: grid; gap: 1rem; padding: 1.4rem; }
+.dialog-content h2 { border-bottom: 1px solid #9b6627; margin: 0; padding-bottom: .7rem; }
+.dialog-actions { border-top: 1px solid #9b6627; display: flex; justify-content: flex-end; padding-top: 1rem; }
+.opening-hours-header { align-items: start; display: grid; gap: 1rem; grid-template-columns: auto minmax(10rem,1fr); }
+.opening-hours-header > h2 { white-space: nowrap; }
+.edit-hours { min-width: 6rem; }
+.weekly-summary { display: grid; gap: .12rem; justify-self: end; min-width: 13rem; }
+.weekly-summary span { color: #d2ccc3; display: grid; font-size: .78rem; grid-template-columns: 2.4rem 1fr; line-height: 1.2; }
+.weekly-summary b { color: #ff8a00; }
+.hours-dialog { box-sizing: border-box; grid-template-rows: auto minmax(0,1fr) auto; max-height: calc(100vh - 4rem); min-width: 0; width: 100%; }
+.hours-grid { display: grid; gap: .35rem; min-height: 0; overflow-y: auto; padding-right: .25rem; }
+.hours-head,.hours-dialog .day-row { align-items: center; display: grid; gap: .6rem; grid-template-columns: 6.5rem 8.25rem 8.25rem 4rem 4rem; }
+.hours-head { color: #d2ccc3; font-size: .78rem; text-align: center; }
+.hours-dialog .day-row { border-top: 1px solid #38250f; padding: .35rem 0; }
+.hours-dialog .day-row > strong { font-size: .92rem; }
+.hours-dialog .day-row > input { min-width: 0; width: 8.25rem; }
+.state-check { display: grid; place-items: center; }
+dialog .state-check input { accent-color: #ff8a00; height: 1.35rem; margin: 0; padding: 0; width: 1.35rem; }
+.hours-dialog input:disabled { border-color: #4d4236; color: #777; opacity: .65; }
+.day-error { color: #ffb19f; font-size: .78rem; grid-column: 2 / -1; margin: 0; }
+.dialog-actions { gap: .75rem; }
+.check { align-items: center; display: flex; gap: .7rem; }
+.check input { height: 1.2rem; width: 1.2rem; }
+@media (max-width: 48rem) { .opening-hours-header { grid-template-columns: 1fr; } .weekly-summary { justify-self: stretch; margin-left: 3rem; } .hours-head,.hours-dialog .day-row { gap: .3rem; grid-template-columns: 4rem minmax(0,1fr) minmax(0,1fr) 3.2rem 3.2rem; } .hours-dialog .day-row > input { width: 100%; } .hours-dialog .day-row > strong { font-size: .75rem; } }

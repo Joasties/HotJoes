@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using HotJoes.Domain.Vendor;
 using HotJoes.Infrastructure.ComplianceConsumer;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using HotJoes.Infrastructure.VendorRelay;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
@@ -318,9 +318,16 @@ public sealed class PostgreSqlRabbitMqComplianceTraceTests
                 "legalOperatorType": "soleTrader",
                 "tradingCharacteristics": {
                   "tradingLocation": "restaurant",
-                  "openingHours": {
-                    "startTime": "09:00:00",
-                    "endTime": "17:00:00"
+                  "weeklyOpeningHours": {
+                    "days": [
+                      { "day": "monday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "tuesday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "wednesday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "thursday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "friday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "saturday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "sunday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" }
+                    ]
                   },
                   "serviceIncludesHotFood": true,
                   "alcoholService": false
@@ -366,8 +373,7 @@ public sealed class PostgreSqlRabbitMqComplianceTraceTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(
-                    new TimeOnly(9, 0),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(9, 0),
                     new TimeOnly(17, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));

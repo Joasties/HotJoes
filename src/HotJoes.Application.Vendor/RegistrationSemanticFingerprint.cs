@@ -8,7 +8,7 @@ namespace HotJoes.Application.Vendor;
 
 public sealed record RegistrationSemanticFingerprint
 {
-    private const short CurrentVersion = 1;
+    private const short CurrentVersion = 2;
 
     private RegistrationSemanticFingerprint(short version, string sha256Digest)
     {
@@ -64,12 +64,20 @@ public sealed record RegistrationSemanticFingerprint
             writer.WriteString(
                 "tradingLocation",
                 MapTradingLocation(command.TradingLocation));
-            writer.WriteString(
-                "openingHoursStart",
-                FormatTime(command.OpeningHoursStartTime));
-            writer.WriteString(
-                "openingHoursEnd",
-                FormatTime(command.OpeningHoursEndTime));
+            writer.WritePropertyName("weeklyOpeningHours");
+            writer.WriteStartArray();
+            foreach (RegisterVendorDailyOpeningHours day in
+                command.WeeklyOpeningHours.Days.OrderBy(day => day.Day))
+            {
+                writer.WriteStartObject();
+                writer.WriteString("day", MapTradingDay(day.Day));
+                writer.WriteBoolean("isClosed", day.IsClosed);
+                writer.WriteBoolean("isOpenAllDay", day.IsOpenAllDay);
+                WriteOptionalTime(writer, "startTime", day.StartTime);
+                WriteOptionalTime(writer, "endTime", day.EndTime);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
             writer.WriteBoolean(
                 "serviceIncludesHotFood",
                 command.ServiceIncludesHotFood);
@@ -118,6 +126,21 @@ public sealed record RegistrationSemanticFingerprint
         return value.ToString("HH:mm:ss.fffffff", CultureInfo.InvariantCulture);
     }
 
+    private static void WriteOptionalTime(
+        Utf8JsonWriter writer,
+        string propertyName,
+        TimeOnly? value)
+    {
+        if (value is null)
+        {
+            writer.WriteNull(propertyName);
+        }
+        else
+        {
+            writer.WriteString(propertyName, FormatTime(value.Value));
+        }
+    }
+
     private static void WriteOptionalString(
         Utf8JsonWriter writer,
         string propertyName,
@@ -159,4 +182,16 @@ public sealed record RegistrationSemanticFingerprint
             _ => throw new ArgumentOutOfRangeException(nameof(value))
         };
     }
+
+    private static string MapTradingDay(TradingDay value) => value switch
+    {
+        TradingDay.Monday => "monday",
+        TradingDay.Tuesday => "tuesday",
+        TradingDay.Wednesday => "wednesday",
+        TradingDay.Thursday => "thursday",
+        TradingDay.Friday => "friday",
+        TradingDay.Saturday => "saturday",
+        TradingDay.Sunday => "sunday",
+        _ => throw new ArgumentOutOfRangeException(nameof(value))
+    };
 }

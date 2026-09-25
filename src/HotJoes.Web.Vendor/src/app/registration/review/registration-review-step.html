@@ -1,0 +1,74 @@
+<svg class="icon-definitions" aria-hidden="true">
+  <defs>
+    <symbol id="review-shop" viewBox="0 0 24 24"><path d="M4 10v11h16V10M3 10l2-6h14l2 6M8 4l-1 6m5-6v6m4-6 1 6" /></symbol>
+    <symbol id="review-person" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4" /><path d="M4 22c0-5 3-8 8-8s8 3 8 8" /></symbol>
+    <symbol id="review-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l4 2" /></symbol>
+    <symbol id="review-document" viewBox="0 0 24 24"><path d="M6 2h9l4 4v16H6V2Zm9 0v5h4M9 11h7m-7 4h7m-7 4h4" /></symbol>
+  </defs>
+</svg>
+
+<section class="step" aria-labelledby="review-title">
+  <p class="step-number">Step 5 of 5</p>
+  <h1 id="review-title">Review your registration</h1>
+  <p class="subtitle">Check your details below before submitting.</p>
+
+  <div class="journey-information">
+    <button type="button" aria-describedby="review-explanation" aria-label="About reviewing your registration"></button>
+    <div id="review-explanation" class="information-overlay" role="tooltip">
+      <strong>Review your registration</strong>
+      <span>Check every section and confirm the declarations before submitting your registration.</span>
+    </div>
+  </div>
+
+  <form [formGroup]="declarations" (ngSubmit)="submit()" novalidate>
+    <div class="review-columns">
+      <section class="panel business-summary" aria-labelledby="business-summary-title">
+        <h2 id="business-summary-title"><svg><use href="#review-shop" /></svg>Business summary</h2>
+        <dl>
+          <div><dt>Trading location</dt><dd>{{ draft.tradingLocation ?? 'Not provided' }}</dd><button type="button" (click)="edit('location')">Edit</button></div>
+          <div><dt>Legal operator type</dt><dd>{{ draft.legalOperatorType ?? 'Not provided' }}</dd><button type="button" (click)="edit('operator')">Edit</button></div>
+          <div><dt>Legal operator name</dt><dd>{{ draft.legalOperatorName || 'Not provided' }}</dd><button type="button" (click)="edit('business')">Edit</button></div>
+          <div><dt>Trading name</dt><dd>{{ draft.tradingName || 'Not provided' }}</dd><button type="button" (click)="edit('business')">Edit</button></div>
+          <div class="address"><dt>Business address</dt><dd>@for (line of draft.addressDisplayLines; track line) {<span>{{ line }}</span>} @if (!draft.addressDisplayLines.length) {<span>Not provided</span>}</dd><button type="button" (click)="edit('business')">Edit</button></div>
+        </dl>
+        <div class="contact-summary">
+          <h3><svg><use href="#review-person" /></svg>Primary contact details</h3>
+          <p><strong>{{ draft.contactName || 'Not provided' }}</strong><span>{{ draft.contactTelephone || 'No telephone number' }}</span><span>{{ draft.contactEmail || 'No email address' }}</span></p>
+          <button type="button" (click)="edit('business')">Edit</button>
+        </div>
+      </section>
+
+      <section class="panel trading-summary" aria-labelledby="trading-summary-title">
+        <h2 id="trading-summary-title"><svg><use href="#review-clock" /></svg>Trading details</h2>
+        <div class="opening-summary">
+          <div class="section-title"><h3>Opening hours</h3><button type="button" (click)="edit('characteristics')">Edit</button></div>
+          <div class="week" aria-label="Weekly opening hours">
+            @for (hours of draft.weeklyOpeningHours; track hours.day) {
+              <span><b>{{ hours.day }}</b><em>{{ hoursSummary(hours) }}</em></span>
+            }
+          </div>
+        </div>
+        <dl class="service-summary">
+          <div><dt>Hot food service</dt><dd>{{ yesNo(draft.serviceIncludesHotFood) }}</dd><button type="button" (click)="edit('characteristics')">Edit</button></div>
+          <div><dt>Alcohol service</dt><dd>{{ yesNo(draft.alcoholService) }}</dd><button type="button" (click)="edit('characteristics')">Edit</button></div>
+          <div><dt>Licence details</dt><dd>{{ draft.licenceDetailsRequired ? 'Licence details required' : 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
+          <div><dt>Website</dt><dd>{{ draft.website || 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
+          <div><dt>Business description</dt><dd>{{ draft.businessDescription || 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
+        </dl>
+      </section>
+    </div>
+
+    <section class="panel declarations" aria-labelledby="declarations-title">
+      <div><h2 id="declarations-title"><svg><use href="#review-document" /></svg>Registration declarations</h2><p>Please confirm the following before submitting your registration.</p></div>
+      <fieldset>
+        <legend class="visually-hidden">Registration declarations</legend>
+        <label><input type="checkbox" formControlName="authorised" />I confirm that I am authorised to register this business.</label>
+        <label><input type="checkbox" formControlName="accurate" />I confirm that the information I have provided is accurate and complete.</label>
+        <label><input type="checkbox" formControlName="termsAccepted" />I accept the HotJoes <a href="/terms" target="_blank">Terms and Conditions</a>.</label>
+      </fieldset>
+    </section>
+
+    @if (submissionError) {<div class="submission-message error" role="alert">{{ submissionError }}</div>}
+    <div class="actions"><button class="back" type="button" (click)="back()" [disabled]="submitting || !!result">← Back</button><button class="submit" type="submit" [disabled]="!canSubmit || submitting || !!result">{{ submitting ? 'Submitting…' : result ? 'Registration Submitted' : 'Submit Registration' }} <span aria-hidden="true">→</span></button></div>
+  </form>
+</section>

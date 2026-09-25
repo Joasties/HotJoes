@@ -3,11 +3,11 @@
 | **Document ID** | ADR-007 |
 |-----------------|---------|
 | **Document Title** | Vendor Compliance as a Separate Bounded Context |
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 28 August 2026 |
+| **Last Updated** | 19 September 2026 |
 
 ---
 
@@ -17,6 +17,7 @@
 |---------|------|-------------|
 | 1.0 | 23 July 2026 | Initial Architectural Decision Record. |
 | 1.1 | 28 August 2026 | Defined the Epic 1 Compliance consumer stub as a thin RabbitMQ adapter with durable EventId receipt and byte-hash deduplication under CON-022. |
+| 1.2 | 19 September 2026 | Amended by CR-076 for CON-047 to recognise a synchronous side-effect-free pre-registration Compliance Determination boundary alongside asynchronous post-registration Compliance processing. |
 
 ---
 
@@ -67,7 +68,15 @@ Vendor activation therefore depends upon successful compliance rather than succe
 
 The Vendor aggregate remains responsible only for its own business lifecycle and does not implement regulatory decision making.
 
-## 2.1 Epic 1 Compliance Consumer Stub
+## 2.1 Pre-registration Compliance Determination
+
+Before Vendor Registration submission, Vendor Application may synchronously request a complete immutable Compliance Determination through a consumed Compliance port. Vendor Application validates the controlling draft and resolves authoritative Address information but owns no applicability rule. Compliance owns the policy, determination meaning, canonical ordering and Rule Set Version.
+
+Epic 1 implements that port with one in-process, side-effect-free, non-persistent deterministic Compliance stub adapter. The result is retained only as transient Web-client Registration Session state. It creates no Compliance Requirement, evidence, Licence Details or Compliance Domain state and is excluded from RegisterVendor, Vendor persistence, fingerprinting, retrieval and VendorRegistered. A future Compliance implementation replaces the stub through an outer adapter without moving regulatory policy into Vendor or the Web client.
+
+This synchronous pre-registration collaboration does not replace the asynchronous post-registration flow. After successful registration, Compliance independently determines and manages actual lifecycle-bearing Compliance Requirements from authoritative registered facts using its then-active policy.
+
+## 2.2 Epic 1 Compliance Consumer Stub
 
 The Epic 1 stub consumes only VendorRegistered v1. It durably records EventId, EventType, EventVersion, receipt time and a hash of the serialized bytes before acknowledgement. An equivalent duplicate is acknowledged without another receipt; the same EventId with different bytes is dead-lettered as a contract-integrity failure. The stub performs no Vendor lookup and introduces no Compliance Domain behaviour or Pending Activation processing.
 
@@ -87,7 +96,8 @@ The Epic 1 stub consumes only VendorRegistered v1. It durably records EventId, E
 
 - Vendor activation becomes an inter-domain collaboration.
 - Event-driven communication is required between Vendor and Compliance.
-- Temporary inconsistencies must be tolerated while compliance processing completes.
+- Temporary inconsistencies must be tolerated while post-registration compliance processing completes.
+- The pre-registration journey gains a synchronous dependency for determination, with explicit controlled unavailability and fail-closed unsupported coverage.
 
 ---
 

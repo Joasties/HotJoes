@@ -1,0 +1,50 @@
+:host { display: block; }
+.step { color: #fff; margin: 0 auto; max-width: 78rem; min-height: calc(100vh - 6rem); position: relative; }
+.step-number { color: #ff8200; font-weight: 800; letter-spacing: .08em; margin: 0; text-align: center; text-transform: uppercase; }
+h1 { font-size: clamp(2rem,4vw,3.25rem); line-height: 1; margin: .55rem 0 .4rem; text-align: center; }
+.subtitle { font-size: 1.05rem; margin: 0; text-align: center; }
+form { bottom: clamp(.25rem,1.5vh,1rem); display: grid; gap: .75rem; inset-inline: 0; position: absolute; }
+.review-columns { display: grid; gap: 1rem; grid-template-columns: .9fr 1.1fr; }
+.panel { background: rgba(8,8,8,.95); border: 1px solid #ff8200; border-radius: 1rem; padding: 1rem 1.2rem; }
+h2,h3 { align-items: center; display: flex; gap: .65rem; margin: 0; }
+h2 { border-bottom: 1px solid #81551f; font-size: 1.08rem; padding-bottom: .6rem; }
+h3 { font-size: .98rem; }
+.icon-definitions { height: 0; position: absolute; width: 0; }
+svg { color: #ff8a00; fill: none; height: 1.6rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; width: 1.6rem; }
+dl { margin: 0; }
+dl > div { align-items: start; border-bottom: 1px solid #4b4238; display: grid; gap: .6rem; grid-template-columns: 9rem minmax(0,1fr) auto; padding: .42rem 0; }
+dt { color: #d3ccc3; font-size: .8rem; }
+dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.address dd { display: grid; }
+button { background: #ff8a00; border: 1px solid #ff8a00; border-radius: .45rem; color: #17100a; cursor: pointer; font: inherit; font-weight: 800; min-height: 2.7rem; padding: 0 1.25rem; }
+dl button,.contact-summary > button,.section-title button { background: transparent; border: 0; color: #ff8a00; min-height: 0; padding: 0; text-decoration: underline; }
+.contact-summary { align-items: start; border-top: 1px solid #81551f; display: grid; gap: .55rem; grid-template-columns: 1fr auto; margin-top: .7rem; padding-top: .7rem; }
+.contact-summary h3 { grid-column: 1; }
+.contact-summary p { display: grid; gap: .16rem; grid-column: 1; margin: 0 0 0 2.25rem; }
+.contact-summary p span { color: #d3ccc3; font-size: .82rem; }
+.contact-summary > button { grid-column: 2; grid-row: 1; }
+.section-title { align-items: center; display: flex; justify-content: space-between; padding: .65rem 0 .4rem; }
+.week { display: grid; gap: .18rem 1.5rem; grid-auto-flow: column; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, auto); padding: 0 .25rem .6rem; }
+.week span { display: grid; font-size: .8rem; gap: .6rem; grid-template-columns: 5.6rem 1fr; }
+.week b { color: #ff8a00; }
+.week em { color: #d3ccc3; font-style: normal; }
+.service-summary { border-top: 1px solid #81551f; }
+.service-summary > div { grid-template-columns: 8rem minmax(0,1fr) auto; }
+.declarations { align-items: center; display: grid; gap: 1.25rem; grid-template-columns: .8fr 1.2fr; }
+.declarations h2 { border: 0; padding: 0; }
+.declarations p { color: #d3ccc3; font-size: .8rem; margin: .2rem 0 0 2.25rem; }
+fieldset { border: 0; display: grid; gap: .45rem; margin: 0; padding: 0; }
+fieldset label { align-items: center; display: grid; font-size: .8rem; gap: .65rem; grid-template-columns: auto 1fr; }
+fieldset input { accent-color: #ff8a00; height: 1.2rem; margin: 0; width: 1.2rem; }
+fieldset a { color: #ff8a00; margin: 0; }
+.actions { display: flex; justify-content: space-between; }
+.back { background: #090807; color: #fff; }
+.submit:disabled { cursor: not-allowed; filter: grayscale(.7); opacity: .55; }
+.submission-message { border: 1px solid; border-radius: .6rem; display: grid; gap: .2rem; padding: .7rem 1rem; }
+.submission-message.error { background: #2a0d09; border-color: #ff8d78; color: #ffd4cc; }
+.submission-message.success { background: #071b12; border-color: #61d69a; color: #d8ffea; grid-template-columns: auto 1fr 1fr; }
+.submission-message.success strong { color: #61d69a; }
+button:focus-visible,input:focus-visible,a:focus-visible { outline: 3px solid #55dff2; outline-offset: 3px; }
+@media (max-width: 64rem), (max-height: 50rem) { form { margin-top: 2rem; position: static; } }
+@media (max-width: 52rem) { .review-columns,.declarations { grid-template-columns: 1fr; } .week { grid-auto-flow: row; grid-template-columns: 1fr; grid-template-rows: none; } }
+@media (max-width: 34rem) { dl > div,.service-summary > div { grid-template-columns: 1fr auto; } dl dd { grid-column: 1; } dl button { grid-column: 2; grid-row: 1 / span 2; } }

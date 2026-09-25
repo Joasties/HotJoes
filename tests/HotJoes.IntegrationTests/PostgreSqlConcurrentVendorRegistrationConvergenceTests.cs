@@ -1,6 +1,6 @@
 using HotJoes.Application.Vendor;
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotJoes.IntegrationTests;
@@ -200,8 +200,9 @@ public sealed class PostgreSqlConcurrentVendorRegistrationConvergenceTests
             LegalOperatorType.SoleTrader,
             companyRegistrationNumber: null,
             TradingLocation.Kitchen,
-            new TimeOnly(17, 0),
-            new TimeOnly(2, 0),
+            RegisterVendorWeeklyOpeningHours.EveryDay(
+                new TimeOnly(17, 0),
+                new TimeOnly(2, 0)),
             serviceIncludesHotFood: true,
             alcoholService: false,
             "Jamie Taylor",

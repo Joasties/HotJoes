@@ -55,6 +55,7 @@ public sealed class RegisterVendorCommandValidator
             nameof(RegisterVendorCommand.TradingLocation),
             "Trading Location",
             errors);
+        ValidateWeeklyOpeningHours(command.WeeklyOpeningHours, errors);
         ValidateRequiredBoundedText(
             command.ContactName,
             nameof(RegisterVendorCommand.ContactName),
@@ -161,6 +162,56 @@ public sealed class RegisterVendorCommandValidator
                 field,
                 RegistrationValidationErrorCode.InvalidValue,
                 $"{displayName} must be a supported value."));
+    }
+
+    private static void ValidateWeeklyOpeningHours(
+        RegisterVendorWeeklyOpeningHours weekly,
+        ICollection<RegistrationValidationError> errors)
+    {
+        IReadOnlyList<RegisterVendorDailyOpeningHours> days = weekly.Days;
+        if (days.Count != 7 ||
+            days.Any(day => !Enum.IsDefined(day.Day)) ||
+            days.Select(day => day.Day).Distinct().Count() != 7 ||
+            Enum.GetValues<TradingDay>().Any(
+                expected => days.All(day => day.Day != expected)))
+        {
+            errors.Add(new RegistrationValidationError(
+                nameof(RegisterVendorCommand.WeeklyOpeningHours),
+                RegistrationValidationErrorCode.InvalidValue,
+                "Weekly Opening Hours must contain exactly one entry for every day Monday through Sunday."));
+            return;
+        }
+
+        foreach (RegisterVendorDailyOpeningHours day in days)
+        {
+            string field =
+                $"{nameof(RegisterVendorCommand.WeeklyOpeningHours)}.{day.Day}";
+            bool valid = day switch
+            {
+                {
+                    IsClosed: true, IsOpenAllDay: false,
+                    StartTime: null, EndTime: null
+                } => true,
+                {
+                    IsClosed: false, IsOpenAllDay: true,
+                    StartTime: null, EndTime: null
+                } => true,
+                {
+                    IsClosed: false, IsOpenAllDay: false,
+                    StartTime: not null, EndTime: not null
+                } value =>
+                    value.StartTime != value.EndTime,
+                _ => false
+            };
+
+            if (!valid)
+            {
+                errors.Add(new RegistrationValidationError(
+                    field,
+                    RegistrationValidationErrorCode.InvalidValue,
+                    "Daily Opening Hours must be Closed, Open All Day, or have distinct start and end times."));
+            }
+        }
     }
 
     private static string? ValidateCompanyRegistrationNumber(
@@ -455,8 +506,8 @@ public sealed class RegisterVendorCommandValidator
             command.LegalOperatorType,
             canonicalCompanyRegistrationNumber,
             command.TradingLocation,
-            command.OpeningHoursStartTime,
-            command.OpeningHoursEndTime,
+            new RegisterVendorWeeklyOpeningHours(
+                command.WeeklyOpeningHours.Days.OrderBy(day => day.Day)),
             command.ServiceIncludesHotFood,
             command.AlcoholService,
             command.ContactName,

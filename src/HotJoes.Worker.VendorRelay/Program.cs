@@ -7,7 +7,7 @@ VendorRelayHostOptions options =
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(options);
 builder.Services.AddSingleton(
-    new Epic1HealthEvaluator(
+    new OperationalHealthEvaluator(
         [
             new PostgreSqlHealthDependencyProbe(
                 HealthDependency.VendorPostgreSql,
@@ -20,18 +20,18 @@ WebApplication app = builder.Build();
 
 app.MapGet(
     "/health/live",
-    (Epic1HealthEvaluator evaluator) => Results.Json(
-        evaluator.EvaluateLiveness(Epic1Component.VendorRelay)));
+    (OperationalHealthEvaluator evaluator) => Results.Json(
+        evaluator.EvaluateLiveness(OperationalComponent.VendorRelay)));
 
 app.MapGet(
     "/health/ready",
     async (
-        Epic1HealthEvaluator evaluator,
+        OperationalHealthEvaluator evaluator,
         CancellationToken cancellationToken) =>
     {
         OperationalHealthEvidence evidence =
             await evaluator.EvaluateReadinessAsync(
-                Epic1Component.VendorRelay,
+                OperationalComponent.VendorRelay,
                 cancellationToken);
         int statusCode = evidence.Status == OperationalHealthStatus.Unhealthy
             ? StatusCodes.Status503ServiceUnavailable

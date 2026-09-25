@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-105 |
 | **Document Title** | Vendor Registration Sequence Diagram |
-| **Version** | 4.1 |
+| **Version** | 4.4 |
 | **Status** | Approved |
 | **Classification** | Model |
 | **Owner** | Project Architecture |
-| **Last Updated** | 28 August 2026 |
+| **Last Updated** | 22 September 2026 |
 
 ## Revision History
 
@@ -29,24 +29,29 @@
 | 3.9 | 25 August 2026 | Added the approved CON-023–CON-026 HTTP adaptation, technical contract, controlled failure mapping and validation ownership and ordering to the registration and retrieval interactions. |
 | 4.0 | 26 August 2026 | Reconciled the approved unified RegisterVendor validation-failure outcome and API mapping for CON-025, CON-026 and CON-040. |
 | 4.1 | 28 August 2026 | Added the approved independent relay, RabbitMQ confirmation and retry, durable Compliance receipt, and duplicate and dead-letter behaviour. |
+| 4.2 | 14 September 2026 | Applied CR-073. Propagated the seven-day Weekly Opening Hours contract through validation, canonicalisation, fingerprinting, Vendor creation, persistence, retrieval and the deliberately revised unreleased VendorRegistered v1 publication contract. |
+| 4.3 | 19 September 2026 | Propagated approved CON-047 by adding the separate transient Required Licence Types determination sequence and preserving RegisterVendor independence. |
+| 4.4 | 22 September 2026 | Propagated approved CON-046 by adding the separate post-registration Join Community, Not Now, authoritative replay, conflict, persistence, publication and asynchronous Community consumer sequences. |
 
 ## Related Documents
 
 | Document ID | Title | Status | Relevance |
 |---|---|---|---|
 | HJ-002 | Architectural Principles | Approved | Supporting architectural principles |
-| HJ-003 | Ubiquitous Language Guide | Approved | Authoritative business terminology |
-| HJ-004 | Vendor Domain Models | Approved | Vendor aggregate, invariants, lifecycle and event model |
-| HJ-104 | Vendor Registration Fields Matrix | Approved | Authoritative registration information and business rules |
-| ADR-002 | Business Capabilities and Bounded Contexts | Accepted | Capability and data ownership |
-| ADR-003 | Event-Driven Collaboration | Accepted | Cross-context event collaboration |
+| HJ-003 | Ubiquitous Language Guide | Approved v2.6 | Authoritative business terminology |
+| HJ-004 | Vendor Domain Models | Approved v3.1 | Vendor aggregate, invariants, lifecycle and Community boundary model |
+| HJ-104 | Vendor Registration Fields Matrix | Approved v3.9 | Authoritative registration and separate post-registration Community information rules |
+| ADR-002 | Business Capabilities and Bounded Contexts | Accepted v1.2 | Capability and data ownership |
+| ADR-003 | Event-Driven Collaboration | Accepted v1.4 | Cross-context event collaboration |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Accepted | Registration Session, service and lifecycle boundaries |
 | ADR-005 | Registered Information vs Vendor Managed Information | Accepted | Information classification |
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | Accepted | Address trust boundary and snapshot ownership |
 | ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted | Compliance boundary and activation dependency |
-| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted | Idempotency and publication reliability |
+| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted v1.6 | Idempotency and publication reliability |
+| ADR-013 | Epic 1 Runtime and Deployment Composition | Accepted v1.1 | Community runtime, Edge and consumer composition |
 | CR-026 | Define Registered Vendor Retrieval for Epic 1 | Approved | Registered Vendor retrieval behaviour and scope |
 | CR-035 | Remove Delivery-Slice Scope from Vendor Registration Behavioural Model | Approved | Enduring behavioural-model scope and responsibility |
+| CR-073 | Define Weekly Opening Hours in the Vendor Domain Model | Approved | Weekly Opening Hours information, validation, persistence and event propagation |
 
 # 1. Purpose and Authority
 
@@ -70,6 +75,7 @@ This document covers:
 - client or BFF assembly of registration information;
 - Address search and selection before registration submission;
 - submission of one complete, self-contained `RegisterVendor` request;
+- the separate post-registration Not Now and Join Community interactions after definitive registration success;
 - server-side validation of client-authored information and Registration Declarations;
 - authoritative Address Domain retrieval using the approved Address Resolution reference;
 - Vendor aggregate creation and invariant enforcement;
@@ -112,7 +118,7 @@ This document does not place Registration Session management inside the Vendor R
 | Address failure | Semantic rejection fails fast. Technical timeout, unavailability or transient failure returns a controlled retryable application failure without in-process automatic retry; Epic 1 has no circuit breaker. |
 | Server authority | User-interface validation is advisory; server-side validation and aggregate invariants are authoritative. |
 | Validation allocation | The API owns HTTP and wire-structure validation. The Vendor Application authoritatively validates all HJ-104 registration rules and returns all independently detectable errors together before Address resolution or any business effect. The Vendor Domain remains the final defensive invariant boundary. |
-| Canonical values | Successful Application validation produces canonical values used by Address-context processing, semantic identity and fingerprint derivation, Aggregate creation and persistence. Downstream processing never reuses uncanonicalized client input. |
+| Canonical values | Successful Application validation produces canonical values used by Address-context processing, semantic identity and fingerprint derivation, Aggregate creation and persistence. Weekly Opening Hours are canonicalised to the complete Monday-to-Sunday sequence. Downstream processing never reuses uncanonicalized client input. |
 | HTTP adaptation | `POST /vendors` and `GET /vendors/{vendorId}` are thin ASP.NET Core Minimal API adapters. They contain no Domain rule, Address resolution, persistence query, transaction, event, outbox or broker behaviour. |
 | Vendor existence | No Vendor exists before successful processing. A successful request creates the Vendor in `PendingActivation` and `Offline`. |
 | Declaration lifecycle | Registration Declarations influence the registration decision only and are never persisted or included in Domain or Integration Events. |
@@ -123,6 +129,10 @@ This document does not place Registration Session management inside the Vendor R
 | Retrieval lookup | `RetrieveRegisteredVendor` uses VendorId as its sole lookup input and performs no search. |
 | Retrieval authority | The persisted Vendor aggregate is the authoritative read source; the application maps it to Registered Vendor Details rather than exposing it directly. |
 | Retrieval isolation | Registered Vendor retrieval is read-only, has no events or lifecycle effects and invokes no other bounded context. |
+| Community separation | Join Community occurs only after definitive registration success, remains outside RegisterVendor and Registration Session state, and does not modify Vendor state. |
+| Community authority | Community owns participation, Contact Preference, persistence, replay and CommunityParticipationRecorded; Vendor owns successful-registration verification and Primary Contact information. |
+| Community idempotency | VendorId is unique in Community persistence. Equivalent preference replay returns the original result; a different preference conflicts; concurrent first requests create exactly one record and at most one logical event. |
+| Community publication | Community Participation persistence and immutable outbox work commit atomically. Asynchronous Community processing uses EventId idempotency and durable receipt evidence without communication delivery. |
 
 # 4. Participants and Responsibilities
 
@@ -140,6 +150,12 @@ This document does not place Registration Session management inside the Vendor R
 | Event Bus | Delivers published contracts to subscribing capabilities. |
 | Pending Activation Process | Reacts to `VendorRegistered` and coordinates post-registration work required to move the Vendor towards an activation outcome. |
 | Compliance Capability | Determines applicable Compliance Requirements through the approved Compliance boundary. |
+| Community UI | Owns the separate post-registration selection and submission state, initially selects Email, leaves Keep Me Involved unticked, performs no request for Not Now and presents definitive outcomes. |
+| Community Application | Validates Join Community, verifies successful Vendor registration, resolves replay or conflict, coordinates Community persistence and returns the authoritative result. |
+| Vendor Verification Capability | Confirms only whether VendorId identifies a successfully registered Vendor; exposes no aggregate, Registered Vendor Details or Primary Contact. |
+| Community Repository | Owns immutable Community Participation persistence and the unique VendorId boundary. |
+| Community Outbox | Stores the immutable serialized CommunityParticipationRecorded v1 event atomically with first participation. |
+| Community Consumer | Independently consumes the Community event, records idempotent durable receipt evidence and invokes the deterministic Community stub without sending a message. |
 
 A Registration Session is deliberately absent from the server-side participant list. A client application or BFF may own transient interaction state, but the Vendor Registration Application neither knows nor depends on it.
 
@@ -256,7 +272,43 @@ sequenceDiagram
 
 The displayed Address result supports selection and user confirmation. It is not the authoritative source persisted by the Vendor. Authoritative Address-owned values are retrieved again by the Vendor Registration Application using the approved reference during request validation.
 
-# 7. Successful Vendor Registration
+# 7. Pre-registration Required Licence Types Determination
+
+The Step 4 determination is a separate, side-effect-free Vendor Application operation. It does not create a Vendor, Compliance Requirement, Domain Event, Integration Event, persistence record or outbox work.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Applicant as Prospective Vendor
+    participant Client as Registration UI / Registration Session
+    participant VendorApi as Vendor-facing boundary
+    participant Application as Vendor Application
+    participant Address as Address Application
+    participant Compliance as Compliance determination port
+    participant Stub as Epic 1 Compliance stub adapter
+
+    Applicant->>Client: Complete Steps 1–4 controlling information
+    Client->>VendorApi: Determine Required Licence Types
+    VendorApi->>Application: Legal Operator Type, Trading Location,<br/>Weekly Opening Hours, Hot Food, Alcohol Service,<br/>Address Resolution Reference
+    Application->>Application: Validate complete determination input
+    Application->>Address: Resolve authoritative Address information
+    Address-->>Application: Approved Business Address,<br/>Food Registration Authority,<br/>conditional Primary Trading Authority
+    Application->>Compliance: Request Compliance Determination
+    Compliance->>Stub: Invoke active deterministic rule set
+    Stub-->>Compliance: Rule Set Version + five ordered items
+    Compliance-->>Application: Complete immutable Compliance Determination
+    Application-->>VendorApi: Controlled success
+    VendorApi-->>Client: Determination result
+    Client->>Client: Retain result, Rule Set Version<br/>and controlling-input fingerprint
+    Client-->>Applicant: Present every type and IsRequired result
+
+    Note over Client,Stub: Changing a controlling input invalidates the retained result.
+    Note over Client,Stub: Malformed input, Address failure, unsupported coverage<br/>and temporary unavailability are distinct controlled failures.
+```
+
+Immediately before Web submission, the client obtains a fresh determination. If its set or Rule Set Version differs from the reviewed result, the client does not call RegisterVendor and requires renewed review. If unchanged, the client may issue the separate RegisterVendor request. A determination failure retains the draft and prevents only that Web submission attempt. Direct RegisterVendor remains independent of Compliance availability and requires no prior determination token or result.
+
+# 8. Successful Vendor Registration
 
 ```mermaid
 sequenceDiagram
@@ -280,6 +332,7 @@ sequenceDiagram
     Application->>Application: Validate request completeness and field rules
     Application->>Application: Validate all Registration Declarations
     Application->>Application: Validate Legal Operator and Trading Characteristics rules
+    Application->>Application: Canonicalise seven Daily Opening Hours<br/>Monday through Sunday
 
     Application->>Address: Get approved Address result(reference)
     Address->>Address: Validate reference and canonical Address
@@ -291,12 +344,12 @@ sequenceDiagram
 
     Application->>Application: Reject or ignore any client-authored Address-owned values
     Application->>Application: Derive composite Vendor identity<br/>from normalized names + CanonicalAddressId
-    Application->>Application: Derive semantic registration fingerprint
+    Application->>Application: Derive semantic registration fingerprint v2
     Application->>Application: Confirm first-processing outcome
     Application->>Vendor: Create Vendor(complete validated Domain input)
     Vendor->>Vendor: Enforce creation invariants
     Vendor->>Vendor: Create VendorId and RegisteredAt
-    Vendor->>Vendor: Store Registered and Vendor Managed Information
+    Vendor->>Vendor: Store Registered and Vendor Managed Information<br/>including complete Weekly Opening Hours
     Vendor->>Vendor: Set Vendor State = PendingActivation
     Vendor->>Vendor: Set Trading Preference = Offline
     Vendor->>Vendor: Record internal VendorRegistered Domain Event
@@ -304,7 +357,7 @@ sequenceDiagram
 
     Application->>Application: Derive VendorRegistered Integration Event
     Application->>Repository: Begin atomic persistence operation
-    Repository->>Repository: Persist Vendor aggregate
+    Repository->>Repository: Persist Vendor aggregate<br/>and seven Daily Opening Hours entries
     Application->>Outbox: Record Integration Event publication work
     Outbox-->>Application: Publication work recorded
     Repository-->>Application: Atomic commit successful
@@ -325,7 +378,7 @@ The synchronous response confirms the committed Vendor state. Downstream Pending
 
 The Pending Activation Process obtains the registration information required to begin coordination from the published Integration Event and collaborates with the Compliance capability through the approved boundary. It shall not synchronously query the Vendor Domain for registration information already supplied by the published contract. Registration itself does not complete Compliance processing.
 
-# 8. Validation and Creation Failure
+# 9. Validation and Creation Failure
 
 ```mermaid
 sequenceDiagram
@@ -378,7 +431,9 @@ Before Address resolution, the Vendor Application shall validate the raw registr
 - conditional Company Registration Number presence and canonical uppercase storage;
 - the approved ASCII Contact Email profile, trimming surrounding whitespace, preserving local-part case and lowercasing the domain;
 - the approved pragmatic UK Primary Contact Telephone profile and canonical `+44` storage;
-- Opening Hours that permit legitimate overnight periods;
+- Weekly Opening Hours containing exactly one entry for every Trading Day Monday–Sunday;
+- exactly one valid Closed, Open All Day or timed-interval state per day;
+- both times present and unequal for timed intervals, while permitting End Time earlier than Start Time for overnight operation;
 - all three mandatory Registration Declarations;
 - approved Address Resolution reference;
 - Primary Trading Authority presence only for `Stall`;
@@ -387,7 +442,7 @@ Before Address resolution, the Vendor Application shall validate the raw registr
 
 Successful validation supplies canonical values to every subsequent stage. The Domain Value Objects enforce their corresponding invariants defensively. Any failure before commit creates no Vendor, Domain Event, Integration Event, persisted outcome or outbox work.
 
-# 9. Idempotent Replay and Concurrency
+# 10. Idempotent Replay and Concurrency
 
 `RegisterVendor` is not naturally idempotent. After resolving the approved Address Resolution reference, the Vendor Application derives a composite Vendor uniqueness identity from:
 
@@ -411,7 +466,7 @@ sequenceDiagram
     Application->>Application: Validate client-authored request information
     Application->>Address: Resolve permanent reference<br/>with declared Trading Location
     Address-->>Application: CanonicalAddressId, snapshot and authorities
-    Application->>Application: Derive composite identity<br/>and semantic registration fingerprint
+    Application->>Application: Derive composite identity<br/>and semantic registration fingerprint v2
     Application->>Idempotency: Determine outcome(identity, fingerprint)
 
     alt First processing of request
@@ -438,15 +493,15 @@ The three outcomes are distinct:
 - replay applies only to the same composite identity and semantically equivalent registration information and returns the original committed successful result; and
 - the same composite identity with materially different registration information returns `IdempotencyConflict`.
 
-Semantic registration equivalence compares all materially relevant registration information after its approved canonicalisation. It excludes transient Registration Declarations, the opaque Address Resolution reference, server-generated values and technical metadata.
+Semantic registration equivalence compares all materially relevant registration information after its approved canonicalisation. Weekly Opening Hours are represented in fingerprint version 2 as the deterministic Monday-to-Sunday sequence including every daily state, flag and applicable time. A migrated legacy single interval is replay-compatible with seven identical timed daily entries. The comparison excludes transient Registration Declarations, the opaque Address Resolution reference, server-generated values and technical metadata.
 
 Conflict processing creates no Vendor, modifies no existing Vendor, records no completed business fact, Domain Event, publication work or Transactional Outbox entry, publishes no Integration Event and leaves all previously committed Vendor state unchanged.
 
 Concurrent requests with the same composite identity and semantically equivalent information must converge on one processing owner and one successful outcome. Registration Session state is outside the idempotency boundary and shall never be consulted.
 
-The concurrency technique, replay persistence and retention, transaction mechanics, and database enforcement are governed separately by CON-014, CON-015, CON-016 and CON-028. The exact fingerprint encoding and storage representation remain implementation concerns within those approved boundaries.
+The concurrency technique, replay persistence and retention, transaction mechanics, and database enforcement are governed separately by CON-014, CON-015, CON-016 and CON-028. Fingerprint representation version 2 and migrated legacy replay treatment follow the approved CON-015 boundary; remaining encoding and storage mechanics stay within those approved boundaries.
 
-# 10. Persistence and Publication Reliability
+# 11. Persistence and Publication Reliability
 
 Vendor persistence and durable recording of the corresponding Integration Event publication work form one atomic operation.
 
@@ -463,7 +518,7 @@ sequenceDiagram
     Application->>Application: Map completed VendorRegistered fact<br/>to Integration Event v1
     Application->>Repository: Persist Vendor and serialized publication work
     Repository->>Store: Begin transaction
-    Repository->>Store: Persist Vendor aggregate
+    Repository->>Store: Persist Vendor aggregate<br/>and seven Daily Opening Hours entries
     Repository->>Outbox: Add immutable serialized VendorRegistered v1 record
     Outbox->>Store: Persist publication record
     Repository->>Store: Commit transaction
@@ -480,7 +535,7 @@ sequenceDiagram
 
 The internal Domain Event is not the outbox message. Before outbox persistence, an explicit Vendor Application mapper translates the completed business fact and registration-time information into the approved Integration Event. Vendor Infrastructure serializes and stores that contract unchanged. The relay publishes the stored event and does not reconstruct it from current Vendor state.
 
-## 10.1 Minimum VendorRegistered Integration Event Contract
+## 11.1 Minimum VendorRegistered Integration Event Contract
 
 The published `VendorRegistered` Integration Event shall contain, at a minimum:
 
@@ -508,15 +563,15 @@ The Integration Event-owned `BusinessAddress` contains `CanonicalAddressId`, opt
 
 The stable envelope contains `EventId`, `EventType` `VendorRegistered`, `EventVersion` `1`, `OccurredAt` and the immutable payload. The event is serialized once as UTF-8 camel-case JSON before outbox persistence and published unchanged. Optional values are explicitly `null`.
 
-The mapper and serializer produce the exact nested member structure and deterministic identifier, timestamp, time, enum and explicit-null representations defined by HJ-004 §7.2. The Integration Event contract owns those published representations and does not expose or reuse Vendor Domain Aggregate, Value Object or enum types. This representation requirement does not add another runtime interaction or change the sequence above.
+The mapper and serializer produce the exact nested member structure and deterministic identifier, timestamp, time, enum and explicit-null representations defined by HJ-004 §7.2. The revised unreleased v1 payload contains `tradingCharacteristics.weeklyOpeningHours.days` with exactly seven entries serialized Monday through Sunday. Each entry contains `day`, `isClosed`, `isOpenAllDay`, `startTime` and `endTime`; times are explicit `null` for Closed and Open All Day. The Integration Event contract owns those published representations and does not expose or reuse Vendor Domain Aggregate, Value Object or enum types. This representation requirement does not add another runtime interaction or change the sequence above.
 
-Compatible optional additions are permitted within v1 and consumers tolerate unknown fields. Removal, renaming, type or meaning changes require a new version. Retries retain the original EventId, version and serialized event.
+Because v1 has not been released or consumed externally, CR-073 revises this representation in place. Compatible optional additions are permitted within the corrected v1 and consumers tolerate unknown fields. After release, removal, renaming, type or meaning changes require a new version. Retries retain the original EventId, version and serialized event.
 
 The contract purpose is to support downstream Compliance and Pending Activation processing without a synchronous Vendor callback.
 
 Registration Declarations shall never appear in the Integration Event. Implementation-specific metadata may be added provided the minimum business content and contract semantics are preserved.
 
-## 10.2 Epic 1 Publication and Receipt Sequence
+## 11.2 Epic 1 Publication and Receipt Sequence
 
 ```mermaid
 sequenceDiagram
@@ -542,7 +597,7 @@ sequenceDiagram
 
 A relay crash between broker acceptance and marking published may cause duplicate delivery. The durable EventId receipt makes that duplicate harmless. No ordering guarantee is assumed.
 
-# 11. Client / BFF-Owned Registration Session Lifecycle
+# 12. Client / BFF-Owned Registration Session Lifecycle
 
 A Registration Session, if used, is client- or BFF-owned interaction state and is not part of Vendor Registration processing.
 
@@ -573,9 +628,9 @@ sequenceDiagram
 
 The concrete storage mechanism, timeout and expiry policy are client implementation decisions. An abandoned or expired Registration Session cannot be resumed as Vendor business state.
 
-# 12. Failure Behaviour
+# 13. Failure Behaviour
 
-## 12.1 Application Validation Failure
+## 13.1 Application Validation Failure
 
 - Return one `RequestValidationFailure` containing every independently detectable request-field, Registration Declaration, conditional and cross-field validation error.
 - Do not return separate `RegistrationDeclarationFailure` or `ConditionalRuleFailure` outcomes.
@@ -584,7 +639,7 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 - Record no completed business fact, Domain Event, publication work or Integration Event.
 - Retain no server-side interaction state.
 
-## 12.2 Address Failure
+## 13.2 Address Failure
 
 - Return `InvalidReference` for an unknown or fabricated Address Resolution reference.
 - Return `InvalidAddressResult` when a known immutable result cannot satisfy the submitted Trading Location context or lacks required authoritative values.
@@ -595,32 +650,32 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 - Permit a later caller-controlled RegisterVendor attempt to reuse the same permanent Address Resolution reference.
 - Perform no in-process automatic retry and use no Epic 1 circuit breaker.
 
-## 12.3 Aggregate Invariant Failure
+## 13.3 Aggregate Invariant Failure
 
 - Return structured Domain validation errors.
 - Persist no Vendor and record no event or publication work.
 - Do not expose technical exceptions as business validation messages.
 
-## 12.4 Persistence or Atomic Recording Failure
+## 13.4 Persistence or Atomic Recording Failure
 
 - Roll back Vendor persistence and publication work.
 - Do not report registration as successful.
 - Permit safe retry through the idempotency safeguard.
 - Prevent a partial Vendor or orphaned publication record.
 
-## 12.5 Integration Event Dispatch Failure
+## 13.5 Integration Event Dispatch Failure
 
 - Leave the successfully registered Vendor unchanged.
 - Keep the durable publication record available for retry.
 - Retry publication without repeating `RegisterVendor`.
 - Do not require the applicant to register again.
 
-## 12.6 Duplicate or Concurrent Submission
+## 13.6 Duplicate or Concurrent Submission
 
 - Return the original committed successful result for the same composite identity and semantically equivalent registration information.
 - Create no additional Vendor, business fact, Domain Event, publication record or Integration Event.
 
-## 12.7 Idempotency Conflict
+## 13.7 Idempotency Conflict
 
 - Return `IdempotencyConflict` when the same composite identity is associated with materially different registration information from the previously successful registration.
 - Create no Vendor and modify no existing Vendor.
@@ -628,7 +683,7 @@ The concrete storage mechanism, timeout and expiry policy are client implementat
 - Publish no Integration Event.
 - Leave all previously committed Vendor state unchanged.
 
-# 13. Resulting Vendor State
+# 14. Resulting Vendor State
 
 After successful registration:
 
@@ -640,7 +695,7 @@ After successful registration:
 | Vendor may trade | No |
 | VendorId | Created |
 | RegisteredAt | Recorded |
-| Registered Information | Persisted and read-only to the Vendor |
+| Registered Information | Persisted and read-only to the Vendor, including all seven canonical Daily Opening Hours entries |
 | Vendor Managed Information | Persisted when supplied |
 | Canonical Address Identifier | Persisted from the Address Domain |
 | Business Address Snapshot | Immutable snapshot persisted exactly as returned by the Address Domain |
@@ -652,11 +707,11 @@ After successful registration:
 | Pending Activation Process | Initiated asynchronously from the published Integration Event |
 | Compliance Requirements | Obtained through the approved Compliance capability |
 
-# 14. Retrieve Registered Vendor
+# 15. Retrieve Registered Vendor
 
 This section defines the read-only registered Vendor retrieval capability. It is separate from the `RegisterVendor` command flow and does not participate in registration processing.
 
-## 14.1 Participants
+## 15.1 Participants
 
 | Participant | Responsibility |
 |---|---|
@@ -666,7 +721,7 @@ This section defines the read-only registered Vendor retrieval capability. It is
 
 No Registration UI / BFF, Registration Session, Address Service, Compliance capability, Pending Activation Process, Identity capability, search infrastructure or event publisher participates in this sequence.
 
-## 14.2 Retrieval Sequence
+## 15.2 Retrieval Sequence
 
 ```mermaid
 sequenceDiagram
@@ -681,7 +736,7 @@ sequenceDiagram
 
     alt Vendor found
         Repository-->>Application: Existing persisted Vendor
-        Application->>Application: Map persisted Vendor state<br/>to Registered Vendor Details
+        Application->>Application: Map persisted Vendor state<br/>including Weekly Opening Hours<br/>to Registered Vendor Details
         Application-->>Administrator: RegisteredVendorDetails
     else Vendor not found
         Repository-->>Application: Vendor not found
@@ -693,7 +748,7 @@ sequenceDiagram
 
 Registered Vendor Details contains the registration-established information defined by HJ-004 §1.7. The application returns that purpose-specific representation and never exposes the Vendor aggregate directly.
 
-## 14.3 Query Behaviour
+## 15.3 Query Behaviour
 
 Retrieve Registered Vendor is a read-only Vendor query.
 
@@ -701,7 +756,138 @@ It does not mutate the Vendor, alter lifecycle state, change Trading Preference,
 
 Neither the successful outcome nor the controlled Vendor Not Found outcome creates a Domain Event, Integration Event or business state.
 
-# 15. Design Decisions
+# 16. Post-registration Community Participation
+
+Community Participation is a separate post-registration capability. It begins only after a definitive successful RegisterVendor response has supplied the committed VendorId. It is not part of Vendor Registration, does not retain or reopen the Registration Session and cannot change the completed registration outcome.
+
+## 16.1 Web Interaction
+
+The Community page initially selects Email as Contact Preference and leaves Keep Me Involved unticked. Email, SMS and WhatsApp are the complete Epic 1 preference set. Join the Community remains disabled while Keep Me Involved is unticked.
+
+Not Now performs no Community request, creates no record and navigates to the not-joined confirmation. Absence of a Community Participation record means not joined; it is not stored as `false` or as a refusal.
+
+When Keep Me Involved is ticked, Join the Community becomes enabled and submits the currently selected preference. Only one submission may be active. Failure retains the page and selections and permits an explicit safe retry. Navigation to the joined confirmation occurs only after definitive authoritative success.
+
+The joined confirmation thanks the Vendor for joining. The not-joined confirmation explains that the Vendor can join later through an approved entry point. Neither page presents a placeholder as an operational link.
+
+## 16.2 Authoritative Join Community Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor VendorUser as Registered Vendor user
+    participant Web as Community UI
+    participant Edge as Trusted Edge
+    participant Community as Community Application
+    participant Verify as Vendor Verification Capability
+    participant Store as Community Repository
+    participant Outbox as Community Outbox
+
+    alt Not Now
+        VendorUser->>Web: Select Not Now
+        Note over Web,Community: No Community request and no record
+        Web-->>VendorUser: Not-joined confirmation
+    else Join the Community
+        VendorUser->>Web: Keep Me Involved + selected Contact Preference
+        Web->>Edge: POST /community-participations<br/>{vendorId, contactPreference}
+        Edge->>Community: JoinCommunity(VendorId, ContactPreference)
+        Community->>Community: Validate request
+        Community->>Verify: VerifySuccessfullyRegisteredVendor(VendorId)
+
+        alt Vendor not found or ineligible
+            Verify-->>Community: VendorNotFound
+            Community-->>Web: Controlled VendorNotFound
+            Web-->>VendorUser: Retain selections and show failure
+        else Verification unavailable
+            Verify-->>Community: Unavailable
+            Community-->>Web: VendorVerificationUnavailable
+            Web-->>VendorUser: Retain selections and offer explicit retry
+        else Successfully registered Vendor
+            Verify-->>Community: Confirmed
+            Community->>Store: Resolve by unique VendorId
+
+            alt No existing participation
+                Community->>Community: Create immutable participation<br/>and CommunityParticipationRecorded v1
+                Community->>Store: Begin Community transaction
+                Community->>Store: Insert Community Participation
+                Community->>Outbox: Insert immutable serialized event
+                Community->>Store: Commit transaction
+                Community-->>Web: CommunityParticipationRecorded<br/>original authoritative result
+                Web-->>VendorUser: Joined confirmation
+            else Same Contact Preference already recorded
+                Store-->>Community: Original committed participation
+                Community-->>Web: CommunityParticipationAlreadyRecorded<br/>original authoritative result
+                Web-->>VendorUser: Joined confirmation
+            else Different Contact Preference already recorded
+                Store-->>Community: Existing different preference
+                Community-->>Web: CommunityParticipationConflict
+                Web-->>VendorUser: Retain selections and show conflict
+            end
+        end
+    end
+```
+
+The request contains exactly VendorId and Contact Preference. Invocation implies affirmative participation. No Primary Contact information, participation Boolean, Communication Consent or delivery instruction crosses the boundary.
+
+The complete Community Application outcomes are:
+
+- `CommunityParticipationRecorded`;
+- `CommunityParticipationAlreadyRecorded`;
+- `RequestValidationFailure`;
+- `VendorNotFound`;
+- `CommunityParticipationConflict`;
+- `VendorVerificationUnavailable`; and
+- `CommunityPersistenceUnavailable`.
+
+Recorded and Already Recorded return the original CommunityParticipationId, VendorId, Contact Preference and JoinedAt. The HTTP adapter maps both to `201 Created` with the same stable Location semantics; validation maps to 400, Vendor Not Found to 404, conflict to 409 and unavailable outcomes to 503. The Edge and HTTP adapter contain no Community rule and perform no automatic retry.
+
+## 16.3 Concurrency, Persistence and Publication
+
+VendorId is the unique Community replay and conflict boundary. The Community persistence boundary atomically resolves concurrent first requests so that exactly one Community Participation record and at most one corresponding outbox item and logical event exist. Equivalent contenders return the original result; conflicting contenders receive the controlled conflict.
+
+Failure before the Community transaction commits leaves neither participation nor outbox work. Once committed, the authoritative success remains valid even if publication or consumer processing is delayed. An uncertain client may explicitly retry because equivalent replay returns the original committed result.
+
+The authoritative record and its original result are retained for at least as long as the associated Vendor exists. Epic 1 provides no amendment, withdrawal, deletion or expiry operation. Primary Contact details are absent from Community persistence, event content and processing evidence.
+
+## 16.4 Asynchronous Community Processing
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Relay as Community Relay Responsibility
+    participant Outbox as Community Outbox
+    participant Broker as RabbitMQ
+    participant Consumer as Community Consumer
+    participant Receipt as Community Receipt Store
+    participant Stub as Community Stub Processor
+
+    Relay->>Outbox: Claim eligible immutable event
+    Relay->>Broker: Publish stored bytes with publisher confirm
+    Broker-->>Relay: Confirmed
+    Relay->>Outbox: Mark published
+    Broker->>Consumer: Deliver CommunityParticipationRecorded v1
+    Consumer->>Consumer: Validate envelope, version and payload
+    Consumer->>Receipt: Resolve EventId and immutable-content hash
+
+    alt First valid delivery
+        Consumer->>Stub: Process deterministic Community fact
+        Note over Stub: No consent or message delivery
+        Consumer->>Receipt: Record durable processing evidence
+        Consumer-->>Broker: Acknowledge
+    else Same immutable event already processed
+        Receipt-->>Consumer: Existing matching receipt
+        Consumer-->>Broker: Acknowledge duplicate
+    else EventId reused with different content
+        Receipt-->>Consumer: Integrity mismatch
+        Consumer->>Broker: Integrity failure treatment
+    else Transient infrastructure failure
+        Consumer->>Broker: Retry under bounded policy
+    end
+```
+
+The Community event payload contains exactly CommunityParticipationId, VendorId, JoinedAt and ContactPreference within the approved versioned envelope. Consumer receipt is processing evidence only: it is not another participation record and does not imply consent or message delivery.
+
+# 17. Design Decisions
 
 ## Decision 1: Registration Session is outside the service boundary
 
@@ -739,15 +925,35 @@ Successful registration cannot be confirmed unless the Vendor and durable public
 
 After Address resolution supplies `CanonicalAddressId`, RegisterVendor derives the composite Vendor identity from trimmed, case-insensitive Trading Name, trimmed, case-insensitive Legal Operator Name and `CanonicalAddressId`. Reprocessing semantically equivalent registration information for that identity returns the original committed successful result without repeating any business effect. Materially different information for the same identity returns `IdempotencyConflict` without creating or modifying business state. Registration never updates an existing Vendor; that requires a separate future administration operation.
 
-## Decision 10: Downstream capabilities consume the published contract
+## Decision 10: Pre-registration determination is separate and transient
+
+Vendor Application orchestrates a side-effect-free Compliance-owned determination through a consumed port before Web submission. The result is retained only by the Registration Session, is refreshed immediately before submission and is absent from RegisterVendor and Vendor state.
+
+## Decision 11: Downstream capabilities consume the published contract
 
 The Pending Activation Process begins from the published `VendorRegistered` Integration Event and does not synchronously query the Vendor Domain for registration information already present in that contract. Compliance collaboration occurs through the approved Compliance boundary.
 
-## Decision 11: Registered Vendor retrieval is isolated and read-only
+## Decision 12: Registered Vendor retrieval is isolated and read-only
 
 `RetrieveRegisteredVendor` loads one persisted Vendor by VendorId and maps its state to Registered Vendor Details. It exposes no aggregate, introduces no cross-domain dependency or dedicated read model, and creates no state change, lifecycle transition, event or publication work.
 
-# 16. Behavioural Conformance Checklist
+## Decision 13: Community Participation is a separate authoritative operation
+
+Join Community follows definitive registration success and never extends RegisterVendor or the Registration Session. Community owns the record and outcomes; Vendor supplies only minimal successful-registration verification.
+
+## Decision 14: Absence is not a recorded negative choice
+
+Not Now performs no Community request. Community persists affirmative participation only and does not store an unticked choice as false or refusal.
+
+## Decision 15: Community replay uses VendorId
+
+VendorId is unique within Community persistence. Equivalent preference replay returns the original result, a different preference conflicts, and concurrent requests result in one record and at most one event.
+
+## Decision 16: Community publication does not imply communication
+
+CommunityParticipationRecorded communicates the completed participation fact to a deterministic Community stub. Neither publication, receipt nor processing represents Communication Consent or message delivery.
+
+# 18. Behavioural Conformance Checklist
 
 Confirm that the Vendor Registration behaviour conforms to the following requirements:
 
@@ -763,6 +969,8 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 - [ ] idempotency conflict creates or modifies no Vendor and records or publishes no business fact, Domain Event, publication work, Transactional Outbox entry or Integration Event;
 - [ ] idempotency conflict leaves previously committed Vendor state unchanged;
 - [ ] all HJ-104 field and conditional rules are validated server-side;
+- [ ] Weekly Opening Hours contain one unique entry for every Trading Day and each entry satisfies exactly one valid daily state;
+- [ ] fingerprint representation v2 includes the canonical weekly schedule and preserves approved migrated-legacy replay compatibility;
 - [ ] all mandatory Registration Declarations are explicitly accepted;
 - [ ] Registration Declarations are not persisted or included in either event type;
 - [ ] the request carries an approved Address Resolution reference;
@@ -774,7 +982,7 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 - [ ] a new Vendor begins in `PendingActivation` and `Offline`;
 - [ ] successful creation records the internal `VendorRegistered` Domain Event;
 - [ ] Vendor persistence and Integration Event publication recording are atomic;
-- [ ] the published `VendorRegistered` Integration Event satisfies the minimum contract;
+- [ ] the published `VendorRegistered` Integration Event satisfies the corrected unreleased v1 Weekly Opening Hours contract;
 - [ ] publication retry does not repeat Vendor Registration;
 - [ ] the synchronous response reflects committed Vendor state;
 - [ ] the downstream Pending Activation Process consumes the published contract without synchronously querying the Vendor Domain for registration information already supplied by that contract;
@@ -787,12 +995,32 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 - [ ] retrieval changes no state and creates no Domain Event, Integration Event or publication work; and
 - [ ] no search or additional query infrastructure has been introduced.
 
-# 17. Traceability
+Community conformance additionally requires:
+
+- [ ] Community interaction begins only after definitive Vendor Registration success;
+- [ ] Email is initially selected and Keep Me Involved is initially unticked;
+- [ ] Join the Community is disabled until Keep Me Involved is ticked;
+- [ ] Not Now performs no request and creates no record;
+- [ ] JoinCommunity contains exactly VendorId and Contact Preference;
+- [ ] Vendor verification exposes no aggregate, Registered Vendor Details or Primary Contact;
+- [ ] first success atomically commits one immutable participation and one outbox item;
+- [ ] equivalent replay returns the original result and different preference returns conflict;
+- [ ] concurrent requests create exactly one participation and at most one logical event;
+- [ ] controlled or technical failure retains Web selections and allows safe explicit retry;
+- [ ] CommunityParticipationRecorded v1 excludes contact details, consent and delivery instructions;
+- [ ] duplicate event delivery creates no additional processing effect;
+- [ ] EventId reuse with different immutable content is treated as an integrity failure;
+- [ ] Community receipt is processing evidence only; and
+- [ ] no Email, SMS or WhatsApp delivery is performed.
+
+# 19. Traceability
 
 | Behaviour | Authoritative source |
 |---|---|
 | Registration Session ownership and service boundary | ADR-004; HJ-003 §3.5; HJ-004 §1.2 |
+| Pre-registration Compliance Determination | HJ-010 CON-047; HJ-012 CON-047; HJ-104 §4.1; ADR-007 |
 | Complete request and field rules | HJ-104 §§2, 5 and 6 |
+| Weekly Opening Hours terminology and daily states | HJ-003 §3.4.2; HJ-004; HJ-104 §§2 and 5.2; CR-073 |
 | Composite Vendor uniqueness identity and semantic registration equivalence | HJ-010 CON-013; HJ-012 CON-013; HJ-104 §§5.3 and 5.6 |
 | Information classifications | ADR-005; HJ-104 §§2 and 5.5 |
 | Address Resolution reference and trust boundary | ADR-006 §2; HJ-104 §§5.4 and 6; HJ-004 §§1.5 and 8 |
@@ -805,7 +1033,12 @@ Confirm that the Vendor Registration behaviour conforms to the following require
 | Register Vendor replay behaviour | ADR-008 §§2.2 and 2.4; HJ-010 CON-013; HJ-012 CON-013 |
 | Controlled idempotency conflict | ADR-008 §2.3; HJ-010 CON-013; HJ-012 CON-013 |
 | Event-driven Pending Activation and Compliance relationship | ADR-003; ADR-007; HJ-004 §§7 and 12 |
-| Retrieve Registered Vendor terminology and actor | HJ-003 §§3.20–3.22 |
+| Retrieve Registered Vendor terminology and actor | HJ-003 §§3.23–3.25 |
 | Query definition, result content and read source | HJ-004 §1.7; CR-026 §4.2 |
 | Successful and Vendor Not Found retrieval behaviour | HJ-004 §1.7; CR-026 §4.3 |
 | Retrieval side-effect and bounded-context constraints | HJ-004 §1.7; CR-026 §§4.2, 4.3 and 5 |
+| Community terminology and information boundary | HJ-003 §§3.26–3.29; HJ-104 §4.2 |
+| Community ownership and Vendor verification boundary | ADR-002 v1.2; HJ-004 §1.5; HJ-010 CON-046; HJ-012 CON-046 |
+| Join Community replay, conflict, transaction and retention | ADR-008 v1.6; HJ-010 CON-046; HJ-012 CON-046 |
+| Community Integration Event and consumer processing | ADR-003 v1.4; HJ-010 CON-046; HJ-012 CON-046 |
+| Community runtime and trusted Edge composition | ADR-013 v1.1 |

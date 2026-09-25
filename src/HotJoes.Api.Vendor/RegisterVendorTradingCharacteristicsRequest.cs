@@ -4,7 +4,7 @@ public sealed class RegisterVendorTradingCharacteristicsRequest
 {
     public string? TradingLocation { get; init; }
 
-    public RegisterVendorOpeningHoursRequest? OpeningHours { get; init; }
+    public RegisterVendorWeeklyOpeningHoursRequest? WeeklyOpeningHours { get; init; }
 
     public bool? ServiceIncludesHotFood { get; init; }
 

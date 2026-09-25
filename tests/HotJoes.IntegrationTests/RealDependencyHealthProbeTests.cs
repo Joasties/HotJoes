@@ -89,7 +89,7 @@ public sealed class RealDependencyHealthProbeTests
     [Fact]
     public async Task DependencyOutageMatrix_ReportsResponsibilityAndRecovers()
     {
-        Epic1HealthEvaluator evaluator = CreateEvaluator();
+        OperationalHealthEvaluator evaluator = CreateEvaluator();
 
         await AssertAllReadyAsync(evaluator);
 
@@ -97,14 +97,14 @@ public sealed class RealDependencyHealthProbeTests
         try
         {
             AssertHealthy(await evaluator.EvaluateReadinessAsync(
-                Epic1Component.VendorApi));
+                OperationalComponent.VendorApi));
             AssertUnhealthy(
                 await evaluator.EvaluateReadinessAsync(
-                    Epic1Component.VendorRelay),
+                    OperationalComponent.VendorRelay),
                 HealthDependency.RabbitMq);
             AssertUnhealthy(
                 await evaluator.EvaluateReadinessAsync(
-                    Epic1Component.ComplianceConsumer),
+                    OperationalComponent.ComplianceConsumer),
                 HealthDependency.RabbitMq);
         }
         finally
@@ -123,15 +123,15 @@ public sealed class RealDependencyHealthProbeTests
         {
             AssertUnhealthy(
                 await evaluator.EvaluateReadinessAsync(
-                    Epic1Component.VendorApi),
+                    OperationalComponent.VendorApi),
                 HealthDependency.VendorPostgreSql);
             AssertUnhealthy(
                 await evaluator.EvaluateReadinessAsync(
-                    Epic1Component.VendorRelay),
+                    OperationalComponent.VendorRelay),
                 HealthDependency.VendorPostgreSql);
             AssertUnhealthy(
                 await evaluator.EvaluateReadinessAsync(
-                    Epic1Component.ComplianceConsumer),
+                    OperationalComponent.ComplianceConsumer),
                 HealthDependency.CompliancePostgreSql);
         }
         finally
@@ -180,9 +180,9 @@ public sealed class RealDependencyHealthProbeTests
             item => item.PropertyType == typeof(Exception));
     }
 
-    private Epic1HealthEvaluator CreateEvaluator()
+    private OperationalHealthEvaluator CreateEvaluator()
     {
-        return new Epic1HealthEvaluator(
+        return new OperationalHealthEvaluator(
             [
                 new PostgreSqlHealthDependencyProbe(
                     HealthDependency.VendorPostgreSql,
@@ -241,14 +241,14 @@ public sealed class RealDependencyHealthProbeTests
     }
 
     private static async Task AssertAllReadyAsync(
-        Epic1HealthEvaluator evaluator)
+        OperationalHealthEvaluator evaluator)
     {
         AssertHealthy(await evaluator.EvaluateReadinessAsync(
-            Epic1Component.VendorApi));
+            OperationalComponent.VendorApi));
         AssertHealthy(await evaluator.EvaluateReadinessAsync(
-            Epic1Component.VendorRelay));
+            OperationalComponent.VendorRelay));
         AssertHealthy(await evaluator.EvaluateReadinessAsync(
-            Epic1Component.ComplianceConsumer));
+            OperationalComponent.ComplianceConsumer));
     }
 
     private static void AssertHealthy(OperationalHealthEvidence evidence)

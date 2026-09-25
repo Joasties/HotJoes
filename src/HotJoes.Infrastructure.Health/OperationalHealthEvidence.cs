@@ -10,7 +10,7 @@ public sealed class OperationalHealthEvidence
 
     internal OperationalHealthEvidence(
         OperationalHealthCheckKind checkKind,
-        Epic1Component component,
+        OperationalComponent component,
         OperationalHealthStatus status,
         IEnumerable<HealthDependency> unavailableDependencies,
         IEnumerable<DegradedWorkKind> degradedWork)
@@ -25,7 +25,7 @@ public sealed class OperationalHealthEvidence
 
     public OperationalHealthCheckKind CheckKind { get; }
 
-    public Epic1Component Component { get; }
+    public OperationalComponent Component { get; }
 
     public OperationalHealthStatus Status { get; }
 

@@ -7,7 +7,8 @@ public sealed class VendorValueObjectEqualityTests
     [Theory]
     [InlineData("VendorId")]
     [InlineData("TradingCharacteristics")]
-    [InlineData("OpeningHours")]
+    [InlineData("WeeklyOpeningHours")]
+    [InlineData("DailyOpeningHours")]
     [InlineData("VendorName")]
     [InlineData("CompanyRegistrationNumber")]
     [InlineData("PrimaryContact")]
@@ -46,10 +47,14 @@ public sealed class VendorValueObjectEqualityTests
                 CreateTradingCharacteristics(TradingLocation.Kitchen, true, false),
                 CreateTradingCharacteristics(TradingLocation.Kitchen, true, false),
                 CreateTradingCharacteristics(TradingLocation.Restaurant, true, false)),
-            "OpeningHours" => (
-                new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
-                new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
-                new OpeningHours(new TimeOnly(18, 0), new TimeOnly(2, 0))),
+            "WeeklyOpeningHours" => (
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(18, 0), new TimeOnly(2, 0))),
+            "DailyOpeningHours" => (
+                DailyOpeningHours.OpenDuring(TradingDay.Monday, new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                DailyOpeningHours.OpenDuring(TradingDay.Monday, new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                DailyOpeningHours.OpenAllDay(TradingDay.Monday)),
             "VendorName" => (
                 new VendorName("Jordan's Evening Kitchen"),
                 new VendorName("Jordan's Evening Kitchen"),
@@ -99,7 +104,7 @@ public sealed class VendorValueObjectEqualityTests
     {
         return new TradingCharacteristics(
             tradingLocation,
-            new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+            WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
             serviceIncludesHotFood,
             alcoholService);
     }

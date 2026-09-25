@@ -40,6 +40,13 @@ public sealed class RegisterVendorRequestStructureValidator
             "kitchen"
         };
 
+    private static readonly HashSet<string> TradingDays =
+        new(StringComparer.Ordinal)
+        {
+            "monday", "tuesday", "wednesday", "thursday",
+            "friday", "saturday", "sunday"
+        };
+
     public bool IsValid(JsonElement root)
     {
         if (root.ValueKind != JsonValueKind.Object || ContainsProhibitedMember(root))
@@ -69,11 +76,26 @@ public sealed class RegisterVendorRequestStructureValidator
                 trading,
                 "tradingLocation",
                 TradingLocations)
-            && TryGetObject(trading, "openingHours", out JsonElement hours)
-            && IsRequiredTime(hours, "startTime")
-            && IsRequiredTime(hours, "endTime")
+            && TryGetObject(
+                trading,
+                "weeklyOpeningHours",
+                out JsonElement hours)
+            && hours.TryGetProperty("days", out JsonElement days)
+            && days.ValueKind == JsonValueKind.Array
+            && days.GetArrayLength() == 7
+            && days.EnumerateArray().All(IsDailyOpeningHoursStructurallyValid)
             && IsRequiredBoolean(trading, "serviceIncludesHotFood")
             && IsRequiredBoolean(trading, "alcoholService");
+    }
+
+    private static bool IsDailyOpeningHoursStructurallyValid(JsonElement day)
+    {
+        return day.ValueKind == JsonValueKind.Object
+            && IsRequiredControlledString(day, "day", TradingDays)
+            && IsRequiredBoolean(day, "isClosed")
+            && IsRequiredBoolean(day, "isOpenAllDay")
+            && IsOptionalTime(day, "startTime")
+            && IsOptionalTime(day, "endTime");
     }
 
     private static bool IsPrimaryContactValid(JsonElement root)
@@ -117,16 +139,17 @@ public sealed class RegisterVendorRequestStructureValidator
             && approvedValues.Contains(value.GetString()!);
     }
 
-    private static bool IsRequiredTime(JsonElement parent, string propertyName)
+    private static bool IsOptionalTime(JsonElement parent, string propertyName)
     {
         return parent.TryGetProperty(propertyName, out JsonElement value)
-            && value.ValueKind == JsonValueKind.String
-            && TimeOnly.TryParseExact(
-                value.GetString(),
-                "HH:mm:ss",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out _);
+            && (value.ValueKind == JsonValueKind.Null ||
+                value.ValueKind == JsonValueKind.String &&
+                TimeOnly.TryParseExact(
+                    value.GetString(),
+                    "HH:mm:ss",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out _));
     }
 
     private static bool IsRequiredBoolean(JsonElement parent, string propertyName)

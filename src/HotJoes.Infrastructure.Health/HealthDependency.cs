@@ -4,5 +4,6 @@ public enum HealthDependency
 {
     VendorPostgreSql = 1,
     RabbitMq = 2,
-    CompliancePostgreSql = 3
+    CompliancePostgreSql = 3,
+    CommunityPostgreSql = 4
 }

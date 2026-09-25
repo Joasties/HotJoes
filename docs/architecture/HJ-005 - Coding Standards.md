@@ -3,11 +3,11 @@
 | Document ID | HJ-005 |
 | --- | --- |
 | Document Title | Coding Standards |
-| Version | 2.0 |
+| Version | 2.1 |
 | Status | Approved |
 | Classification | Architecture |
 | Owner | Project Architecture |
-| Last Updated | 9 August 2026 |
+| Last Updated | 25 September 2026 |
 
 ## Revision History
 
@@ -16,6 +16,7 @@
 | 0.1 | 16 July 2026 | Previous draft. |
 | 1.0 | 17 July 2026 | Applied the standard HotJoes document metadata, revision history, related documents and numbered heading structure. Coding standards unchanged. |
 | 2.0 | 9 August 2026 | Completed human review and promoted Coding Standards from Draft to Approved. Existing coding standards were retained unchanged. Related-document status references were reconciled with the approved repository baseline. |
+| 2.1 | 25 September 2026 | Applied CR-083. Replaced obsolete illustrative API and persistence project and namespace names with the responsibility-specific Vendor structure, clarified that the displayed solution structure is representative rather than exhaustive, and preserved the existing dependency and ownership standards unchanged. |
 
 ## Related Documents
 
@@ -148,28 +149,31 @@ Primitive types should not be used where doing so makes unrelated concepts inter
 
 ## 3. Solution and Project Structure
 
-### 3.1 Existing Structure
+### 3.1 Representative Structure
 
-The solution currently follows this structure:
+HotJoes projects are named for their architectural responsibility and owning bounded context. A representative Vendor slice follows:
 
 ```csharp
 HotJoes.sln
 
 src/
-  HotJoes.Api
+  HotJoes.Api.Vendor
   HotJoes.Application.Vendor
   HotJoes.Domain.Vendor
-  HotJoes.Infrastructure.Persistence
+  HotJoes.Infrastructure.Vendor.Persistence
 
 tests/
-  HotJoes.Domain.Vendor.Tests
+  HotJoes.Api.Vendor.Tests
   HotJoes.Application.Vendor.Tests
+  HotJoes.Domain.Vendor.Tests
   HotJoes.IntegrationTests
 ```
 
 Production projects belong under src.
 
 Test projects belong under tests.
+
+Other bounded contexts and runtime responsibilities use separately named Application, Infrastructure, API or Worker projects where required by the approved architecture. This representative slice is not an exhaustive project inventory.
 
 ### 3.2 Project Dependencies
 
@@ -178,7 +182,7 @@ Dependencies must point inward toward the domain.
 The intended dependency direction is:
 
 ```csharp
-HotJoes.Api
+HotJoes.Api.Vendor
     ↓
 HotJoes.Application.Vendor
     ↓
@@ -270,7 +274,7 @@ Examples:
 HotJoes.Domain.Vendor
 HotJoes.Domain.Vendor.Menus
 HotJoes.Application.Vendor.Onboarding
-HotJoes.Infrastructure.Persistence.Vendor
+HotJoes.Infrastructure.Vendor.Persistence
 ```
 
 Do not create deeply nested namespaces unless the additional grouping genuinely improves navigation.

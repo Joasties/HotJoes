@@ -3,11 +3,11 @@
 | **Document ID** | ADR-000 |
 |-----------------|--------|
 | **Document Title** | Architectural Decision Register |
-| **Version** | 1.4 |
+| **Version** | 1.6 |
 | **Status** | Accepted |
 | **Classification** | Architecture |
 | **Owner** | Project Architecture |
-| **Last Updated** | 7 September 2026 |
+| **Last Updated** | 22 September 2026 |
 
 ---
 
@@ -20,6 +20,8 @@
 | 1.2 | 4 September 2026 | Registered the accepted Angular Vendor Web client decision as ADR-010 and the accepted Playwright Test browser UI testing and automation decision as ADR-011. |
 | 1.3 | 7 September 2026 | Registered the accepted feature-oriented Angular Vendor Web client application architecture as ADR-012. |
 | 1.4 | 7 September 2026 | Synchronized ADR-011 v1.1 and registered ADR-013 for the accepted CON-038 runtime and deployment composition decision. |
+| 1.5 | 19 September 2026 | Synchronized the CR-076 amendment of ADR-007 to v1.2 for the approved CON-047 pre-registration Compliance Determination boundary. |
+| 1.6 | 22 September 2026 | Synchronized the CR-078 through CR-081 amendments of ADR-002 v1.2, ADR-003 v1.4, ADR-008 v1.6 and ADR-013 v1.1 for the approved CON-046 Community Participation and Contact Preference decision. |
 
 ---
 
@@ -81,18 +83,18 @@ ADRs are never deleted. When a decision changes, a new ADR supersedes the previo
 | ADR | Title | Status |
 |-----|-------|--------|
 | ADR-001 | Domain-Driven Design as the Primary Architectural Style | Accepted |
-| ADR-002 | Business Capabilities and Bounded Contexts | Accepted |
-| ADR-003 | Event-Driven Collaboration | Accepted |
+| ADR-002 | Business Capabilities and Bounded Contexts | Accepted v1.2 |
+| ADR-003 | Event-Driven Collaboration | Accepted v1.4 |
 | ADR-004 | Vendor Lifecycle Begins After Successful Registration | Accepted |
 | ADR-005 | Registered Information vs Vendor Managed Information | Accepted |
 | ADR-006 | Address Domain Ownership and Business Address Snapshots | Accepted |
-| ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted |
-| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted |
+| ADR-007 | Vendor Compliance as a Separate Bounded Context | Accepted v1.2 |
+| ADR-008 | Idempotent Operations and Reliable Event Publication | Accepted v1.6 |
 | ADR-009 | Azure Reference Cloud, Centralized Configuration and Secret Management | Accepted |
 | ADR-010 | Angular for the Vendor Web Client | Accepted |
 | ADR-011 | Playwright Test for Browser UI Testing and Automation | Accepted |
 | ADR-012 | Feature-Oriented Angular Architecture for the Vendor Web Client | Accepted |
-| ADR-013 | Epic 1 Runtime and Deployment Composition | Accepted |
+| ADR-013 | Epic 1 Runtime and Deployment Composition | Accepted v1.1 |
 
 ---
 

@@ -291,9 +291,16 @@ public sealed class RabbitMqComplianceConsumerTests
                 "legalOperatorType": "soleTrader",
                 "tradingCharacteristics": {
                   "tradingLocation": "restaurant",
-                  "openingHours": {
-                    "startTime": "09:00:00",
-                    "endTime": "17:00:00"
+                  "weeklyOpeningHours": {
+                    "days": [
+                      { "day": "monday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "tuesday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "wednesday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "thursday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "friday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "saturday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" },
+                      { "day": "sunday", "isClosed": false, "isOpenAllDay": false, "startTime": "09:00:00", "endTime": "17:00:00" }
+                    ]
                   },
                   "serviceIncludesHotFood": true,
                   "alcoholService": false

@@ -1,5 +1,5 @@
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
 namespace HotJoes.IntegrationTests;
@@ -38,8 +38,14 @@ public sealed class VendorRegistrationRecordMapperTests
         Assert.Equal("Greenwich Borough Council", record.FoodRegistrationAuthority);
         Assert.Null(record.PrimaryTradingAuthority);
         Assert.Equal("kitchen", record.TradingLocation);
-        Assert.Equal(new TimeOnly(17, 0), record.OpeningHoursStart);
-        Assert.Equal(new TimeOnly(2, 0), record.OpeningHoursEnd);
+        Assert.Equal(7, record.WeeklyOpeningHours.Count);
+        Assert.All(record.WeeklyOpeningHours, day =>
+        {
+            Assert.False(day.IsClosed);
+            Assert.False(day.IsOpenAllDay);
+            Assert.Equal(new TimeOnly(17, 0), day.StartTime);
+            Assert.Equal(new TimeOnly(2, 0), day.EndTime);
+        });
         Assert.True(record.ServiceIncludesHotFood);
         Assert.False(record.AlcoholService);
         Assert.Equal("https://example.test/", record.Website);
@@ -82,8 +88,9 @@ public sealed class VendorRegistrationRecordMapperTests
             FoodRegistrationAuthority = "Greenwich Borough Council",
             PrimaryTradingAuthority = null,
             TradingLocation = "kitchen",
-            OpeningHoursStart = new TimeOnly(17, 0),
-            OpeningHoursEnd = new TimeOnly(2, 0),
+            WeeklyOpeningHours = WeeklyOpeningHoursTestData.Records(
+                new TimeOnly(17, 0),
+                new TimeOnly(2, 0)),
             ServiceIncludesHotFood = true,
             AlcoholService = false,
             Website = "https://example.test/",
@@ -149,11 +156,11 @@ public sealed class VendorRegistrationRecordMapperTests
             TradingLocation.Kitchen,
             vendor.RegisteredInformation.TradingCharacteristics.TradingLocation);
         Assert.Equal(
-            record.OpeningHoursStart,
-            vendor.RegisteredInformation.TradingCharacteristics.OpeningHours.StartTime);
+            record.WeeklyOpeningHours[0].StartTime,
+            vendor.RegisteredInformation.TradingCharacteristics.WeeklyOpeningHours.Days[0].StartTime);
         Assert.Equal(
-            record.OpeningHoursEnd,
-            vendor.RegisteredInformation.TradingCharacteristics.OpeningHours.EndTime);
+            record.WeeklyOpeningHours[0].EndTime,
+            vendor.RegisteredInformation.TradingCharacteristics.WeeklyOpeningHours.Days[0].EndTime);
         Assert.True(
             vendor.RegisteredInformation.TradingCharacteristics.ServiceIncludesHotFood);
         Assert.False(
@@ -197,7 +204,7 @@ public sealed class VendorRegistrationRecordMapperTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
 

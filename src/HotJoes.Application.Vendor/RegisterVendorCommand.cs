@@ -10,8 +10,7 @@ public sealed class RegisterVendorCommand
         LegalOperatorType legalOperatorType,
         string? companyRegistrationNumber,
         TradingLocation tradingLocation,
-        TimeOnly openingHoursStartTime,
-        TimeOnly openingHoursEndTime,
+        RegisterVendorWeeklyOpeningHours weeklyOpeningHours,
         bool serviceIncludesHotFood,
         bool alcoholService,
         string contactName,
@@ -29,8 +28,8 @@ public sealed class RegisterVendorCommand
         LegalOperatorType = legalOperatorType;
         CompanyRegistrationNumber = companyRegistrationNumber;
         TradingLocation = tradingLocation;
-        OpeningHoursStartTime = openingHoursStartTime;
-        OpeningHoursEndTime = openingHoursEndTime;
+        ArgumentNullException.ThrowIfNull(weeklyOpeningHours);
+        WeeklyOpeningHours = weeklyOpeningHours;
         ServiceIncludesHotFood = serviceIncludesHotFood;
         AlcoholService = alcoholService;
         ContactName = contactName;
@@ -54,9 +53,7 @@ public sealed class RegisterVendorCommand
 
     public TradingLocation TradingLocation { get; }
 
-    public TimeOnly OpeningHoursStartTime { get; }
-
-    public TimeOnly OpeningHoursEndTime { get; }
+    public RegisterVendorWeeklyOpeningHours WeeklyOpeningHours { get; }
 
     public bool ServiceIncludesHotFood { get; }
 

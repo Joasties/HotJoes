@@ -1,5 +1,5 @@
 using HotJoes.Domain.Vendor;
-using HotJoes.Infrastructure.Persistence;
+using HotJoes.Infrastructure.Vendor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VendorAggregate = HotJoes.Domain.Vendor.Vendor;
 
@@ -38,6 +38,7 @@ public sealed class VendorRegistrationPostgreSqlRoundTripTests
         VendorRegistrationRecord persisted = await context
             .Set<VendorRegistrationRecord>()
             .AsNoTracking()
+            .Include(candidate => candidate.WeeklyOpeningHours)
             .SingleAsync(candidate => candidate.VendorId == original.Id.Value);
         VendorAggregate rehydrated =
             VendorRegistrationRecordMapper.ToDomain(persisted);
@@ -80,7 +81,7 @@ public sealed class VendorRegistrationPostgreSqlRoundTripTests
             primaryTradingAuthority: null,
             new TradingCharacteristics(
                 TradingLocation.Kitchen,
-                new OpeningHours(new TimeOnly(17, 0), new TimeOnly(2, 0)),
+                WeeklyOpeningHours.EveryDay(new TimeOnly(17, 0), new TimeOnly(2, 0)),
                 serviceIncludesHotFood: true,
                 alcoholService: false));
 

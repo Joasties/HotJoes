@@ -4,11 +4,11 @@
 |---|---|
 | **Document ID** | HJ-000 |
 | **Document Title** | Current Approved Baseline Manifest |
-| **Version** | 0.45 |
+| **Version** | 0.58 |
 | **Status** | Approved |
 | **Classification** | Operational Control |
 | **Owner** | Project Architecture |
-| **Last Updated** | 8 September 2026 |
+| **Last Updated** | 25 September 2026 |
 
 ## Revision History
 
@@ -59,6 +59,19 @@
 | 0.43 | 7 September 2026 | Synchronized the manifest with HJ-013 v2.8 regenerated through PR-005 from the approved CON-038 runtime/deployment and CON-044 browser-test architecture baseline; changed no architecture, delivery scope, service contract or behavioural catalogue. |
 | 0.44 | 8 September 2026 | Synchronized the manifest with the PR-007 CON-009/CON-034 synthetic Address bootstrap clarification candidates: HJ-010 v2.14, HJ-011 v2.12 and HJ-012 v2.11; retained HJ-013 v2.8 pending separate PR-005 regeneration. |
 | 0.45 | 8 September 2026 | Synchronized the manifest with HJ-013 v2.9 regenerated through PR-005 from the approved CON-009/CON-034 synthetic Address bootstrap clarification baseline; changed no architecture, delivery scope, service contract or behavioural catalogue. |
+| 0.46 | 10 September 2026 | Applied CR-072. Synchronized HJ-011 v2.13 and HJ-013 v2.10 for the approved Address-owned browser-search adapter, single server-side stub catalogue and three-route Edge allowlist. |
+| 0.47 | 18 September 2026 | Synchronized the manifest with the HJ-010 v2.16 PR-009 candidate introducing CON-046 and CON-047 as Exploring concerns, and reconciled the explained pending baseline updates completed through CR-073, CR-074 and their controlled regeneration sequence. The Approved concern subset remains CON-001–CON-045. |
+| 0.48 | 19 September 2026 | Synchronized the manifest with HJ-010 v2.17 after PR-009 materially reconciled Exploring CON-047 from approved CR-075 and HJ-011 v2.16; corrected the active HJ-011 index from v2.15 to v2.16. The Approved concern subset remains CON-001–CON-045. |
+| 0.49 | 19 September 2026 | Synchronized the PR-007 CON-047 authoritative propagation cohort: HJ-010 v2.18, HJ-011 v2.17, HJ-012 v2.13, HJ-104 v3.8 and HJ-105 v4.3; recorded CON-047 as Approved and retained HJ-106, HJ-107 and HJ-013 pending their controlled later iterations. |
+| 0.50 | 19 September 2026 | Synchronized HJ-106 v2.1 regenerated through PR-002 from the approved CON-047 authoritative cohort; retained HJ-107 v2.0 and HJ-013 v2.11 pending their separate PR-004 and PR-005 iterations. |
+| 0.51 | 19 September 2026 | Synchronized HJ-107 v2.1 regenerated through the CR-077-amended PR-004 from HJ-106 v2.1 Approved; retained HJ-013 v2.11 pending its separate PR-005 iteration. |
+| 0.52 | 19 September 2026 | Synchronized HJ-013 v2.12 regenerated through PR-005 from HJ-012 v2.13, HJ-011 v2.17 and HJ-107 v2.1 Approved for the CON-047 Required Licence Types determination baseline. |
+| 0.53 | 21 September 2026 | Synchronized the PR-007 CON-046 architecture-baseline candidates HJ-010 v2.19 and HJ-012 v2.14; added CON-046 to the Approved concern baseline and recorded the pending authoritative downstream propagation. |
+| 0.54 | 22 September 2026 | Synchronized the approved CON-046 authoritative downstream cohort: HJ-003 v2.6, HJ-004 v3.1, HJ-011 v2.18, HJ-104 v3.9 and HJ-105 v4.4; added HJ-003 and HJ-004 to the compact controlled-baseline index and retained HJ-106, HJ-107 and HJ-013 pending their controlled regeneration. |
+| 0.55 | 22 September 2026 | Synchronized HJ-106 v2.2 regenerated through PR-002 from the approved CON-046 authoritative cohort; retained HJ-107 v2.1 and HJ-013 v2.12 pending their separate PR-004 and PR-005 iterations. |
+| 0.56 | 22 September 2026 | Synchronized HJ-107 v2.2 regenerated through the CR-082-amended PR-004 from HJ-106 v2.2 Approved; retained HJ-013 v2.12 pending its separate PR-005 iteration. |
+| 0.57 | 22 September 2026 | Synchronized HJ-013 v2.13 regenerated through PR-005 from HJ-012 v2.14, HJ-011 v2.18 and HJ-107 v2.2 Approved for the CON-046 Community Participation and Contact Preference baseline. |
+| 0.58 | 25 September 2026 | Applied CR-083. Synchronized HJ-005 v2.1 following its responsibility-specific project and namespace example alignment, together with the reference-only HJ-107 v2.3 and HJ-013 v2.14 revisions. No architecture, contract, behaviour or verification obligation changed. |
 
 ## 1. Purpose
 
@@ -80,14 +93,17 @@ If this manifest disagrees with a controlled artefact, the disagreement is a bas
 
 | Role | Artefact | Version | Status | Controlled Filename |
 |---|---|---:|---|---|
-| Architectural concern register | HJ-010 | 2.14 | Approved | `HJ-010 - Current Application Architectural Concerns.md` |
-| Active delivery scope | HJ-011 | 2.12 | Approved | `HJ-011 - Epic 1 Vendor Registration Implementation Scope.md` |
-| Established architecture patterns | HJ-012 | 2.11 | Approved | `HJ-012 - Established Application Architecture Patterns.md` |
-| Architecture and implementation test catalogue | HJ-013 | 2.9 | Approved | `HJ-013 - Architecture and Implementation Test Catalogue.md` |
-| Vendor Registration information contract | HJ-104 | 3.6 | Approved | `HJ-104 - Vendor Registration Fields Matrix.md` |
-| Vendor Registration behavioural sequence | HJ-105 | 4.1 | Approved | `HJ-105 - Vendor Registration Sequence Diagram.md` |
-| Vendor Registration service contract | HJ-106 | 1.9 | Approved | `HJ-106 - Vendor Registration Service Contract.md` |
-| Vendor Registration behavioural test catalogue | HJ-107 | 1.9 | Approved | `HJ-107 - Vendor Registration Test Catalogue.md` |
+| Coding standards | HJ-005 | 2.1 | Approved | `HJ-005 - Coding Standards.md` |
+| Ubiquitous language authority | HJ-003 | 2.6 | Approved | `HJ-003 - Ubiquitous Language Guide.md` |
+| Vendor domain model authority | HJ-004 | 3.1 | Approved | `HJ-004 - Vendor Domain Models.md` |
+| Architectural concern register | HJ-010 | 2.19 | Approved | `HJ-010 - Current Application Architectural Concerns.md` |
+| Active delivery scope | HJ-011 | 2.18 | Approved | `HJ-011 - Epic 1 Vendor Registration Implementation Scope.md` |
+| Established architecture patterns | HJ-012 | 2.14 | Approved | `HJ-012 - Established Application Architecture Patterns.md` |
+| Architecture and implementation test catalogue | HJ-013 | 2.14 | Approved | `HJ-013 - Architecture and Implementation Test Catalogue.md` |
+| Vendor Registration information contract | HJ-104 | 3.9 | Approved | `HJ-104 - Vendor Registration Fields Matrix.md` |
+| Vendor Registration behavioural sequence | HJ-105 | 4.4 | Approved | `HJ-105 - Vendor Registration Sequence Diagram.md` |
+| Vendor Registration service contract | HJ-106 | 2.2 | Approved | `HJ-106 - Vendor Registration Service Contract.md` |
+| Vendor Registration behavioural test catalogue | HJ-107 | 2.3 | Approved | `HJ-107 - Vendor Registration Test Catalogue.md` |
 
 ## 3. Approved Concern Baseline
 
@@ -120,9 +136,20 @@ approved_concerns:
     - CON-043
     - CON-044
     - CON-045
+    - CON-046
+    - CON-047
 ```
 
 This is an index of the controlled concern baseline, not an independent approval record. Concern wording, Required Guarantees, Approved Approaches, verification treatment and current state remain authoritative in HJ-010 and HJ-012.
+
+The current unresolved concern population is recorded only by HJ-010 and supplies no implementation authority:
+
+```yaml
+exploring_concerns: []
+selected_concerns: []
+blocked_concerns: []
+challenged_concerns: []
+```
 
 ## 4. Governing Process Baseline
 
@@ -172,20 +199,22 @@ HJ-000 is updated only when a controlled baseline artefact is added, removed, re
 
 ```yaml
 architecture_baseline:
-  HJ-010: 2.14 Approved
-  HJ-011: 2.12 Approved
-  HJ-012: 2.11 Approved
+  HJ-003: 2.6 Approved
+  HJ-004: 3.1 Approved
+  HJ-010: 2.19 Approved
+  HJ-011: 2.18 Approved
+  HJ-012: 2.14 Approved
 
 service_and_test_baseline:
-  HJ-104: 3.6 Approved
-  HJ-105: 4.1 Approved
-  HJ-106: 1.9 Approved
-  HJ-107: 1.9 Approved
-  HJ-013: 2.9 Approved
+  HJ-104: 3.9 Approved
+  HJ-105: 4.4 Approved
+  HJ-106: 2.2 Approved
+  HJ-107: 2.2 Approved
+  HJ-013: 2.13 Approved
 
 implementation_direction:
-  capability: CON-038 Slice 2C production-capable Vendor API composition root
-  next_activity: After approval and application of HJ-013 v2.9 and HJ-000 v0.45, generate the Slice 2C two-step Happy Day implementation package.
+  capability: Epic 1 Community Participation and Contact Preference
+  next_activity: Use PR-006 to define and execute bounded CON-046 Community Participation implementation slices from HJ-107 v2.2 and HJ-013 v2.13.
 ```
 
 The workflow-position block is operational guidance only. It shall be updated or removed when it ceases to describe the active work and shall never be treated as delivery-scope authority.
@@ -194,9 +223,11 @@ The workflow-position block is operational guidance only. It shall be updated or
 
 - [x] Every listed file exists under its controlled filename.
 - [x] Every listed internal version and status matches its controlled artefact.
-- [x] HJ-010 and HJ-012 describe the same approved concern baseline.
+- [x] HJ-010 and HJ-012 describe the same Approved concern subset, CON-001–CON-047; no Exploring, Selected, Blocked or Challenged concern remains in the current Epic 1 population.
 - [x] HJ-011 remains the active delivery-scope authority.
+- [x] HJ-003 v2.6, HJ-004 v3.1, HJ-011 v2.18, HJ-104 v3.9 and HJ-105 v4.4 form the approved CON-046 authoritative downstream cohort.
 - [x] HJ-106 is the current approved service-contract source for HJ-107.
 - [x] HJ-107 is the current behavioural source used downstream by HJ-013.
+- [x] HJ-013 v2.13 is the current architecture and implementation verification source for CON-046 implementation slicing.
 - [x] The manifest introduces no architecture, behaviour, approval or delivery scope.
 - [x] Any drift is reported rather than silently reconciled.

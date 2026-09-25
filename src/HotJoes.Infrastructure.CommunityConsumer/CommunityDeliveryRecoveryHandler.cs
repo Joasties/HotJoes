@@ -1,4 +1,5 @@
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class CommunityDeliveryRecoveryHandler
 {
     private readonly CommunityConsumerRetryPolicy policy;

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class CommunityReceiptDbContext : DbContext
 {
     public CommunityReceiptDbContext(DbContextOptions<CommunityReceiptDbContext> options) : base(options) { }

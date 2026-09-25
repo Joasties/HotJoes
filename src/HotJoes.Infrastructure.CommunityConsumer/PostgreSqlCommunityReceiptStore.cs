@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class PostgreSqlCommunityReceiptStore : ICommunityReceiptStore
 {
     private readonly CommunityReceiptDbContext context;
@@ -13,9 +14,12 @@ public sealed class PostgreSqlCommunityReceiptStore : ICommunityReceiptStore
         if (existing is not null) return existing.SerializedEventSha256.SequenceEqual(hash) ? CommunityReceiptOutcome.EquivalentDuplicate : CommunityReceiptOutcome.ConflictingBytes;
         context.Set<CommunityReceiptRecord>().Add(new CommunityReceiptRecord
         {
-            EventId = candidate.EventId, EventType = candidate.EventType,
-            EventVersion = candidate.EventVersion, CommunityParticipationId = candidate.CommunityParticipationId,
-            VendorId = candidate.VendorId, ReceivedAtUtc = candidate.ReceivedAtUtc,
+            EventId = candidate.EventId,
+            EventType = candidate.EventType,
+            EventVersion = candidate.EventVersion,
+            CommunityParticipationId = candidate.CommunityParticipationId,
+            VendorId = candidate.VendorId,
+            ReceivedAtUtc = candidate.ReceivedAtUtc,
             SerializedEventSha256 = hash
         });
         try { await context.SaveChangesAsync(cancellationToken); return CommunityReceiptOutcome.Recorded; }

@@ -136,7 +136,8 @@ public sealed class ComplianceDeterminationAdapterTests
 
         public int InvocationCount { get; private set; }
         public ComplianceApplication.ComplianceDeterminationRequest?
-            ReceivedRequest { get; private set; }
+            ReceivedRequest
+        { get; private set; }
 
         public ComplianceApplication.ComplianceDeterminationResult Determine(
             ComplianceApplication.ComplianceDeterminationRequest request)

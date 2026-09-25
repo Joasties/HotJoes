@@ -1,5 +1,6 @@
 using RabbitMQ.Client;
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class RabbitMqCommunityConsumer : IAsyncDisposable
 {
     private readonly CommunityRabbitMqConsumerOptions options;

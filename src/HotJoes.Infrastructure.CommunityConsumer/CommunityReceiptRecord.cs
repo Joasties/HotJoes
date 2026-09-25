@@ -1,4 +1,5 @@
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class CommunityReceiptRecord
 {
     public Guid EventId { get; set; }

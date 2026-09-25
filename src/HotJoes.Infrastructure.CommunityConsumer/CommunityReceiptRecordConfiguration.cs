@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 internal sealed class CommunityReceiptRecordConfiguration : IEntityTypeConfiguration<CommunityReceiptRecord>
 {
     public void Configure(EntityTypeBuilder<CommunityReceiptRecord> builder)

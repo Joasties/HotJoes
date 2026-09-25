@@ -1,4 +1,5 @@
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class CommunityRabbitMqRecoveryOptions
 {
     public CommunityRabbitMqRecoveryOptions(string connectionString,

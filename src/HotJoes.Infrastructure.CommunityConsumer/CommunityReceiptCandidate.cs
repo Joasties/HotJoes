@@ -1,4 +1,5 @@
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class CommunityReceiptCandidate
 {
     private readonly byte[] bytes;

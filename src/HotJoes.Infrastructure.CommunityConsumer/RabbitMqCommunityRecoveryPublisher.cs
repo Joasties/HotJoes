@@ -1,5 +1,6 @@
 using RabbitMQ.Client;
 namespace HotJoes.Infrastructure.CommunityConsumer;
+
 public sealed class RabbitMqCommunityRecoveryPublisher : ICommunityRecoveryPublisher, IAsyncDisposable
 {
     private readonly CommunityRabbitMqRecoveryOptions options;
@@ -26,8 +27,13 @@ public sealed class RabbitMqCommunityRecoveryPublisher : ICommunityRecoveryPubli
             : route == CommunityRecoveryRoute.DeadLetter
                 ? (options.DeadLetterExchangeName, options.DeadLetterRoutingKey)
                 : throw new ArgumentOutOfRangeException(nameof(route));
-        var properties = new BasicProperties { ContentType = "application/json", MessageId = publication.EventId.ToString("D"), Persistent = true,
-            Headers = new Dictionary<string, object?> { ["x-hotjoes-automatic-attempt"] = publication.AutomaticAttempt, ["x-hotjoes-failure-category"] = publication.FailureCategory, ["x-hotjoes-event-version"] = publication.EventVersion } };
+        var properties = new BasicProperties
+        {
+            ContentType = "application/json",
+            MessageId = publication.EventId.ToString("D"),
+            Persistent = true,
+            Headers = new Dictionary<string, object?> { ["x-hotjoes-automatic-attempt"] = publication.AutomaticAttempt, ["x-hotjoes-failure-category"] = publication.FailureCategory, ["x-hotjoes-event-version"] = publication.EventVersion }
+        };
         await channel.BasicPublishAsync(exchange, key, true, properties, publication.SerializedEvent, cancellationToken);
     }
     public async ValueTask DisposeAsync() { await channel.DisposeAsync(); await connection.DisposeAsync(); }

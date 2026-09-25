@@ -190,12 +190,18 @@ internal static class VendorRegistrationRecordMapper
 
         return value switch
         {
-            { IsClosed: true, IsOpenAllDay: false,
-                StartTime: null, EndTime: null } => DailyOpeningHours.Closed(day),
-            { IsClosed: false, IsOpenAllDay: true,
-                StartTime: null, EndTime: null } => DailyOpeningHours.OpenAllDay(day),
-            { IsClosed: false, IsOpenAllDay: false,
-                StartTime: not null, EndTime: not null } =>
+            {
+                IsClosed: true, IsOpenAllDay: false,
+                StartTime: null, EndTime: null
+            } => DailyOpeningHours.Closed(day),
+            {
+                IsClosed: false, IsOpenAllDay: true,
+                StartTime: null, EndTime: null
+            } => DailyOpeningHours.OpenAllDay(day),
+            {
+                IsClosed: false, IsOpenAllDay: false,
+                StartTime: not null, EndTime: not null
+            } =>
                 DailyOpeningHours.OpenDuring(
                     day,
                     value.StartTime.Value,

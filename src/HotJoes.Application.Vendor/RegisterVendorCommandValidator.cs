@@ -188,12 +188,18 @@ public sealed class RegisterVendorCommandValidator
                 $"{nameof(RegisterVendorCommand.WeeklyOpeningHours)}.{day.Day}";
             bool valid = day switch
             {
-                { IsClosed: true, IsOpenAllDay: false,
-                    StartTime: null, EndTime: null } => true,
-                { IsClosed: false, IsOpenAllDay: true,
-                    StartTime: null, EndTime: null } => true,
-                { IsClosed: false, IsOpenAllDay: false,
-                    StartTime: not null, EndTime: not null } value =>
+                {
+                    IsClosed: true, IsOpenAllDay: false,
+                    StartTime: null, EndTime: null
+                } => true,
+                {
+                    IsClosed: false, IsOpenAllDay: true,
+                    StartTime: null, EndTime: null
+                } => true,
+                {
+                    IsClosed: false, IsOpenAllDay: false,
+                    StartTime: not null, EndTime: not null
+                } value =>
                     value.StartTime != value.EndTime,
                 _ => false
             };

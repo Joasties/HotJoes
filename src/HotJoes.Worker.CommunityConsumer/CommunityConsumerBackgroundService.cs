@@ -2,6 +2,7 @@ using HotJoes.Infrastructure.CommunityConsumer;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotJoes.Worker.CommunityConsumer;
+
 public sealed class CommunityConsumerBackgroundService : BackgroundService
 {
     private readonly CommunityConsumerHostOptions options;

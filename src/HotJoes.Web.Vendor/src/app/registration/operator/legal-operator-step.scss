@@ -80,8 +80,10 @@ input { opacity: 0; position: absolute; }
   text-transform: uppercase;
 }
 .description { font-size: clamp(0.82rem, 0.9vw, 1rem); line-height: 1.35; }
-.operator-actions { margin-top: .75rem; }
-.back { background: #090807; border: 1px solid #ff8a00; border-radius: .5rem; color: #fff; font-weight: 700; min-height: 2.7rem; min-width: 8rem; }
+.operator-actions { display:flex; justify-content:space-between; margin-top:.75rem; }
+.operator-actions button { background:#ff8a00; border:1px solid #ff8a00; border-radius:.5rem; color:#17100a; font:inherit; font-weight:700; min-height:2.7rem; min-width:8rem; }
+.operator-actions button:disabled { cursor:not-allowed; opacity:.5; }
+.back { background: #090807 !important; color: #fff !important; }
 .back:focus-visible { outline: 3px solid #55dff2; outline-offset: 3px; }
 .journey-information {
   position: fixed;
@@ -94,11 +96,11 @@ input { opacity: 0; position: absolute; }
   background: transparent;
   border: 0;
   border-radius: 50%;
-  color: transparent;
+  color: #ff8a00;
   display: flex;
-  height: 3.25rem;
+  height: 3rem;
   justify-content: center;
-  width: 3.25rem;
+  width: 3rem;
 }
 .journey-information button:focus-visible { outline: 3px solid #55dff2; outline-offset: 4px; }
 .information-overlay {

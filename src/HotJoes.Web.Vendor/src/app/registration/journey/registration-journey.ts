@@ -1,5 +1,5 @@
-import { Component, inject } from "@angular/core";
-import { Router, RouterLink, RouterOutlet } from "@angular/router";
+import { Component } from "@angular/core";
+import { RouterLink, RouterOutlet } from "@angular/router";
 import { RegistrationSessionStore } from "../session/registration-session.store";
 
 @Component({
@@ -8,7 +8,7 @@ import { RegistrationSessionStore } from "../session/registration-session.store"
   providers: [RegistrationSessionStore],
   template: `
     <header>
-      <a routerLink="/registration/start" class="brand">HotJoes</a>
+      <a routerLink="/registration/location" class="brand">HotJoes</a>
       <span>Vendor registration</span>
     </header>
     <main>
@@ -63,29 +63,6 @@ import { RegistrationSessionStore } from "../session/registration-session.store"
   ],
 })
 export class RegistrationJourney {}
-
-@Component({
-  selector: "app-registration-start",
-  template: `
-    <section>
-      <h1>Register your food business</h1>
-      <p>
-        We will guide you through the information needed to register with
-        HotJoes.
-      </p>
-      <button type="button" (click)="begin()">Start registration</button>
-    </section>
-  `,
-})
-export class RegistrationStart {
-  readonly #session = inject(RegistrationSessionStore);
-  readonly #router = inject(Router);
-
-  begin(): void {
-    this.#session.start();
-    void this.#router.navigate(["/registration/location"]);
-  }
-}
 
 @Component({
   selector: "app-registration-business",

@@ -7,17 +7,13 @@ import { RegistrationReviewStep } from "./review/registration-review-step";
 import { RegistrationConfirmationStep } from "./confirmation/registration-confirmation-step";
 import { CommunityJoinedStep } from "./community/community-joined-step";
 import { CommunityNotJoinedStep } from "./community/community-not-joined-step";
-import {
-  RegistrationJourney,
-  RegistrationStart,
-} from "./journey/registration-journey";
+import { RegistrationJourney } from "./journey/registration-journey";
 
 export const registrationRoutes: Routes = [
   {
     path: "",
     component: RegistrationJourney,
     children: [
-      { path: "start", component: RegistrationStart },
       { path: "business", component: BusinessIdentityStep },
       { path: "location", component: TradingLocationStep },
       { path: "operator", component: LegalOperatorStep },
@@ -26,8 +22,8 @@ export const registrationRoutes: Routes = [
       { path: "confirmation", component: RegistrationConfirmationStep },
       { path: "community-joined", component: CommunityJoinedStep },
       { path: "community-not-joined", component: CommunityNotJoinedStep },
-      { path: "", pathMatch: "full", redirectTo: "start" },
-      { path: "**", redirectTo: "start" },
+      { path: "", pathMatch: "full", redirectTo: "location" },
+      { path: "**", redirectTo: "location" },
     ],
   },
 ];

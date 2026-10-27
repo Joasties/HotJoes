@@ -1,12 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type TestInfo } from "@playwright/test";
+import { createBrowserTestIdentity } from "../support/browser-runtime-lifecycle.mjs";
 import { registerVendor } from "../support/registration-journey";
 import {
   communityCounts, composeLogs, contactPreference, eventually, vendorIdFor
 } from "../support/runtime-evidence";
 
 test.describe.serial("CON-046 full-stack Community acceptance", () => {
-  test("AI-BROWSER-012 Not Now performs no request and creates no Community state", async ({ page }) => {
-    const vendor = await registerVendor(page, unique());
+  test("AI-BROWSER-012 Not Now performs no request and creates no Community state", async ({ page }, testInfo) => {
+    const vendor = await registerVendor(page, identity(testInfo));
     let requests = 0;
     page.on("request", request => {
       if (request.method() === "POST" && request.url().endsWith("/community-participations")) requests++;
@@ -18,8 +19,8 @@ test.describe.serial("CON-046 full-stack Community acceptance", () => {
     expect(communityCounts(vendorIdFor(vendor.tradingName))).toEqual([0, 0, 0]);
   });
 
-  test("VR-COMMUNITY-001/008/013 join is authoritative, replay-safe and processed once", async ({ page, request }) => {
-    const vendor = await registerVendor(page, unique());
+  test("VR-COMMUNITY-001/008/013 join is authoritative, replay-safe and processed once", async ({ page, request }, testInfo) => {
+    const vendor = await registerVendor(page, identity(testInfo));
     const vendorId = vendorIdFor(vendor.tradingName);
 
     await page.getByLabel("SMS").check();
@@ -37,8 +38,8 @@ test.describe.serial("CON-046 full-stack Community acceptance", () => {
     expect(communityCounts(vendorId)).toEqual([1, 1, 1]);
   });
 
-  test("AI-BROWSER-006 failure retains selections and permits a safe retry", async ({ page }) => {
-    const vendor = await registerVendor(page, unique());
+  test("AI-BROWSER-006 failure retains selections and permits a safe retry", async ({ page }, testInfo) => {
+    const vendor = await registerVendor(page, identity(testInfo));
     await page.getByLabel("WhatsApp").check();
     await page.getByLabel(/Keep me involved/).check();
     await page.route("**/community-participations", route => route.fulfill({
@@ -67,6 +68,12 @@ test.describe.serial("CON-046 full-stack Community acceptance", () => {
   });
 });
 
-function unique(): string {
-  return `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+function identity(testInfo: TestInfo): string {
+  return createBrowserTestIdentity({
+    runId: process.env.HOTJOES_BROWSER_RUN_ID ?? "local",
+    titlePath: testInfo.titlePath,
+    workerIndex: testInfo.workerIndex,
+    repeatEachIndex: testInfo.repeatEachIndex,
+    retryIndex: testInfo.retry,
+  });
 }

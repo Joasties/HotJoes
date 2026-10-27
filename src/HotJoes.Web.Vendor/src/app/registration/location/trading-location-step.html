@@ -9,9 +9,7 @@
       type="button"
       aria-describedby="journey-explanation"
       aria-label="About Vendor Registration"
-    >
-      i
-    </button>
+    ></button>
     <div id="journey-explanation" class="information-overlay" role="tooltip">
       <strong>Vendor Registration</strong>
       <span
@@ -44,6 +42,9 @@
         </span>
       </label>
       }
+    </div>
+    <div class="location-actions">
+      <button type="button" [disabled]="!selected" (click)="continue()">Continue</button>
     </div>
   </fieldset>
 </section>

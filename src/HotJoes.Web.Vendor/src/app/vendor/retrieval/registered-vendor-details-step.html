@@ -1,0 +1,76 @@
+<main class="registered-vendor-page">
+  @if (loading) {
+    <section class="status-panel" aria-live="polite">
+      <p>Retrieving registered Vendor details…</p>
+    </section>
+  } @else if (retrievalError) {
+    <section class="status-panel error" role="alert">
+      <h1>Registered Vendor details unavailable</h1>
+      <p>{{ retrievalError }}</p>
+    </section>
+  } @else if (details; as vendor) {
+    <header>
+      <p class="eyebrow">HOTJOES VENDOR</p>
+      <h1>Registered Vendor details</h1>
+      <p>Persisted details retrieved through the approved Vendor boundary.</p>
+    </header>
+
+    <div class="details-grid">
+      <section class="panel" aria-labelledby="business-heading">
+        <h2 id="business-heading">Business identity</h2>
+        <dl>
+          <div><dt>Vendor ID</dt><dd>{{ vendor.vendorId }}</dd></div>
+          <div><dt>Trading name</dt><dd>{{ vendor.tradingName }}</dd></div>
+          <div><dt>Legal operator</dt><dd>{{ vendor.legalOperatorName }}</dd></div>
+          <div><dt>Legal operator type</dt><dd>{{ vendor.legalOperatorType }}</dd></div>
+          <div><dt>Vendor state</dt><dd>{{ vendor.vendorState }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Primary contact and address</h2>
+        <dl>
+          <div><dt>Contact name</dt><dd>{{ vendor.primaryContact.contactName }}</dd></div>
+          <div><dt>Email address</dt><dd>{{ vendor.primaryContact.contactEmail }}</dd></div>
+          <div><dt>Telephone number</dt><dd>{{ vendor.primaryContact.contactTelephone }}</dd></div>
+        </dl>
+        <address>
+          @if (vendor.businessAddressSnapshot.recipientOrOrganisationName) {
+            <span>{{ vendor.businessAddressSnapshot.recipientOrOrganisationName }}</span>
+          }
+          <span>{{ vendor.businessAddressSnapshot.addressLine1 }}</span>
+          @if (vendor.businessAddressSnapshot.addressLine2) {
+            <span>{{ vendor.businessAddressSnapshot.addressLine2 }}</span>
+          }
+          @if (vendor.businessAddressSnapshot.addressLine3) {
+            <span>{{ vendor.businessAddressSnapshot.addressLine3 }}</span>
+          }
+          <span>{{ vendor.businessAddressSnapshot.postTown }}</span>
+          <span>{{ vendor.businessAddressSnapshot.postcode }}</span>
+        </address>
+      </section>
+
+      <section class="panel schedule" role="region" aria-labelledby="hours-heading">
+        <h2 id="hours-heading">Weekly opening hours</h2>
+        <dl>
+          @for (day of vendor.tradingCharacteristics.weeklyOpeningHours.days; track day.day) {
+            <div>
+              <dt>{{ dayName(day.day) }}</dt>
+              <dd>{{ openingHours(day) }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section class="panel" aria-labelledby="trading-heading">
+        <h2 id="trading-heading">Trading characteristics</h2>
+        <dl>
+          <div><dt>Trading location</dt><dd>{{ vendor.tradingCharacteristics.tradingLocation }}</dd></div>
+          <div><dt>Hot food service</dt><dd>{{ yesNo(vendor.tradingCharacteristics.serviceIncludesHotFood) }}</dd></div>
+          <div><dt>Alcohol service</dt><dd>{{ yesNo(vendor.tradingCharacteristics.alcoholService) }}</dd></div>
+          <div><dt>Food registration authority</dt><dd>{{ vendor.foodRegistrationAuthority }}</dd></div>
+        </dl>
+      </section>
+    </div>
+  }
+</main>

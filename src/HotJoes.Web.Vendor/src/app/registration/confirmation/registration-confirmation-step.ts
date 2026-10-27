@@ -43,9 +43,10 @@ export class RegistrationConfirmationStep {
 
   notNow(): void {
     if (this.submitting) return;
-    void this.#router.navigate([
-      "/registration/community-not-joined",
-    ]);
+    void this.#router.navigate(
+      ["/registration/community-not-joined"],
+      { replaceUrl: true },
+    );
   }
 
   joinCommunity(): void {
@@ -68,9 +69,10 @@ export class RegistrationConfirmationStep {
       next: () => {
         this.submitting = false;
         this.#changeDetector.markForCheck();
-        void this.#router.navigate([
-          "/registration/community-joined",
-        ]);
+        void this.#router.navigate(
+          ["/registration/community-joined"],
+          { replaceUrl: true },
+        );
       },
       error: (error: unknown) => {
         this.submitting = false;

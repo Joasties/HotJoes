@@ -43,6 +43,31 @@ describe("TradingCharacteristicsStep", () => {
     expect(fixture.nativeElement.querySelectorAll("button[type='submit']")).toHaveLength(0);
   });
 
+  it("F-004 places optional profile controls before Back and confirmation", () => {
+    const fixture = TestBed.createComponent(TradingCharacteristicsStep);
+    response.next(completeDetermination);
+    fixture.detectChanges();
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll("button"),
+    ) as HTMLButtonElement[];
+    const website = buttons.findIndex((button) =>
+      button.textContent?.includes("Add Website"));
+    const description = buttons.findIndex((button) =>
+      button.textContent?.includes("Add Business Description"));
+    const back = buttons.findIndex((button) => button.textContent?.includes("Back"));
+    const confirm = buttons.findIndex((button) =>
+      button.textContent?.includes("Confirm and continue"));
+
+    expect(website).toBeGreaterThan(-1);
+    expect(description).toBeGreaterThan(website);
+    expect(website).toBeLessThan(back);
+    expect(description).toBeLessThan(back);
+    expect(back).toBeLessThan(confirm);
+    expect(buttons.every((button) =>
+      !button.hasAttribute("tabindex") || button.getAttribute("tabindex") === "0"))
+      .toBe(true);
+  });
+
   it("shows the mockup defaults while accepting No", () => {
     const component = TestBed.createComponent(TradingCharacteristicsStep).componentInstance;
     expect(component.form.controls.serviceIncludesHotFood.value).toBe(true);

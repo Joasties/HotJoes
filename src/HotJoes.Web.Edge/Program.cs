@@ -65,6 +65,9 @@ public sealed partial class Program
         app.MapFallbackToFile(
             "/registration/{*path:nonfile}",
             "index.html");
+        app.MapFallbackToFile(
+            "/registered-vendors/{*path:nonfile}",
+            "index.html");
         app.Run();
     }
 

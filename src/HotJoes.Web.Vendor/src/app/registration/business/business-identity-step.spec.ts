@@ -23,6 +23,28 @@ describe("BusinessIdentityStep", () => {
     expect([...fixture.nativeElement.querySelectorAll("input")].map((input: HTMLInputElement) => input.id)).toEqual(["contact-name", "contact-telephone", "contact-email", "trading-name", "legal-name", "address-query"]);
   });
 
+  it("F-003 places Address Search before Back and Continue in natural DOM order", () => {
+    const fixture = TestBed.createComponent(BusinessIdentityStep);
+    fixture.detectChanges();
+    const interactive = Array.from(
+      fixture.nativeElement.querySelectorAll("input, button"),
+    ) as Array<HTMLInputElement | HTMLButtonElement>;
+    const address = interactive.findIndex((control) => control.id === "address-query");
+    const back = interactive.findIndex((control) =>
+      control.textContent?.includes("Back"));
+    const continueAction = interactive.findIndex((control) =>
+      control.textContent?.trim().startsWith("Continue"));
+
+    expect(address).toBeGreaterThan(-1);
+    expect(back).toBeGreaterThan(-1);
+    expect(continueAction).toBeGreaterThan(-1);
+    expect(address).toBeLessThan(back);
+    expect(address).toBeLessThan(continueAction);
+    expect(interactive.every((control) =>
+      !control.hasAttribute("tabindex") || control.getAttribute("tabindex") === "0"))
+      .toBe(true);
+  });
+
   it("requires a company number only for applicable operator types", () => {
     const store = TestBed.inject(RegistrationSessionStore); store.start(); store.selectLegalOperatorType("Sole Trader");
     let component = TestBed.createComponent(BusinessIdentityStep).componentInstance;

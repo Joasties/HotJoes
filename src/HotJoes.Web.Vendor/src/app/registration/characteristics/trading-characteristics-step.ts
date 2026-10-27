@@ -103,6 +103,28 @@ export class TradingCharacteristicsStep implements OnDestroy {
     this.#hoursBeforeEditing = this.form.controls.weeklyOpeningHours.getRawValue().map((day) => ({ ...day })) as DailyOpeningHours[];
     dialog.showModal();
   }
+  containCustomHoursFocus(event: KeyboardEvent, dialog: HTMLDialogElement): void {
+    if (event.key !== "Tab") return;
+
+    const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
+      "button:not([disabled]), input:not([disabled]), select:not([disabled]), " +
+      "textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    ));
+    const first = controls.at(0);
+    const last = controls.at(-1);
+    if (!first || !last) return;
+
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !dialog.contains(active))) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+    if (!event.shiftKey && (active === last || !dialog.contains(active))) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
   cancelCustomHours(dialog: HTMLDialogElement): void {
     this.#hoursBeforeEditing.forEach((day, index) => this.form.controls.weeklyOpeningHours.at(index).setValue({ ...day }));
     dialog.close();

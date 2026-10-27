@@ -10,15 +10,35 @@ export async function registerVendor(page: Page, suffix: string): Promise<Regist
   const vendor = {
     tradingName: `Browser Vendor ${suffix}`,
     email: `browser-${suffix}@example.test`,
-    telephone: "07123456789"
+    telephone: "07123456789",
   };
 
-  await page.goto("/registration/start");
-  await page.getByRole("button", { name: "Start registration" }).click();
-  await page.locator("label.card").filter({ hasText: "Restaurant" }).click();
-  await page.locator("label.card").filter({ hasText: "Sole Trader" }).click();
+  await page.goto("/registration/location");
+  const restaurant = page.getByRole("radio", { name: /Restaurant/ });
+  await restaurant.check({ force: true });
+  await expect(restaurant).toBeChecked();
+  const locationContinue = page.getByRole("button", { name: "Continue" });
+  await expect(locationContinue).toBeEnabled();
+  await locationContinue.click();
+  await expect(page).toHaveURL(/\/registration\/operator$/);
 
-  await page.getByLabel("Search for the business address").fill("Blackheath");
+  const soleTrader = page.getByRole("radio", { name: /Sole Trader/ });
+  await soleTrader.check({ force: true });
+  await expect(soleTrader).toBeChecked();
+  const operatorContinue = page.getByRole("button", { name: "Continue" });
+  await expect(operatorContinue).toBeEnabled();
+  await operatorContinue.click();
+  await expect(page).toHaveURL(/\/registration\/business$/);
+
+  const addressResponse = page.waitForResponse((response) =>
+    response.request().method() === "GET" &&
+    new URL(response.url()).pathname === "/address-search" &&
+    new URL(response.url()).searchParams.get("query") === "Hot Joes");
+  const addressQuery = page.getByLabel("Search for the business address");
+  await addressQuery.click();
+  await addressQuery.pressSequentially("Hot Joes");
+  await expect(addressQuery).toHaveValue("Hot Joes");
+  expect((await addressResponse).status()).toBe(200);
   await page.getByRole("button", { name: /Hot Joes, Blackheath Avenue/ }).click();
 
   const contactName = `Browser Contact ${suffix}`;

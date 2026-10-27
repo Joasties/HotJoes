@@ -61,6 +61,10 @@ export class LegalOperatorStep {
   choose(next: LegalOperatorType): void {
     this.#store.selectLegalOperatorType(next);
     this.selected = next;
+  }
+
+  continue(): void {
+    if (!this.selected) return;
     void this.#router.navigate(["/registration/business"]);
   }
 

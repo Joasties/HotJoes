@@ -19,7 +19,7 @@
 }
 fieldset {
   border: 0;
-  bottom: clamp(2rem, 7vh, 5.5rem);
+  bottom: clamp(0.75rem, 2vh, 1.5rem);
   left: 0;
   margin: 0;
   padding: 0;
@@ -116,6 +116,26 @@ input {
   grid-column: 1 / -1;
   line-height: 1.45;
 }
+.location-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.location-actions button {
+  background: #ff8a00;
+  border: 1px solid #ff8a00;
+  border-radius: .5rem;
+  color: #17100a;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  min-height: 2.8rem;
+  padding: 0 1.4rem;
+}
+.location-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
 .journey-information {
   position: fixed;
   right: 2rem;
@@ -127,14 +147,14 @@ input {
   background: transparent;
   border: 0;
   border-radius: 50%;
-  color: transparent;
+  color: #ff8a00;
   display: flex;
   font-family: Georgia, serif;
   font-size: 2rem;
   font-style: italic;
-  height: 3.25rem;
+  height: 3rem;
   justify-content: center;
-  width: 3.25rem;
+  width: 3rem;
 }
 .journey-information button:focus-visible {
   outline: 3px solid #55dff2;
@@ -183,9 +203,11 @@ input {
   }
   .cards {
     grid-template-columns: 1fr;
+    justify-items: center;
   }
   .card {
     min-height: 22rem;
+    width: min(100%, 32rem);
   }
   .journey-information {
     right: 1rem;

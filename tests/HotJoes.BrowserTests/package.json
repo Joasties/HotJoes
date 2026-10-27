@@ -3,11 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed"
+    "test": "node support/verify-browser-baseline.mjs && node support/run-playwright.mjs test",
+    "test:ci": "node support/verify-browser-baseline.mjs && node support/run-playwright.mjs test",
+    "test:headed": "node support/run-playwright.mjs test --headed --project=chromium-headed",
+    "scan:diagnostics": "node support/scan-diagnostic-evidence.mjs",
+    "verify:browser-baseline": "node support/verify-browser-baseline.mjs",
+    "demo": "node support/run-playwright.mjs demo tests/representative-demonstration.spec.ts --headed --project=chromium-demo"
   },
   "devDependencies": {
-    "@playwright/test": "1.55.0",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.1",
     "@types/node": "24.3.0",
     "typescript": "5.9.2"
   }

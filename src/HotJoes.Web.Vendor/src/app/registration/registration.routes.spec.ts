@@ -6,7 +6,6 @@ describe("registrationRoutes", () => {
       (route) => route.path,
     );
     expect(childPaths).toEqual([
-      "start",
       "business",
       "location",
       "operator",
@@ -20,8 +19,8 @@ describe("registrationRoutes", () => {
     ]);
   });
 
-  it("returns unknown registration routes to the beginning", () => {
+  it("returns unknown registration routes to Step 1", () => {
     const fallback = registrationRoutes[0].children?.at(-1);
-    expect(fallback).toMatchObject({ path: "**", redirectTo: "start" });
+    expect(fallback).toMatchObject({ path: "**", redirectTo: "location" });
   });
 });

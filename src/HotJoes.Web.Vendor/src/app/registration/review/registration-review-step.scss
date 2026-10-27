@@ -15,7 +15,8 @@ dl { margin: 0; }
 dl > div { align-items: start; border-bottom: 1px solid #4b4238; display: grid; gap: .6rem; grid-template-columns: 9rem minmax(0,1fr) auto; padding: .42rem 0; }
 dt { color: #d3ccc3; font-size: .8rem; }
 dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.address dd { display: grid; }
+.summary-action { overflow: visible; }
+.address dd:not(.summary-action) { display: grid; }
 button { background: #ff8a00; border: 1px solid #ff8a00; border-radius: .45rem; color: #17100a; cursor: pointer; font: inherit; font-weight: 800; min-height: 2.7rem; padding: 0 1.25rem; }
 dl button,.contact-summary > button,.section-title button { background: transparent; border: 0; color: #ff8a00; min-height: 0; padding: 0; text-decoration: underline; }
 .contact-summary { align-items: start; border-top: 1px solid #81551f; display: grid; gap: .55rem; grid-template-columns: 1fr auto; margin-top: .7rem; padding-top: .7rem; }
@@ -47,4 +48,4 @@ fieldset a { color: #ff8a00; margin: 0; }
 button:focus-visible,input:focus-visible,a:focus-visible { outline: 3px solid #55dff2; outline-offset: 3px; }
 @media (max-width: 64rem), (max-height: 50rem) { form { margin-top: 2rem; position: static; } }
 @media (max-width: 52rem) { .review-columns,.declarations { grid-template-columns: 1fr; } .week { grid-auto-flow: row; grid-template-columns: 1fr; grid-template-rows: none; } }
-@media (max-width: 34rem) { dl > div,.service-summary > div { grid-template-columns: 1fr auto; } dl dd { grid-column: 1; } dl button { grid-column: 2; grid-row: 1 / span 2; } }
+@media (max-width: 34rem) { dl > div,.service-summary > div { grid-template-columns: 1fr auto; } dl dd:not(.summary-action) { grid-column: 1; } dl .summary-action { grid-column: 2; grid-row: 1 / span 2; } }

@@ -1,4 +1,4 @@
-FROM node:24.15.0-bookworm AS web-build
+FROM node:24.22.1-bookworm AS web-build
 WORKDIR /source/src/HotJoes.Web.Vendor
 COPY src/HotJoes.Web.Vendor/package*.json ./
 RUN npm ci

@@ -16,12 +16,14 @@ public static class ArchitectureHarnessCompletenessRuleSet
     private static readonly string[] ApprovedObligationIds =
     [
         "AI-ADDR-001", "AI-ADDR-007", "AI-AGG-002", "AI-API-001", "AI-API-003",
-        "AI-APP-002", "AI-ARCH-001", "AI-BROWSER-012", "AI-CFG-001", "AI-CI-001",
-        "AI-CI-002", "AI-COMMUNITY-001", "AI-COMMUNITY-002", "AI-COMMUNITY-003",
+        "AI-APP-002", "AI-ARCH-001", "AI-BROWSER-001", "AI-BROWSER-002", "AI-BROWSER-003",
+        "AI-BROWSER-004", "AI-BROWSER-006", "AI-BROWSER-007", "AI-BROWSER-008",
+        "AI-BROWSER-012", "AI-CFG-001", "AI-CI-001", "AI-CI-002",
+        "AI-COMMUNITY-001", "AI-COMMUNITY-002", "AI-COMMUNITY-003",
         "AI-CONS-003", "AI-COMP-001", "AI-COMP-002", "AI-DE-001", "AI-DE-003",
-        "AI-ENT-002", "AI-MIG-002", "AI-OUT-003", "AI-REP-001", "AI-RUNTIME-001",
-        "AI-RUNTIME-002", "AI-RUNTIME-004", "AI-RUNTIME-006", "AI-RUNTIME-009",
-        "AI-SEC-001", "AI-SEC-002"
+        "AI-ENT-002", "AI-MIG-002", "AI-OUT-003", "AI-REP-001",
+        "AI-RUNTIME-001", "AI-RUNTIME-002", "AI-RUNTIME-004", "AI-RUNTIME-006",
+        "AI-RUNTIME-009", "AI-SEC-001", "AI-SEC-002"
     ];
 
     public static IReadOnlyList<ArchitectureViolation> Evaluate(ArchitectureHarnessCatalog catalog)

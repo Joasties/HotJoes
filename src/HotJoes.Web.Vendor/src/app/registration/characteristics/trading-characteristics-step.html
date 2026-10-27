@@ -176,14 +176,6 @@
         </ul>
       </section>
       }
-      <div class="navigation-actions">
-        <button class="back" type="button" (click)="back()">
-          <span aria-hidden="true">←</span> Back
-        </button>
-        @if (determinationResult) {
-        <button type="button" (click)="confirmDeterminationAndContinue()">Confirm and continue <span aria-hidden="true">→</span></button>
-        }
-      </div>
     </div>
 
     <div class="panel profile-panel">
@@ -222,7 +214,20 @@
       </button>
     </div>
 
-    <dialog #hoursDialog aria-labelledby="hours-dialog-title">
+    <div class="navigation-actions">
+      <button class="back" type="button" (click)="back()">
+        <span aria-hidden="true">←</span> Back
+      </button>
+      @if (determinationResult) {
+      <button type="button" (click)="confirmDeterminationAndContinue()">Confirm and continue <span aria-hidden="true">→</span></button>
+      }
+    </div>
+
+    <dialog
+      #hoursDialog
+      aria-labelledby="hours-dialog-title"
+      (keydown)="containCustomHoursFocus($event, hoursDialog)"
+    >
       <div class="dialog-content hours-dialog">
         <h2 id="hours-dialog-title">Customise Hours</h2>
         <div class="hours-grid" formArrayName="weeklyOpeningHours">

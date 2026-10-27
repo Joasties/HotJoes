@@ -52,6 +52,10 @@ export class TradingLocationStep {
       );
     if (!this.#store.changeTradingLocation(next, confirmed)) return;
     this.selected = next;
+  }
+
+  continue(): void {
+    if (!this.selected) return;
     void this.#router.navigate(["/registration/operator"]);
   }
 }

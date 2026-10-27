@@ -25,11 +25,11 @@
       <section class="panel business-summary" aria-labelledby="business-summary-title">
         <h2 id="business-summary-title"><svg><use href="#review-shop" /></svg>Business summary</h2>
         <dl>
-          <div><dt>Trading location</dt><dd>{{ draft.tradingLocation ?? 'Not provided' }}</dd><button type="button" (click)="edit('location')">Edit</button></div>
-          <div><dt>Legal operator type</dt><dd>{{ draft.legalOperatorType ?? 'Not provided' }}</dd><button type="button" (click)="edit('operator')">Edit</button></div>
-          <div><dt>Legal operator name</dt><dd>{{ draft.legalOperatorName || 'Not provided' }}</dd><button type="button" (click)="edit('business')">Edit</button></div>
-          <div><dt>Trading name</dt><dd>{{ draft.tradingName || 'Not provided' }}</dd><button type="button" (click)="edit('business')">Edit</button></div>
-          <div class="address"><dt>Business address</dt><dd>@for (line of draft.addressDisplayLines; track line) {<span>{{ line }}</span>} @if (!draft.addressDisplayLines.length) {<span>Not provided</span>}</dd><button type="button" (click)="edit('business')">Edit</button></div>
+          <div><dt>Trading location</dt><dd>{{ draft.tradingLocation ?? 'Not provided' }}</dd><dd class="summary-action"><button type="button" (click)="edit('location')">Edit</button></dd></div>
+          <div><dt>Legal operator type</dt><dd>{{ draft.legalOperatorType ?? 'Not provided' }}</dd><dd class="summary-action"><button type="button" (click)="edit('operator')">Edit</button></dd></div>
+          <div><dt>Legal operator name</dt><dd>{{ draft.legalOperatorName || 'Not provided' }}</dd><dd class="summary-action"><button type="button" (click)="edit('business')">Edit</button></dd></div>
+          <div><dt>Trading name</dt><dd>{{ draft.tradingName || 'Not provided' }}</dd><dd class="summary-action"><button type="button" (click)="edit('business')">Edit</button></dd></div>
+          <div class="address"><dt>Business address</dt><dd>@for (line of draft.addressDisplayLines; track line) {<span>{{ line }}</span>} @if (!draft.addressDisplayLines.length) {<span>Not provided</span>}</dd><dd class="summary-action"><button type="button" (click)="edit('business')">Edit</button></dd></div>
         </dl>
         <div class="contact-summary">
           <h3><svg><use href="#review-person" /></svg>Primary contact details</h3>
@@ -49,11 +49,11 @@
           </div>
         </div>
         <dl class="service-summary">
-          <div><dt>Hot food service</dt><dd>{{ yesNo(draft.serviceIncludesHotFood) }}</dd><button type="button" (click)="edit('characteristics')">Edit</button></div>
-          <div><dt>Alcohol service</dt><dd>{{ yesNo(draft.alcoholService) }}</dd><button type="button" (click)="edit('characteristics')">Edit</button></div>
-          <div><dt>Licence details</dt><dd>{{ draft.licenceDetailsRequired ? 'Licence details required' : 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
-          <div><dt>Website</dt><dd>{{ draft.website || 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
-          <div><dt>Business description</dt><dd>{{ draft.businessDescription || 'Not added' }}</dd><button type="button" (click)="edit('characteristics')">Review</button></div>
+          <div><dt>Hot food service</dt><dd>{{ yesNo(draft.serviceIncludesHotFood) }}</dd><dd class="summary-action"><button type="button" (click)="edit('characteristics')">Edit</button></dd></div>
+          <div><dt>Alcohol service</dt><dd>{{ yesNo(draft.alcoholService) }}</dd><dd class="summary-action"><button type="button" (click)="edit('characteristics')">Edit</button></dd></div>
+          <div><dt>Licence details</dt><dd>{{ draft.licenceDetailsRequired ? 'Licence details required' : 'Not added' }}</dd><dd class="summary-action"><button type="button" (click)="edit('characteristics')">Review</button></dd></div>
+          <div><dt>Website</dt><dd>{{ draft.website || 'Not added' }}</dd><dd class="summary-action"><button type="button" (click)="edit('characteristics')">Review</button></dd></div>
+          <div><dt>Business description</dt><dd>{{ draft.businessDescription || 'Not added' }}</dd><dd class="summary-action"><button type="button" (click)="edit('characteristics')">Review</button></dd></div>
         </dl>
       </section>
     </div>

@@ -9,9 +9,7 @@
       type="button"
       aria-describedby="operator-explanation"
       aria-label="About Legal Operator Type"
-    >
-      i
-    </button>
+    ></button>
     <div id="operator-explanation" class="information-overlay" role="tooltip">
       <strong>Legal Operator Type</strong>
       <span
@@ -51,6 +49,7 @@
       <button class="back" type="button" (click)="back()">
         <span aria-hidden="true">←</span> Back
       </button>
+      <button type="button" [disabled]="!selected" (click)="continue()">Continue</button>
     </div>
   </fieldset>
 </section>

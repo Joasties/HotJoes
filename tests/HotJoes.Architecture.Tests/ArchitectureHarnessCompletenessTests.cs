@@ -7,26 +7,23 @@ public sealed class ArchitectureHarnessCompletenessTests
 
     private static readonly string[] ExpectedRuleSetNames =
     [
-        nameof(ApiAddressStructuralRuleSet),
-        nameof(CloudConfigurationStructuralRuleSet),
-        nameof(CommunityOwnershipStructuralRuleSet),
-        nameof(ComplianceDeterminationStructuralRuleSet),
-        nameof(DomainApplicationStructuralRuleSet),
-        nameof(MigrationStructuralRuleSet),
-        nameof(ProjectDependencyRuleSet),
-        nameof(SecretExposureStructuralRuleSet)
+        nameof(ApiAddressStructuralRuleSet), nameof(CloudConfigurationStructuralRuleSet),
+        nameof(CommunityOwnershipStructuralRuleSet), nameof(ComplianceDeterminationStructuralRuleSet),
+        nameof(DomainApplicationStructuralRuleSet), nameof(MigrationStructuralRuleSet),
+        nameof(ProjectDependencyRuleSet), nameof(SecretExposureStructuralRuleSet)
     ];
 
     private static readonly string[] ExpectedObligationIds =
     [
-        "AI-ADDR-001", "AI-ADDR-007", "AI-AGG-002", "AI-API-001",
-        "AI-API-003", "AI-APP-002", "AI-ARCH-001", "AI-BROWSER-012",
-        "AI-CFG-001", "AI-CI-001", "AI-CI-002", "AI-COMMUNITY-001",
-        "AI-COMMUNITY-002", "AI-COMMUNITY-003", "AI-CONS-003",
-        "AI-COMP-001", "AI-COMP-002", "AI-DE-001", "AI-DE-003",
+        "AI-ADDR-001", "AI-ADDR-007", "AI-AGG-002", "AI-API-001", "AI-API-003",
+        "AI-APP-002", "AI-ARCH-001", "AI-BROWSER-001", "AI-BROWSER-002", "AI-BROWSER-003",
+        "AI-BROWSER-004", "AI-BROWSER-006", "AI-BROWSER-007", "AI-BROWSER-008",
+        "AI-BROWSER-012", "AI-CFG-001", "AI-CI-001", "AI-CI-002",
+        "AI-COMMUNITY-001", "AI-COMMUNITY-002", "AI-COMMUNITY-003",
+        "AI-CONS-003", "AI-COMP-001", "AI-COMP-002", "AI-DE-001", "AI-DE-003",
         "AI-ENT-002", "AI-MIG-002", "AI-OUT-003", "AI-REP-001",
-        "AI-RUNTIME-001", "AI-RUNTIME-002", "AI-RUNTIME-004",
-        "AI-RUNTIME-006", "AI-RUNTIME-009", "AI-SEC-001", "AI-SEC-002"
+        "AI-RUNTIME-001", "AI-RUNTIME-002", "AI-RUNTIME-004", "AI-RUNTIME-006",
+        "AI-RUNTIME-009", "AI-SEC-001", "AI-SEC-002"
     ];
 
     [Fact]
@@ -35,56 +32,38 @@ public sealed class ArchitectureHarnessCompletenessTests
         ArchitectureHarnessCatalog catalog = ArchitectureHarnessCatalog.LoadCurrent();
         IReadOnlyList<ArchitectureViolation> violations =
             ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog);
-
         Assert.Empty(violations);
-        Assert.Equal(
-            ExpectedRuleSetNames.Order(StringComparer.Ordinal),
-            catalog.RuleSetNames.Order(StringComparer.Ordinal));
-        Assert.Equal(
-            ExpectedObligationIds.Order(StringComparer.Ordinal),
-            catalog.ExecutableObligationIds.Order(StringComparer.Ordinal));
+        Assert.Equal(ExpectedRuleSetNames.Order(StringComparer.Ordinal), catalog.RuleSetNames.Order(StringComparer.Ordinal));
+        Assert.Equal(ExpectedObligationIds.Order(StringComparer.Ordinal), catalog.ExecutableObligationIds.Order(StringComparer.Ordinal));
         Assert.Contains(ArchitectureProjectPath, catalog.SolutionProjectPaths);
     }
 
     [Fact]
     public void AI_ARCH_001_MissingApprovedObligation_IsDetected()
     {
-        ArchitectureHarnessCatalog catalog = Catalog(
-            obligationIds: ExpectedObligationIds.Where(id => id != "AI-API-003").ToArray());
-        AssertViolation(
-            ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog),
-            "Approved enforcement obligation 'AI-API-003' has no executable architecture test evidence.");
+        ArchitectureHarnessCatalog catalog = Catalog(obligationIds: ExpectedObligationIds.Where(id => id != "AI-API-003").ToArray());
+        AssertViolation(ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog), "Approved enforcement obligation 'AI-API-003' has no executable architecture test evidence.");
     }
 
     [Fact]
     public void AI_ARCH_001_UnapprovedObligationRegistration_IsDetected()
     {
-        ArchitectureHarnessCatalog catalog = Catalog(
-            obligationIds: [.. ExpectedObligationIds, "AI-UNKNOWN-999"]);
-        AssertViolation(
-            ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog),
-            "Unapproved enforcement obligation 'AI-UNKNOWN-999' is registered by the architecture harness.");
+        ArchitectureHarnessCatalog catalog = Catalog(obligationIds: [.. ExpectedObligationIds, "AI-UNKNOWN-999"]);
+        AssertViolation(ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog), "Unapproved enforcement obligation 'AI-UNKNOWN-999' is registered by the architecture harness.");
     }
 
     [Fact]
     public void AI_ARCH_001_MissingApprovedRuleSet_IsDetected()
     {
-        ArchitectureHarnessCatalog catalog = Catalog(
-            ruleSetNames: ExpectedRuleSetNames
-                .Where(name => name != nameof(ApiAddressStructuralRuleSet))
-                .ToArray());
-        AssertViolation(
-            ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog),
-            $"Approved architecture rule set '{nameof(ApiAddressStructuralRuleSet)}' is not registered.");
+        ArchitectureHarnessCatalog catalog = Catalog(ruleSetNames: ExpectedRuleSetNames.Where(name => name != nameof(ApiAddressStructuralRuleSet)).ToArray());
+        AssertViolation(ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog), $"Approved architecture rule set '{nameof(ApiAddressStructuralRuleSet)}' is not registered.");
     }
 
     [Fact]
     public void AI_ARCH_001_ArchitectureTestProjectMissingFromSolution_IsDetected()
     {
         ArchitectureHarnessCatalog catalog = Catalog(solutionProjectPaths: []);
-        AssertViolation(
-            ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog),
-            $"Architecture test project '{ArchitectureProjectPath}' is not included in HotJoes.sln.");
+        AssertViolation(ArchitectureHarnessCompletenessRuleSet.Evaluate(catalog), $"Architecture test project '{ArchitectureProjectPath}' is not included in HotJoes.sln.");
     }
 
     private static ArchitectureHarnessCatalog Catalog(
@@ -96,9 +75,7 @@ public sealed class ArchitectureHarnessCompletenessTests
             obligationIds ?? ExpectedObligationIds,
             solutionProjectPaths ?? [ArchitectureProjectPath]);
 
-    private static void AssertViolation(
-        IReadOnlyList<ArchitectureViolation> violations,
-        string expectedDescription)
+    private static void AssertViolation(IReadOnlyList<ArchitectureViolation> violations, string expectedDescription)
     {
         ArchitectureViolation violation = Assert.Single(violations);
         Assert.Equal("AI-ARCH-001", violation.ObligationId);

@@ -27,7 +27,7 @@ describe("LegalOperatorStep", () => {
     ]);
   });
 
-  it("commits selection and continues to Business Identity", () => {
+  it("F-002 changes the selected radio without navigating", () => {
     const store = TestBed.inject(RegistrationSessionStore);
     const router = TestBed.inject(Router);
     vi.spyOn(router, "navigate").mockResolvedValue(true);
@@ -35,6 +35,23 @@ describe("LegalOperatorStep", () => {
       "Limited Company",
     );
     expect(store.draft()?.legalOperatorType).toBe("Limited Company");
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it("F-002 exposes a separate Continue action that confirms an unchanged selection", () => {
+    const store = TestBed.inject(RegistrationSessionStore);
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, "navigate").mockResolvedValue(true);
+    store.start();
+    store.selectLegalOperatorType("Sole Trader");
+
+    const fixture = TestBed.createComponent(LegalOperatorStep);
+    fixture.detectChanges();
+    const continueButton = [...fixture.nativeElement.querySelectorAll("button")]
+      .find((button: HTMLButtonElement) => button.textContent?.trim() === "Continue");
+
+    expect(continueButton).toBeDefined();
+    continueButton?.click();
     expect(router.navigate).toHaveBeenCalledWith(["/registration/business"]);
   });
 

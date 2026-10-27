@@ -14,21 +14,16 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Scan repository history for secret values
         run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --no-banner /repo
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore HotJoes.sln
-
       - name: Verify formatting
         run: dotnet format HotJoes.sln --verify-no-changes --no-restore
-
       - name: Build without warnings
         run: dotnet build HotJoes.sln --configuration Release --no-restore --warnaserror
 
@@ -38,21 +33,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore HotJoes.sln
-
       - name: Domain tests
         run: dotnet test tests/HotJoes.Domain.Vendor.Tests/HotJoes.Domain.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=domain.trx" --results-directory TestResults
-
       - name: Application tests
         run: dotnet test tests/HotJoes.Application.Vendor.Tests/HotJoes.Application.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=application.trx" --results-directory TestResults
-
       - name: Publish unit-test diagnostics
         if: always()
         uses: actions/upload-artifact@v6
@@ -68,18 +58,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore HotJoes.sln
-
       - name: Architecture tests
         run: dotnet test tests/HotJoes.Architecture.Tests/HotJoes.Architecture.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=architecture.trx" --results-directory TestResults
-
       - name: Publish architecture-test diagnostics
         if: always()
         uses: actions/upload-artifact@v6
@@ -95,18 +81,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore HotJoes.sln
-
       - name: API tests
         run: dotnet test tests/HotJoes.Api.Vendor.Tests/HotJoes.Api.Vendor.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=api.trx" --results-directory TestResults
-
       - name: Publish API-test diagnostics
         if: always()
         uses: actions/upload-artifact@v6
@@ -122,18 +104,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore HotJoes.sln
-
       - name: Migration, PostgreSQL and RabbitMQ integration tests
         run: dotnet test tests/HotJoes.IntegrationTests/HotJoes.IntegrationTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=integration.trx" --results-directory TestResults
-
       - name: Publish integration-test diagnostics
         if: always()
         uses: actions/upload-artifact@v6
@@ -141,4 +119,46 @@ jobs:
           name: integration-test-results
           path: TestResults/*.trx
           if-no-files-found: error
+          retention-days: 7
+
+  browser-tests:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: "true"
+    defaults:
+      run:
+        working-directory: tests/HotJoes.BrowserTests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.22.1'
+          cache: npm
+          cache-dependency-path: tests/HotJoes.BrowserTests/package-lock.json
+      - name: Install browser-test dependencies
+        run: npm ci
+      - name: Install pinned Chromium browser
+        run: npx playwright install --with-deps chromium
+      - name: Verify pinned browser baseline
+        run: npm run verify:browser-baseline
+      - name: Browser tests
+        run: npm run test:ci
+      - name: Scan failed browser diagnostics
+        id: diagnostic-scan
+        if: failure()
+        run: npm run scan:diagnostics
+      - name: Publish failed browser diagnostics
+        if: failure() && steps.diagnostic-scan.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-test-failure-diagnostics
+          path: |
+            tests/HotJoes.BrowserTests/playwright-report
+            tests/HotJoes.BrowserTests/test-results
+          if-no-files-found: ignore
           retention-days: 7

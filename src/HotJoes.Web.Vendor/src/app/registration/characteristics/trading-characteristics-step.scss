@@ -36,7 +36,7 @@ button.back { background: #090807; color: #fff; }
 .determination-review ul { display: grid; gap: .35rem; list-style: none; margin: 0 0 .8rem; padding: 0; }
 .determination-review li { align-items: baseline; display: flex; gap: 1rem; justify-content: space-between; }
 .determination-review li strong { color: #ff8a00; white-space: nowrap; }
-.navigation-actions { align-items: center; display: flex; justify-content: space-between; margin-top: .9rem; }
+.navigation-actions { align-items: center; display: flex; grid-column: 1 / -1; justify-content: space-between; margin-top: .9rem; }
 .navigation-actions button { border-radius: .5rem; }
 .profile-panel { display: grid; gap: 1rem; }
 .profile-panel > p { line-height: 1.45; margin: 0; }

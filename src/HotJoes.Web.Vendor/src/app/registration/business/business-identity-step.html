@@ -23,7 +23,6 @@
       <div class="field"><label for="trading-name">Trading name</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-shop"/></svg></span><input id="trading-name" formControlName="tradingName" maxlength="160" autocomplete="organization" /></span>@if (showError('tradingName')) {<p class="error">Enter a trading name of no more than 160 characters.</p>}</div>
       <div class="field"><label for="legal-name">Legal operator name</label><span class="input-group"><span class="input-icon"><svg><use href="#icon-person"/></svg></span><input id="legal-name" formControlName="legalOperatorName" maxlength="160" autocomplete="organization" /></span>@if (showError('legalOperatorName')) {<p class="error">Enter the legal operator name.</p>}</div>
       @if (requiresCompanyNumber) {<div class="field company-number-field"><label for="company-number">Company registration number</label><span class="company-number-entry"><span class="input-group"><span class="input-icon"><svg><use href="#icon-building"/></svg></span><input id="company-number" formControlName="companyRegistrationNumber" maxlength="8" aria-describedby="company-number-hint" autocomplete="off" /></span><span id="company-number-hint" class="hint">For example, SC123456 or 12345678.</span></span>@if (showError('companyRegistrationNumber')) {<p class="error">Enter a valid UK company registration number.</p>}</div>}
-      <div class="actions"><button class="back" type="button" (click)="back()"><span aria-hidden="true">←</span> Back</button><button type="submit">Continue <span aria-hidden="true">→</span></button></div>
     </div>
 
     <div class="address-panel">
@@ -34,5 +33,6 @@
       <div class="selected-address" aria-live="polite">@if (selectedAddress) {@for (line of selectedAddress.lines; track line) {<span>{{ line }}</span>}} @else {<span class="address-prompt">Search for and select the business address.</span>}</div>
       @if (addressTouched && !selectedAddress) {<p class="error">Select a business address before continuing.</p>}
     </div>
+    <div class="actions"><button class="back" type="button" (click)="back()"><span aria-hidden="true">←</span> Back</button><button type="submit">Continue <span aria-hidden="true">→</span></button></div>
   </form>
 </section>

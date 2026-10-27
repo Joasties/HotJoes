@@ -55,7 +55,7 @@ public sealed class ComposeRuntimeStructuralTests
     public void AI_BROWSER_012_EdgeBuildsAndServesTheVendorClient()
     {
         string dockerfile = Read("src/HotJoes.Web.Edge/Dockerfile");
-        Assert.Contains("node:24.15.0-bookworm", dockerfile);
+        Assert.Contains("node:24.22.1-bookworm", dockerfile);
         Assert.Contains("src/HotJoes.Web.Vendor", dockerfile);
         Assert.Contains("npm run build", dockerfile);
 

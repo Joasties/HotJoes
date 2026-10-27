@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "playwrightVersion": "1.64.1",
+  "chromiumRevision": "1248",
+  "contexts": [
+    {
+      "name": "chromium",
+      "browser": "chromium",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "evidenceKind": "emulated",
+      "testMatch": "**/*.spec.ts"
+    },
+    {
+      "name": "chromium-mobile",
+      "browser": "chromium",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "evidenceKind": "emulated",
+      "testMatch": "**/accessibility-responsive-evidence.spec.ts"
+    }
+  ],
+  "evidenceLimitations": [
+    "Browser emulation is not physical-device evidence.",
+    "Automated browser evidence does not replace manual UX or assistive-technology review."
+  ]
+}

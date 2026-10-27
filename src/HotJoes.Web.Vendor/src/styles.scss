@@ -26,17 +26,23 @@ a {
   color: #812019;
   margin-right: 1rem;
 }
-.journey-information { position: fixed; right: 2rem; top: max(1.5rem, calc((100vh - 56.25vw)/2 + 1.5rem)); z-index: 2; }
+.journey-information { position: fixed; right: 2rem; top: max(1.5rem, calc((100vh - 56.25vw)/2 + 1.5rem)); transform: translate(-25px, 10px); z-index: 2; }
 body .journey-information > button {
   appearance: none;
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: transparent;
-  height: 3.25rem;
+  border-radius: 50%;
+  color: #ff8a00;
+  display: grid;
+  font-family: Georgia, serif;
+  font-size: 1.65rem;
+  font-style: italic;
+  height: 3rem;
+  place-items: center;
   min-height: 0;
   padding: 0;
-  width: 3.25rem;
+  width: 3rem;
 }
 .information-overlay { background: rgba(8,8,8,.97); border: 1px solid #ff8a00; border-radius: .8rem; color: #fff; display: grid; gap: .55rem; opacity: 0; padding: 1rem 1.15rem; pointer-events: none; position: absolute; right: 3.8rem; top: .25rem; transform: translateY(-.5rem); transition: opacity 160ms ease,transform 160ms ease; width: 18rem; }
 .information-overlay strong { color: #ff8a00; font-size: 1.15rem; }

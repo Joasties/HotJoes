@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #f8f4ef;
+  background: #090806;
+}
+
+.registered-vendor-page {
+  box-sizing: border-box;
+  width: min(1120px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 4vw, 3rem);
+}
+
+header { margin-bottom: 2rem; }
+h1, h2, p { margin-top: 0; }
+h1 { font-size: clamp(2.25rem, 5vw, 4rem); }
+h2 { color: #ff8a00; }
+.eyebrow { color: #ff8a00; font-weight: 800; letter-spacing: .14em; }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+  gap: 1rem;
+}
+
+.panel, .status-panel {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 2px solid #ff8a00;
+  border-radius: 1.25rem;
+  background: rgba(10, 9, 7, .94);
+}
+
+dl { margin: 0; }
+dl div {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) 2fr;
+  gap: 1rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(255, 138, 0, .35);
+}
+dt { color: #d9d2ca; }
+dd { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+address { display: grid; margin-top: 1.25rem; font-style: normal; }
+.error { border-color: #ff5a4f; }
+
+@media (max-width: 36rem) {
+  dl div { grid-template-columns: 1fr; gap: .2rem; }
+}

@@ -62,6 +62,19 @@ describe("RegistrationConfirmationStep", () => {
     expect(joinButton().disabled).toBe(true);
   });
 
+  it("AI-UX-007 exposes the approved Step 6 explanation through its information control", () => {
+    const information = fixture.nativeElement.querySelector(
+      '[aria-label="About joining the HotJoes community"]',
+    ) as HTMLButtonElement | null;
+
+    expect(information).not.toBeNull();
+    expect(information?.getAttribute("aria-describedby"))
+      .toBe("community-explanation");
+    expect(fixture.nativeElement.textContent).toContain(
+      "Become a part of the community, learn how Hot Joes works and join the debate on the evolution of the platform.",
+    );
+  });
+
   it("AI-UX-009 enables Join only after Keep me involved is checked", async () => {
     fixture.componentInstance.form.controls.keepInvolved.setValue(true);
     await fixture.whenStable();
@@ -75,9 +88,10 @@ describe("RegistrationConfirmationStep", () => {
 
     expect(adapter.calls).toEqual([]);
     expect(router.navigate).toHaveBeenCalledOnce();
-    expect(router.navigate).toHaveBeenCalledWith([
-      "/registration/community-not-joined",
-    ]);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ["/registration/community-not-joined"],
+      { replaceUrl: true },
+    );
   });
 
   it("AI-WEB-010 submits the committed VendorId and selected preference once", async () => {
@@ -114,9 +128,10 @@ describe("RegistrationConfirmationStep", () => {
     fixture.detectChanges();
 
     expect(router.navigate).toHaveBeenCalledOnce();
-    expect(router.navigate).toHaveBeenCalledWith([
-      "/registration/community-joined",
-    ]);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ["/registration/community-joined"],
+      { replaceUrl: true },
+    );
   });
 
   it("AI-UX-009 retains selections and permits explicit retry after failure", async () => {

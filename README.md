@@ -8,6 +8,12 @@ This repository is therefore more than a code sample. It records the reasoning t
 
 ## A guided route through the repository
 
+## Demonstration
+
+Watch or download the [HotJoes Epic 1 Vendor Registration demonstration](https://github.com/Joasties/HotJoes/releases/download/epic1-demonstration-v1/Demonstration.mov).
+
+The demonstration exercises the rendered Vendor Registration journey through the disposable local runtime, including authoritative registration, retrieval, Compliance processing and optional Community participation.
+
 HotJoes contains several layers of information because each layer answers a different question. The quickest route from the original idea to the executable system is:
 
 ```text

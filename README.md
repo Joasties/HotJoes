@@ -1,4 +1,4 @@
-HotJoes
+# HotJoes
 
 HotJoes is a cloud-native, event-driven marketplace being designed for independent food vendors, delivery drivers and customers. Its commercial aim is to support a fairer and more transparent food-ordering ecosystem; its engineering aim is to provide a serious reference implementation of modern application architecture, disciplined delivery and accountable AI-assisted software development.
 
